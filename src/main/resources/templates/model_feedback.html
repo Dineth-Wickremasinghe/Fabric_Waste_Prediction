@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fabric Waste Monitoring Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 20px;
+        }
+        .dashboard {
+            max-width: 900px;
+            margin: auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        h2 { color: #147d1b; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        input {
+            width: 80px;
+            padding: 5px;
+        }
+        button {
+            padding: 6px 10px;
+            background: #147d1b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+
+    <!-- Performance -->
+    <div class="card">
+        <h2>Model Performance</h2>
+        <p><strong>R² Score:</strong> <span id="r2Score">N/A</span></p>
+    </div>
+
+    <!-- Predictions Table -->
+    <div class="card">
+        <h2>Predictions</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Predicted</th>
+                <th>Actual</th>
+                <th>Error</th>
+                <th>Accuracy</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="predictionTable"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    // Demo predicted values (normally from ML model)
+    let predictions = JSON.parse(localStorage.getItem("predictions")) || [
+        { predicted: 12.5, actual: null },
+        { predicted: 9.2, actual: null },
+        { predicted: 15.8, actual: null },
+        { predicted: 7.4, actual: null }
+    ];
+
+    function calculateAccuracy(error) {
+        if (error <= 2) return "High";
+        if (error <= 5) return "Moderate";
+        return "Low";
+    }
+
+    function calculateR2(data) {
+        const valid = data.filter(d => d.actual !== null);
+        if (valid.length < 2) return "N/A";
+
+        const actuals = valid.map(d => d.actual);
+        const preds = valid.map(d => d.predicted);
+        const meanActual = actuals.reduce((a,b)=>a+b,0) / actuals.length;
+
+        let ssTotal = 0, ssResidual = 0;
+        for (let i=0;i<valid.length;i++){
+            ssTotal += Math.pow(actuals[i] - meanActual, 2);
+            ssResidual += Math.pow(actuals[i] - preds[i], 2);
+        }
+
+        return (1 - ssResidual/ssTotal).toFixed(3);
+    }
+
+    function saveActual(index) {
+        const input = document.getElementById(`actual-${index}`);
+        const actualValue = parseFloat(input.value);
+
+        if (isNaN(actualValue)) {
+            alert("Enter a valid number");
+            return;
+        }
+
+        predictions[index].actual = actualValue;
+        localStorage.setItem("predictions", JSON.stringify(predictions));
+        renderTable();
+    }
+
+    function renderTable() {
+        const table = document.getElementById("predictionTable");
+        table.innerHTML = "";
+
+        predictions.forEach((row, index) => {
+            let error = "";
+            let accuracy = "";
+            let action = "";
+
+            if (row.actual !== null) {
+                error = Math.abs(row.actual - row.predicted).toFixed(2);
+                accuracy = calculateAccuracy(error);
+                action = "✔";
+            } else {
+                action = `
+        <input type="number" id="actual-${index}" placeholder="kg">
+        <button onclick="saveActual(${index})">Save</button>
+      `;
+            }
+
+            table.innerHTML += `
+      <tr>
+        <td>${row.predicted}</td>
+        <td>${row.actual ?? "-"}</td>
+        <td>${error}</td>
+        <td>${accuracy}</td>
+        <td>${action}</td>
+      </tr>
+    `;
+        });
+
+        document.getElementById("r2Score").innerText = calculateR2(predictions);
+    }
+
+    renderTable();
+</script>
+
+</body>
+</html>
