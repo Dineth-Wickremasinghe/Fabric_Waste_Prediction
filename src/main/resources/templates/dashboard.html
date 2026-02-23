@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabric Waste Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: linear-gradient(135deg, #1e3a5f, #2e86c1); }
+        .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 600; }
+        .prediction-result {
+            background: linear-gradient(135deg, #1e3a5f, #2e86c1);
+            color: white; border-radius: 16px;
+            padding: 30px; text-align: center; margin-bottom: 24px;
+        }
+        .prediction-result h2 { font-size: 3rem; font-weight: 700; margin: 0; }
+        .prediction-result p { opacity: 0.85; margin: 0; font-size: 1rem; }
+        .btn-predict {
+            background: linear-gradient(135deg, #1e3a5f, #2e86c1);
+            color: white; border: none; padding: 12px 40px;
+            border-radius: 8px; font-size: 1rem; font-weight: 600; width: 100%;
+        }
+        .btn-predict:hover { opacity: 0.9; color: white; }
+        .table thead { background-color: #1e3a5f; color: white; }
+        .badge-result {
+            background-color: #d4edda; color: #155724;
+            padding: 4px 10px; border-radius: 20px; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark px-4 py-3 mb-4">
+    <span class="navbar-brand fs-4 fw-bold">🧵 Fabric Waste Prediction System</span>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- Result banner — only visible after form submit -->
+    <div th:if="${prediction != null}" class="prediction-result">
+        <p>Predicted Fabric Wastage</p>
+        <h2 th:text="${#numbers.formatDecimal(prediction, 1, 4)} + '%'">--</h2>
+        <p class="mt-2">✓ Saved to database</p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Input Form -->
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">📋 Enter Parameters</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/dashboard/predict}" method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-500">Pattern Complexity</label>
+                            <input type="number" step="any" name="patternComplexity"
+                                   class="form-control" placeholder="e.g. 0, 1, 2, 3"
+                                   required>
+                            <small class="text-muted">Numeric complexity level of the pattern</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Operator Experience (Years)</label>
+                            <input type="number" step="any" name="operatorExperienceYears"
+                                   class="form-control" placeholder="e.g. 13.0"
+                                   required>
+                            <small class="text-muted">Years of experience of the operator</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fabric Pattern Encoded</label>
+                            <input type="number" step="any" name="fabricPatternEncoded"
+                                   class="form-control" placeholder="e.g. 9.02"
+                                   required>
+                            <small class="text-muted">Encoded value of the fabric pattern</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Cutting Method</label>
+                            <select name="cuttingMethodManual" class="form-select" required>
+                                <option value="">-- Select Cutting Method --</option>
+                                <option value="1.0">Manual</option>
+                                <option value="0.0">Automated</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fabric Type Encoded</label>
+                            <input type="number" step="any" name="fabricTypeEncoded"
+                                   class="form-control" placeholder="e.g. 8.50"
+                                   required>
+                            <small class="text-muted">Encoded value of the fabric type</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Marker Loss %</label>
+                            <input type="number" step="any" name="markerLossPct"
+                                   class="form-control" placeholder="e.g. 25.0"
+                                   required>
+                            <small class="text-muted">Percentage of marker loss</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-predict">
+                            🔍 Predict Fabric Waste
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📊 Prediction History</h5>
+                    <span class="badge bg-secondary"
+                          th:text="${history != null ? #lists.size(history) : 0} + ' records'">0 records</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Input Features</th>
+                                <th>Predicted Wastage</th>
+                                <th>Date & Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(history)}">
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No predictions yet. Fill the form to get started!
+                                </td>
+                            </tr>
+                            <tr th:each="record : ${history}">
+                                <td th:text="${record.id}"></td>
+                                <td><small class="text-muted"
+                                           th:text="${record.inputFeatures}"></small></td>
+                                <td>
+                                        <span class="badge-result"
+                                              th:text="${#numbers.formatDecimal(record.predictionResult, 1, 4)} + '%'">
+                                        </span>
+                                </td>
+                                <td>
+                                    <small th:text="${#temporals.format(record.createdAt, 'dd MMM yyyy, HH:mm')}">
+                                    </small>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
