@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Model Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        /* HEADER */
+        header {
+            background: #1d4ed8;
+            color: white;
+            padding: 0 2rem;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .status-pill {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        /* LAYOUT */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* METRIC CARDS */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1d4ed8;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .card-sub {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* TWO COLUMN */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        /* CHART */
+        .chart-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+        }
+
+        .chart-wrap { height: 200px; }
+
+        /* RETRAIN CARD */
+        .retrain-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .progress-bg {
+            background: #e2e8f0;
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1d4ed8;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        .progress-hint {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .info-list { border-top: 1px solid #f1f5f9; }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+
+        .info-row span:first-child { color: #64748b; }
+        .info-row span:last-child { font-weight: 600; }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-primary { background: #1d4ed8; color: white; }
+        .btn-primary:hover { background: #1e40af; }
+
+        /* TABLE */
+        .table-card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            padding: 10px 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8fafc; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-pending { background: #fef9c3; color: #a16207; }
+        .badge-done { background: #dcfce7; color: #166534; }
+
+        .btn-sm {
+            padding: 5px 14px;
+            border: 1px solid #1d4ed8;
+            border-radius: 5px;
+            background: white;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+        }
+
+        .btn-sm:hover { background: #1d4ed8; color: white; }
+
+        /* MODAL */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay.active { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .modal-head {
+            background: #1d4ed8;
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body { padding: 1.5rem; }
+
+        .form-group { margin-bottom: 1rem; }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            outline: none;
+            color: #1e293b;
+            transition: border-color 0.15s;
+        }
+
+        .form-input:focus { border-color: #1d4ed8; }
+        .form-input[readonly] { background: #f8fafc; color: #94a3b8; }
+
+        .modal-foot {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .modal-foot .btn { flex: 1; }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #64748b;
+            border-radius: 6px;
+        }
+
+        .btn-outline:hover { border-color: #94a3b8; }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: #1e293b;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.25s;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 900px) {
+            .two-col { grid-template-columns: 1fr; }
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <h1>ML Model Monitor</h1>
+    <div class="status-pill">
+        <div class="status-dot"></div>
+        <span th:text="${modelStatus ?: 'Healthy'}">Healthy</span>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- METRIC CARDS -->
+    <div class="metrics-row">
+        <div class="card">
+            <div class="card-label">R² Score</div>
+            <div class="card-value" th:text="${r2Score ?: '0.924'}">0.924</div>
+            <div class="card-sub">Baseline: <span th:text="${baselineR2 ?: '0.910'}">0.910</span></div>
+        </div>
+        <div class="card">
+            <div class="card-label">MAE</div>
+            <div class="card-value" th:text="${mae ?: '42.3'}">42.3</div>
+            <div class="card-sub">Baseline: <span th:text="${baselineMae ?: '38.1'}">38.1</span></div>
+        </div>
+        <div class="card">
+            <div class="card-label">RMSE</div>
+            <div class="card-value" th:text="${rmse ?: '61.7'}">61.7</div>
+            <div class="card-sub">Baseline: <span th:text="${baselineRmse ?: '59.4'}">59.4</span></div>
+        </div>
+        <div class="card">
+            <div class="card-label">Model Version</div>
+            <div class="card-value" th:text="${modelVersion ?: 'v4.2'}">v4.2</div>
+            <div class="card-sub">Trained: <span th:text="${lastTrainedDate ?: '2025-02-18'}">2025-02-18</span></div>
+        </div>
+    </div>
+
+    <!-- CHART + RETRAIN -->
+    <div class="two-col">
+
+        <!-- PERFORMANCE CHART -->
+        <div class="chart-card">
+            <div class="section-title">Performance Over Time</div>
+            <div class="chart-wrap">
+                <canvas id="perfChart"></canvas>
+            </div>
+        </div>
+
+        <!-- RETRAIN CONTROL -->
+        <div class="retrain-card">
+            <div class="section-title">Retraining Control</div>
+
+            <div>
+                <div class="progress-label">
+                    <span>Feedback Records</span>
+                    <span>
+                        <span th:text="${feedbackCount ?: 347}">347</span> /
+                        <span th:text="${retrainThreshold ?: 500}">500</span>
+                    </span>
+                </div>
+                <div class="progress-bg">
+                    <div class="progress-fill"
+                         th:style="'width:' + ${feedbackPercent ?: 69} + '%'"
+                         style="width: 69%"></div>
+                </div>
+                <div class="progress-hint">
+                    <span th:text="${(retrainThreshold ?: 500) - (feedbackCount ?: 347)}">153</span>
+                    more records until auto-retrain
+                </div>
+            </div>
+
+            <div class="info-list">
+                <div class="info-row">
+                    <span>Last Retrained</span>
+                    <span th:text="${lastTrainedDate ?: '2025-02-18'}">2025-02-18</span>
+                </div>
+                <div class="info-row">
+                    <span>Training Records</span>
+                    <span th:text="${trainingRecords ?: '2,847'}">2,847</span>
+                </div>
+                <div class="info-row">
+                    <span>Pending Feedback</span>
+                    <span th:text="${pendingFeedback ?: 12}">12</span>
+                </div>
+            </div>
+
+            <form th:action="@{/model/retrain}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn btn-primary">Trigger Retrain</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PREDICTIONS TABLE -->
+    <div class="table-card">
+        <div class="table-header">Recent Predictions — Submit Actual Values</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>Predicted</th>
+                    <th>Actual</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Real rows from controller -->
+                <tr th:each="pred : ${predictions}">
+                    <td th:text="${pred.id}">—</td>
+                    <td th:text="${pred.timestamp}">—</td>
+                    <td th:text="${pred.predictedValue}">—</td>
+                    <td th:text="${pred.actualValue ?: '—'}">—</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${pred.actualValue != null ? 'badge-done' : 'badge-pending'}"
+                              th:text="${pred.actualValue != null ? 'Submitted' : 'Pending'}">Pending</span>
+                    </td>
+                    <td>
+                        <button class="btn-sm" th:if="${pred.actualValue == null}"
+                                th:attr="onclick='openModal(\'' + ${pred.id} + '\', \'' + ${pred.predictedValue} + '\')'">
+                            Add Actual
+                        </button>
+                        <span th:unless="${pred.actualValue == null}" style="color:#94a3b8;font-size:12px">Done</span>
+                    </td>
+                </tr>
+
+                <!-- Static preview rows (shown when list is empty) -->
+                <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
+                    <td>#1041</td><td>2025-02-21 09:14</td><td>284.50</td><td>—</td>
+                    <td><span class="badge badge-pending">Pending</span></td>
+                    <td><button class="btn-sm" onclick="openModal('1041','284.50')">Add Actual</button></td>
+                </tr>
+                <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
+                    <td>#1040</td><td>2025-02-21 08:55</td><td>412.10</td><td>398.00</td>
+                    <td><span class="badge badge-done">Submitted</span></td>
+                    <td><span style="color:#94a3b8;font-size:12px">Done</span></td>
+                </tr>
+                <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
+                    <td>#1039</td><td>2025-02-21 08:33</td><td>189.30</td><td>—</td>
+                    <td><span class="badge badge-pending">Pending</span></td>
+                    <td><button class="btn-sm" onclick="openModal('1039','189.30')">Add Actual</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal">
+    <div class="modal">
+        <div class="modal-head">
+            <span>Submit Actual Value</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Prediction ID</label>
+                <input class="form-input" id="modal-id" readonly/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Predicted Value</label>
+                <input class="form-input" id="modal-pred" readonly/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Actual Value</label>
+                <input class="form-input" id="modal-actual" type="number" step="0.01"
+                       placeholder="Enter observed value"/>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitFeedback()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    // In production, replace these with Thymeleaf inline values:
+    // const labels = /*[[${chartLabels}]]*/ [];
+    // const r2Data  = /*[[${chartR2}]]*/  [];
+    // const maeData = /*[[${chartMae}]]*/ [];
+    const labels = ['Feb 14','Feb 15','Feb 16','Feb 17','Feb 18','Feb 19','Feb 20','Feb 21'];
+    const r2Data  = [0.918, 0.921, 0.915, 0.919, 0.923, 0.920, 0.922, 0.924];
+    const maeData = [38.1, 39.4, 41.2, 40.8, 42.1, 41.9, 42.5, 42.3];
+
+    new Chart(document.getElementById('perfChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'R²',
+                    data: r2Data,
+                    borderColor: '#1d4ed8',
+                    backgroundColor: 'rgba(29,78,216,0.08)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'MAE',
+                    data: maeData,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245,158,11,0.08)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { font: { family: 'Inter', size: 12 }, boxWidth: 12 } }
+            },
+            scales: {
+                x: {
+                    grid: { color: '#f1f5f9' },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#94a3b8' }
+                },
+                y: {
+                    position: 'left',
+                    grid: { color: '#f1f5f9' },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#1d4ed8' }
+                },
+                y1: {
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#f59e0b' }
+                }
+            }
+        }
+    });
+
+    // Modal
+    let activePredId = null;
+
+    function openModal(id, predicted) {
+        activePredId = id;
+        document.getElementById('modal-id').value = id;
+        document.getElementById('modal-pred').value = predicted;
+        document.getElementById('modal-actual').value = '';
+        document.getElementById('modal').classList.add('active');
+        setTimeout(() => document.getElementById('modal-actual').focus(), 100);
+    }
+
+    function closeModal() {
+        document.getElementById('modal').classList.remove('active');
+    }
+
+    function submitFeedback() {
+        const actual = document.getElementById('modal-actual').value.trim();
+        if (!actual) {
+            document.getElementById('modal-actual').style.borderColor = '#ef4444';
+            return;
+        }
+
+        fetch(`/predictions/${activePredId}/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actualValue: parseFloat(actual) })
+        })
+        .then(res => {
+            closeModal();
+            showToast(res.ok ? 'Feedback submitted successfully' : 'Submission failed. Please try again.');
+            if (res.ok) setTimeout(() => location.reload(), 1500);
+        })
+        .catch(() => showToast('Network error. Please try again.'));
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    document.getElementById('modal').addEventListener('click', e => {
+        if (e.target === document.getElementById('modal')) closeModal();
+    });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
