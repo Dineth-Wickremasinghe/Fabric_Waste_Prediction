@@ -4,7 +4,6 @@ import org.example.fabric_waste_prediction.Entity.Prediction;
 import org.example.fabric_waste_prediction.Repository.PredictionRepository;
 import org.example.fabric_waste_prediction.Service.MetricsService;
 import org.example.fabric_waste_prediction.Service.PredictionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

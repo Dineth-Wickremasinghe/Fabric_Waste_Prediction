@@ -19,6 +19,25 @@ public class Prediction {
     @Column(name = "input_features")
     private String inputFeatures;
 
+    @Column(name ="pattern_complexity")
+    private Double patternComplexity;
+
+    @Column(name = "operator_experience")
+    private Double operatorExperience;
+
+    @Column(name="fabric_pattern")
+    private String fabricPattern;
+
+    @Column(name ="cutting_method")
+    private String cuttingMethod;
+
+    @Column(name="fabric_type")
+    private  String fabricType;
+
+    @Column (name="marker_loss_pct")
+    private Double markerLossPct;
+
+
     @Column(name = "prediction_result")
     private Double predictionResult;
 
@@ -27,6 +46,8 @@ public class Prediction {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+
 
     // Called automatically before saving
     @PrePersist

@@ -21,7 +21,7 @@ public class MetricsService {
 
         List<Prediction> completed = predictionRepository.findByActualResultNotNull();
 
-        if (completed.size() < 100) return null;
+        if (completed.size() < 10) return null;
 
         List<Double> actual = completed.stream()
                 .map(Prediction::getActualResult)
@@ -38,8 +38,8 @@ public class MetricsService {
 
         List<Prediction> completed = predictionRepository.findByActualResultNotNull();
 
-        // Optional threshold (recommended)
-        if (completed.size() < 50) return null;
+
+        if (completed.size() < 10) return null;
 
         List<Double> actual = completed.stream()
                 .map(Prediction::getActualResult)

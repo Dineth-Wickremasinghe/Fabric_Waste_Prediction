@@ -58,31 +58,39 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-500">Pattern Complexity</label>
-                            <input type="number" step="any" name="patternComplexity"
-                                   class="form-control" placeholder="e.g. 0, 1, 2, 3"
-                                   required>
-                            <small class="text-muted">Numeric complexity level of the pattern</small>
+                            <select name="patternComplexity" class="form-select" required>
+                                <option value="">-- Select Pattern Complexity --</option>
+                                <option value="0.0">High</option>
+                                <option value="1.0">Low</option>
+                                <option value="2.0">Medium</option>
+                            </select>
+                            <small class="text-muted">Complexity level of the pattern</small>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Operator Experience (Years)</label>
-                            <input type="number" step="any" name="operatorExperienceYears"
+                            <input type="number" step="0.1" min="0" max="50" name="operatorExperience"
                                    class="form-control" placeholder="e.g. 13.0"
                                    required>
                             <small class="text-muted">Years of experience of the operator</small>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Fabric Pattern Encoded</label>
-                            <input type="number" step="any" name="fabricPatternEncoded"
-                                   class="form-control" placeholder="e.g. 9.02"
-                                   required>
-                            <small class="text-muted">Encoded value of the fabric pattern</small>
+                            <label class="form-label">Fabric Pattern</label>
+                            <select name="fabricPattern" class="form-select" required>
+                                <option value="">-- Select Fabric Pattern --</option>
+                                <option value="Checked">Checked</option>
+                                <option value="Floral">Floral</option>
+                                <option value="Printed">Printed</option>
+                                <option value="Solid">Solid</option>
+                                <option value="Striped">Striped</option>
+                            </select>
+                            <small class="text-muted">The fabric pattern</small>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Cutting Method</label>
-                            <select name="cuttingMethodManual" class="form-select" required>
+                            <select name="cuttingMethod" class="form-select" required>
                                 <option value="">-- Select Cutting Method --</option>
                                 <option value="1.0">Manual</option>
                                 <option value="0.0">Automated</option>
@@ -90,20 +98,24 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Fabric Type Encoded</label>
-                            <input type="number" step="any" name="fabricTypeEncoded"
-                                   class="form-control" placeholder="e.g. 8.50"
-                                   required>
-                            <small class="text-muted">Encoded value of the fabric type</small>
+                            <label class="form-label">Fabric Type</label>
+                            <select name="fabricType" class="form-select" required>
+                                <option value="">-- Select Fabric Type --</option>
+                                <option value="Blended">Blended</option>
+                                <option value="Cotton">Cotton</option>
+                                <option value="Denim">Denim</option>
+                                <option value="Linen">Linen</option>
+                                <option value="Polyester">Polyester</option>
+                                <option value="Poplin">Poplin</option>
+                                <option value="Rayon">Rayon</option>
+                                <option value="Twill">Twill</option>
+                                <option value="Viscose">Viscose</option>
+                            </select>
+                            <small class="text-muted">Type of fabric used</small>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">Marker Loss %</label>
-                            <input type="number" step="any" name="markerLossPct"
-                                   class="form-control" placeholder="e.g. 25.0"
-                                   required>
-                            <small class="text-muted">Percentage of marker loss</small>
-                        </div>
+                        <input type="hidden" name="markerLossPct" value="22.509572901325473">
+
 
                         <button type="submit" class="btn btn-predict">
                             🔍 Predict Fabric Waste

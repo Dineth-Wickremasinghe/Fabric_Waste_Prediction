@@ -8,7 +8,6 @@ import java.util.List;
 
  
 @Repository
-//Test to see if Prediction class can be added instead of PredictionRecord, if not then we will have to change the name of the class to PredictionRecord
 public interface PredictionRepository extends JpaRepository<Prediction, Long> {
     List<Prediction> findAllByOrderByCreatedAtDesc();
 

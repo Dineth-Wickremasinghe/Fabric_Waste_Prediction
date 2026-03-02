@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fabric Waste Prediction</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         body { background-color: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
         .navbar { background: linear-gradient(135deg, #1e3a5f, #2e86c1); }
@@ -21,32 +22,87 @@
             padding: 6px 14px; border-radius: 6px; font-weight: 600;
         }
         .btn-save:hover { opacity: 0.9; }
+
+        /* Retrain button */
+        .btn-retrain {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white; border: none;
+            padding: 10px 22px; border-radius: 10px;
+            font-weight: 700; font-size: 0.95rem;
+            display: inline-flex; align-items: center; gap: 8px;
+            cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+            box-shadow: 0 3px 10px rgba(211,84,0,0.35);
+        }
+        .btn-retrain:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-retrain:active { transform: translateY(0); }
+        .btn-retrain.loading { opacity: 0.7; pointer-events: none; }
+        .spinner-icon {
+            display: inline-block; width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .table thead { background-color: #1e3a5f; color: white; }
         .badge-result {
             background-color: #d4edda; color: #155724;
             padding: 4px 10px; border-radius: 20px; font-weight: 600;
         }
         input.actual-input { width: 100px; }
+
+        /* Chart card */
+        .chart-card { padding: 24px; }
+        .chart-wrapper { position: relative; height: 280px; }
+        .retrain-status {
+            display: none; margin-top: 10px;
+            padding: 8px 14px; border-radius: 8px;
+            font-size: 0.875rem; font-weight: 600;
+        }
+        .retrain-status.success { background: #d4edda; color: #155724; }
+        .retrain-status.error   { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-dark px-4 py-3 mb-4">
-    <span class="navbar-brand fs-4 fw-bold">🧵 Fabric Waste Prediction System</span>
+    <span class="navbar-brand fs-4 fw-bold">🧵 Fabric AI Monitoring</span>
 </nav>
 
 <div class="container pb-5">
-
-    <!-- Result banner -->
-    <div th:if="${prediction != null}" class="prediction-result">
-        <p>Predicted Fabric Wastage</p>
-        <h2 th:text="${#numbers.formatDecimal(prediction, 1, 4)} + '%'">--</h2>
-        <p class="mt-2">✓ Saved to database</p>
-    </div>
-    <div class="prediction-result" th:if="${r2Score != null}">
-        <p>R² Score</p>
+    <div th:if="${r2Score != null}" class="prediction-result"
+         th:style="${r2Score >= 0.7} ? 'background: linear-gradient(135deg, #1a6b3a, #27ae60)' :
+                   (${r2Score >= 0.6}  ? 'background: linear-gradient(135deg, #7d5a0a, #e6a817)' :
+                                         'background: linear-gradient(135deg, #7b1a1a, #c0392b)')">
+        <p style="margin-bottom:4px;">R² Score</p>
         <h2 th:text="${#numbers.formatDecimal(r2Score, 1, 4)}">--</h2>
+        <div class="r2-rating-badge"
+             th:text="${r2Score >= 0.7} ? '🟢 Good Performance' :
+                      (${r2Score >= 0.6}  ? '🟡 Moderate Performance' : '🔴 Poor Performance')">
+        </div>
     </div>
+
+    <!-- ── Model Performance Chart + Retrain ── -->
+    <div class="card mb-4 chart-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="mb-0">📈 Model Performance Over Time</h5>
+                <small class="text-muted">R² and MAE tracked per training cycle</small>
+            </div>
+            <div class="text-end">
+                <button class="btn-retrain" id="retrainBtn" onclick="retrainModel()">
+                    <span id="retrainIcon">🔄</span>
+                    <span id="retrainLabel">Retrain Model</span>
+                </button>
+                <div class="retrain-status" id="retrainStatus"></div>
+            </div>
+        </div>
+
+        <div class="chart-wrapper">
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </div>
+    <!-- ─────────────────────────────────────── -->
 
     <div class="row g-4">
         <div class="col-lg-12">
@@ -57,7 +113,7 @@
                           th:text="${history != null ? #lists.size(history) : 0} + ' records'">0 records</span>
                 </div>
 
-                <div class="row mb-4">
+                <div class="row mb-4 px-3 pt-3">
                     <div class="col-md-6">
                         <div class="card p-3 text-center">
                             <h6>R² Score</h6>
@@ -92,7 +148,7 @@
                                 <th>Input Features</th>
                                 <th>Predicted</th>
                                 <th>Actual</th>
-                                <th>Date & Time</th>
+                                <th>Date &amp; Time</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
@@ -105,19 +161,14 @@
 
                             <tr th:each="record : ${history}">
                                 <td th:text="${record.id}"></td>
-
                                 <td>
-                                    <small class="text-muted"
-                                           th:text="${record.inputFeatures}"></small>
+                                    <small class="text-muted" th:text="${record.inputFeatures}"></small>
                                 </td>
-
                                 <td>
                                     <span class="badge-result"
                                           th:text="${#numbers.formatDecimal(record.predictionResult, 1, 4)} + '%'">
                                     </span>
                                 </td>
-
-                                <!-- Editable actual value -->
                                 <td>
                                     <input type="number"
                                            step="0.01"
@@ -126,11 +177,9 @@
                                            th:id="'actual-' + ${record.id}"
                                            placeholder="Enter">
                                 </td>
-
                                 <td>
                                     <small th:text="${#temporals.format(record.createdAt, 'dd MMM yyyy, HH:mm')}"></small>
                                 </td>
-
                                 <td>
                                     <button class="btn-save"
                                             th:onclick="'updateActual(' + ${record.id} + ')'">
@@ -148,6 +197,133 @@
 </div>
 
 <script>
+    /* ── Retrain ── */
+    function retrainModel() {
+        const btn   = document.getElementById('retrainBtn');
+        const icon  = document.getElementById('retrainIcon');
+        const label = document.getElementById('retrainLabel');
+        const status = document.getElementById('retrainStatus');
+
+        btn.classList.add('loading');
+        icon.innerHTML = '<span class="spinner-icon"></span>';
+        label.textContent = 'Retraining…';
+        status.style.display = 'none';
+
+        fetch('/model/retrain', { method: 'POST' })
+            .then(res => {
+                status.style.display = 'block';
+                if (res.ok) {
+                    status.className = 'retrain-status success';
+                    status.textContent = '✓ Model retrained successfully!';
+                    location.reload();
+                } else {
+                    status.className = 'retrain-status error';
+                    status.textContent = '✗ Retraining failed. Please try again.';
+                }
+            })
+            .catch(() => {
+                status.style.display = 'block';
+                status.className = 'retrain-status error';
+                status.textContent = '✗ Network error. Please try again.';
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
+                icon.textContent = '🔄';
+                label.textContent = 'Retrain Model';
+            });
+    }
+
+    /* ── Performance Chart (dummy data) ── */
+    (function () {
+        const labels = [
+            'Cycle 1', 'Cycle 2', 'Cycle 3', 'Cycle 4',
+            'Cycle 5', 'Cycle 6', 'Cycle 7', 'Cycle 8'
+        ];
+
+        const r2Data  = [0.61, 0.68, 0.72, 0.75, 0.78, 0.80, 0.83, 0.86];
+        const maeData = [4.12, 3.85, 3.60, 3.32, 3.05, 2.88, 2.64, 2.41];
+
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'R² Score',
+                        data: r2Data,
+                        borderColor: '#2e86c1',
+                        backgroundColor: 'rgba(46,134,193,0.12)',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#2e86c1',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0.35,
+                        fill: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'MAE',
+                        data: maeData,
+                        borderColor: '#e67e22',
+                        backgroundColor: 'rgba(230,126,34,0.10)',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#e67e22',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0.35,
+                        fill: true,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 20 }
+                    },
+                    tooltip: {
+                        backgroundColor: '#1e3a5f',
+                        titleColor: '#fff',
+                        bodyColor: '#cde',
+                        padding: 12,
+                        callbacks: {
+                            label: ctx => {
+                                const v = ctx.parsed.y.toFixed(4);
+                                return ` ${ctx.dataset.label}: ${v}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(0,0,0,0.06)' },
+                        ticks: { color: '#555' }
+                    },
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        title: { display: true, text: 'R² Score', color: '#2e86c1' },
+                        min: 0, max: 1,
+                        grid: { color: 'rgba(0,0,0,0.06)' },
+                        ticks: { color: '#2e86c1' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        title: { display: true, text: 'MAE (%)', color: '#e67e22' },
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#e67e22' }
+                    }
+                }
+            }
+        });
+    })();
     function updateActual(id) {
         const value = document.getElementById("actual-" + id).value;
 
@@ -177,4 +353,3 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-```

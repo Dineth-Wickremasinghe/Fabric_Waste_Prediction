@@ -13,24 +13,40 @@ import java.util.List;
 public class PredictionService {
     private final MlApiClient mlApiClient;
     private final PredictionRepository predictionRepository;
+    private final TargetEncoderService targetEncoderService;
 
-    public PredictionService(MlApiClient mlApiClient, PredictionRepository predictionRepository) {
+    public PredictionService(MlApiClient mlApiClient, PredictionRepository predictionRepository, TargetEncoderService targetEncoderService) {
+        this.targetEncoderService = targetEncoderService;
         this.mlApiClient = mlApiClient;
         this.predictionRepository = predictionRepository;
     }
 
     public PredictionResponse getPredictionAndSave(PredictionRequest request) {
 
-        // 1. Call FastAPI
+
+        request.setFabricTypeEncoded(targetEncoderService.encodeFabricType(request.getFabricType()));
+        request.setFabricPatternEncoded(targetEncoderService.encodeFabricPattern(request.getFabricPattern()));
+
         PredictionResponse response = mlApiClient.predict(request);
+
 
         // 2. Save to PostgreSQL
         Prediction record = new Prediction();
-        record.setInputFeatures(request.getFeatures().toString()); // e.g. "[0.0, 13.0, 9.02...]"
+
+        record.setPatternComplexity(request.getPatternComplexity());
+        record.setOperatorExperience(request.getOperatorExperience());
+        record.setFabricPattern(request.getFabricPattern());
+        record.setCuttingMethod(String.valueOf(request.getCuttingMethod()));
+        record.setFabricType(request.getFabricType());
+        record.setMarkerLossPct(request.getMarkerLossPct());
+        record.setInputFeatures(String.format("[%s, %s, %s, %s, %s, %s]",
+                request.getPatternComplexity(), request.getOperatorExperience(),
+                request.getFabricPattern(), request.getCuttingMethod(),
+                request.getFabricType(), request.getMarkerLossPct()));
         record.setPredictionResult((Double) response.getPrediction());
         predictionRepository.save(record);
 
-        // 3. Return the response back to whoever called Spring Boot
+
         return response;
     }
 

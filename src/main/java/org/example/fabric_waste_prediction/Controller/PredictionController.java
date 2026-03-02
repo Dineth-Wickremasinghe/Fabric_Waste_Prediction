@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Arrays;
+
 import  org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
@@ -33,26 +33,26 @@ public class PredictionController {
     @PostMapping("/predict")
     public String predict(
             @RequestParam Double patternComplexity,
-            @RequestParam Double operatorExperienceYears,
-            @RequestParam Double fabricPatternEncoded,
-            @RequestParam Double cuttingMethodManual,
-            @RequestParam Double fabricTypeEncoded,
+            @RequestParam Double operatorExperience,
+            @RequestParam String fabricPattern,
+            @RequestParam Double cuttingMethod,
+            @RequestParam String fabricType,
             @RequestParam Double markerLossPct,
             RedirectAttributes redirectAttributes) {
 
-        PredictionRequest request = new PredictionRequest(Arrays.asList(
+        PredictionRequest request = new PredictionRequest(
                 patternComplexity,
-                operatorExperienceYears,
-                fabricPatternEncoded,
-                cuttingMethodManual,
-                fabricTypeEncoded,
+                operatorExperience,
+                fabricPattern,
+                cuttingMethod,
+                fabricType,
                 markerLossPct
-        ));
+        );
 
         PredictionResponse response = predictionService.getPredictionAndSave(request);
         redirectAttributes.addFlashAttribute("prediction", response.getPrediction());
 
-        // ✅ Redirect to GET /dashboard which will load history fresh
+
         return "redirect:/dashboard";
     }
 }
