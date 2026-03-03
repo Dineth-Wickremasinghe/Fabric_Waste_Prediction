@@ -12,7 +12,6 @@
         .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 600; }
         .prediction-result {
-            background: linear-gradient(135deg, #1e3a5f, #2e86c1);
             color: white; border-radius: 16px;
             padding: 30px; text-align: center; margin-bottom: 24px;
         }
@@ -22,8 +21,6 @@
             padding: 6px 14px; border-radius: 6px; font-weight: 600;
         }
         .btn-save:hover { opacity: 0.9; }
-
-        /* Retrain button */
         .btn-retrain {
             background: linear-gradient(135deg, #e67e22, #d35400);
             color: white; border: none;
@@ -43,15 +40,12 @@
             animation: spin 0.7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         .table thead { background-color: #1e3a5f; color: white; }
         .badge-result {
             background-color: #d4edda; color: #155724;
             padding: 4px 10px; border-radius: 20px; font-weight: 600;
         }
         input.actual-input { width: 100px; }
-
-        /* Chart card */
         .chart-card { padding: 24px; }
         .chart-wrapper { position: relative; height: 280px; }
         .retrain-status {
@@ -61,6 +55,18 @@
         }
         .retrain-status.success { background: #d4edda; color: #155724; }
         .retrain-status.error   { background: #f8d7da; color: #721c24; }
+        .r2-rating-badge {
+            display: inline-block; margin-top: 10px;
+            padding: 5px 18px; border-radius: 20px;
+            font-size: 0.95rem; font-weight: 700;
+            background: rgba(255,255,255,0.22); letter-spacing: 0.03em;
+        }
+        .chart-empty {
+            display: flex; align-items: center; justify-content: center;
+            height: 100%; color: #aaa; font-size: 0.95rem;
+        }
+        .retrain-status.warning { background: #fff3cd; color: #856404; }
+
     </style>
 </head>
 <body>
@@ -70,24 +76,25 @@
 </nav>
 
 <div class="container pb-5">
+
+    <!-- R² Score banner -->
     <div th:if="${r2Score != null}" class="prediction-result"
          th:style="${r2Score >= 0.7} ? 'background: linear-gradient(135deg, #1a6b3a, #27ae60)' :
                    (${r2Score >= 0.6}  ? 'background: linear-gradient(135deg, #7d5a0a, #e6a817)' :
                                          'background: linear-gradient(135deg, #7b1a1a, #c0392b)')">
-        <p style="margin-bottom:4px;">R² Score</p>
-        <h2 th:text="${#numbers.formatDecimal(r2Score, 1, 4)}">--</h2>
+
         <div class="r2-rating-badge"
              th:text="${r2Score >= 0.7} ? '🟢 Good Performance' :
                       (${r2Score >= 0.6}  ? '🟡 Moderate Performance' : '🔴 Poor Performance')">
         </div>
     </div>
 
-    <!-- ── Model Performance Chart + Retrain ── -->
+    <!-- Chart + Retrain -->
     <div class="card mb-4 chart-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h5 class="mb-0">📈 Model Performance Over Time</h5>
-                <small class="text-muted">R² and MAE tracked per training cycle</small>
+                <h5 class="mb-0">📈 Predicted vs Actual Over Time</h5>
+                <small class="text-muted">Comparing model predictions against recorded actual values</small>
             </div>
             <div class="text-end">
                 <button class="btn-retrain" id="retrainBtn" onclick="retrainModel()">
@@ -97,13 +104,15 @@
                 <div class="retrain-status" id="retrainStatus"></div>
             </div>
         </div>
-
         <div class="chart-wrapper">
+            <div id="chartEmpty" class="chart-empty" style="display:none;">
+                No records with actual values yet — save some actual results to see the chart.
+            </div>
             <canvas id="performanceChart"></canvas>
         </div>
     </div>
-    <!-- ─────────────────────────────────────── -->
 
+    <!-- History Table -->
     <div class="row g-4">
         <div class="col-lg-12">
             <div class="card">
@@ -112,7 +121,6 @@
                     <span class="badge bg-secondary"
                           th:text="${history != null ? #lists.size(history) : 0} + ' records'">0 records</span>
                 </div>
-
                 <div class="row mb-4 px-3 pt-3">
                     <div class="col-md-6">
                         <div class="card p-3 text-center">
@@ -120,25 +128,19 @@
                             <div th:if="${enoughDataR2}">
                                 <h3 th:text="${#numbers.formatDecimal(r2Score, 1, 4)}"></h3>
                             </div>
-                            <div th:unless="${enoughDataR2}" class="text-muted">
-                                Waiting for enough data...
-                            </div>
+                            <div th:unless="${enoughDataR2}" class="text-muted">Waiting for enough data...</div>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="card p-3 text-center">
                             <h6>MAE</h6>
                             <div th:if="${enoughDataMAE}">
                                 <h3 th:text="${#numbers.formatDecimal(maeScore, 1, 4)}"></h3>
                             </div>
-                            <div th:unless="${enoughDataMAE}" class="text-muted">
-                                Waiting for enough data...
-                            </div>
+                            <div th:unless="${enoughDataMAE}" class="text-muted">Waiting for enough data...</div>
                         </div>
                     </div>
                 </div>
-
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
@@ -153,25 +155,19 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:if="${#lists.isEmpty(history)}">
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    No predictions yet.
-                                </td>
+                            <tr th:if="${history == null or #lists.isEmpty(history)}">
+                                <td colspan="6" class="text-center text-muted py-4">No predictions yet.</td>
                             </tr>
-
                             <tr th:each="record : ${history}">
                                 <td th:text="${record.id}"></td>
-                                <td>
-                                    <small class="text-muted" th:text="${record.inputFeatures}"></small>
-                                </td>
+                                <td><small class="text-muted" th:text="${record.inputFeatures}"></small></td>
                                 <td>
                                     <span class="badge-result"
                                           th:text="${#numbers.formatDecimal(record.predictionResult, 1, 4)} + '%'">
                                     </span>
                                 </td>
                                 <td>
-                                    <input type="number"
-                                           step="0.01"
+                                    <input type="number" step="0.01"
                                            class="form-control actual-input"
                                            th:value="${record.actualResult}"
                                            th:id="'actual-' + ${record.id}"
@@ -181,8 +177,7 @@
                                     <small th:text="${#temporals.format(record.createdAt, 'dd MMM yyyy, HH:mm')}"></small>
                                 </td>
                                 <td>
-                                    <button class="btn-save"
-                                            th:onclick="'updateActual(' + ${record.id} + ')'">
+                                    <button class="btn-save" th:onclick="'updateActual(' + ${record.id} + ')'">
                                         Save
                                     </button>
                                 </td>
@@ -196,63 +191,50 @@
     </div>
 </div>
 
-<script>
-    /* ── Retrain ── */
-    function retrainModel() {
-        const btn   = document.getElementById('retrainBtn');
-        const icon  = document.getElementById('retrainIcon');
-        const label = document.getElementById('retrainLabel');
-        const status = document.getElementById('retrainStatus');
-
-        btn.classList.add('loading');
-        icon.innerHTML = '<span class="spinner-icon"></span>';
-        label.textContent = 'Retraining…';
-        status.style.display = 'none';
-
-        fetch('/model/retrain', { method: 'POST' })
-            .then(res => {
-                status.style.display = 'block';
-                if (res.ok) {
-                    status.className = 'retrain-status success';
-                    status.textContent = '✓ Model retrained successfully!';
-                    location.reload();
-                } else {
-                    status.className = 'retrain-status error';
-                    status.textContent = '✗ Retraining failed. Please try again.';
-                }
-            })
-            .catch(() => {
-                status.style.display = 'block';
-                status.className = 'retrain-status error';
-                status.textContent = '✗ Network error. Please try again.';
-            })
-            .finally(() => {
-                btn.classList.remove('loading');
-                icon.textContent = '🔄';
-                label.textContent = 'Retrain Model';
-            });
-    }
-
-    /* ── Performance Chart (dummy data) ── */
+<!--
+    KEY FIX: Serialize the entire history list as one JSON object.
+    Avoids fragile SpEL projection (history.![field]) which can silently
+    fail or produce wrong types. Thymeleaf's Jackson integration handles
+    nulls, escaping, and type conversion correctly in a single pass.
+-->
+<script th:inline="javascript">
+    /*<![CDATA[*/
     (function () {
-        const labels = [
-            'Cycle 1', 'Cycle 2', 'Cycle 3', 'Cycle 4',
-            'Cycle 5', 'Cycle 6', 'Cycle 7', 'Cycle 8'
-        ];
+        const history = /*[[${history}]]*/ [];
 
-        const r2Data  = [0.61, 0.68, 0.72, 0.75, 0.78, 0.80, 0.83, 0.86];
-        const maeData = [4.12, 3.85, 3.60, 3.32, 3.05, 2.88, 2.64, 2.41];
+        const canvas = document.getElementById('performanceChart');
+        const empty  = document.getElementById('chartEmpty');
 
-        const ctx = document.getElementById('performanceChart').getContext('2d');
+        if (!history || history.length === 0) {
+            canvas.style.display = 'none';
+            empty.style.display  = 'flex';
+            return;
+        }
 
-        new Chart(ctx, {
+        // Only include rows where actualResult has been recorded
+        const rows = history.filter(r => r.actualResult !== null && r.actualResult !== undefined);
+
+        if (rows.length === 0) {
+            canvas.style.display = 'none';
+            empty.style.display  = 'flex';
+            return;
+        }
+
+        const labels        = rows.map(r => {
+            const d = new Date(r.createdAt);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        });
+        const predictedData = rows.map(r => r.predictionResult);
+        const actualData    = rows.map(r => r.actualResult);
+
+        new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {
                 labels,
                 datasets: [
                     {
-                        label: 'R² Score',
-                        data: r2Data,
+                        label: 'Predicted (%)',
+                        data: predictedData,
                         borderColor: '#2e86c1',
                         backgroundColor: 'rgba(46,134,193,0.12)',
                         borderWidth: 2.5,
@@ -260,12 +242,11 @@
                         pointRadius: 5,
                         pointHoverRadius: 7,
                         tension: 0.35,
-                        fill: true,
-                        yAxisID: 'y'
+                        fill: true
                     },
                     {
-                        label: 'MAE',
-                        data: maeData,
+                        label: 'Actual (%)',
+                        data: actualData,
                         borderColor: '#e67e22',
                         backgroundColor: 'rgba(230,126,34,0.10)',
                         borderWidth: 2.5,
@@ -273,8 +254,7 @@
                         pointRadius: 5,
                         pointHoverRadius: 7,
                         tension: 0.35,
-                        fill: true,
-                        yAxisID: 'y1'
+                        fill: true
                     }
                 ]
             },
@@ -293,60 +273,79 @@
                         bodyColor: '#cde',
                         padding: 12,
                         callbacks: {
-                            label: ctx => {
-                                const v = ctx.parsed.y.toFixed(4);
-                                return ` ${ctx.dataset.label}: ${v}`;
-                            }
+                            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)}`
                         }
                     }
                 },
                 scales: {
                     x: {
                         grid: { color: 'rgba(0,0,0,0.06)' },
-                        ticks: { color: '#555' }
+                        ticks: { color: '#555', maxRotation: 45 }
                     },
                     y: {
-                        type: 'linear',
-                        position: 'left',
-                        title: { display: true, text: 'R² Score', color: '#2e86c1' },
-                        min: 0, max: 1,
+                        title: { display: true, text: 'Value (%)' },
                         grid: { color: 'rgba(0,0,0,0.06)' },
-                        ticks: { color: '#2e86c1' }
-                    },
-                    y1: {
-                        type: 'linear',
-                        position: 'right',
-                        title: { display: true, text: 'MAE (%)', color: '#e67e22' },
-                        grid: { drawOnChartArea: false },
-                        ticks: { color: '#e67e22' }
+                        ticks: { color: '#555' }
                     }
                 }
             }
         });
     })();
-    function updateActual(id) {
-        const value = document.getElementById("actual-" + id).value;
+    /*]]>*/
+</script>
 
-        if (!value) {
-            alert("Please enter an actual value");
-            return;
-        }
+<script>
+    function retrainModel() {
+        const btn    = document.getElementById('retrainBtn');
+        const icon   = document.getElementById('retrainIcon');
+        const label  = document.getElementById('retrainLabel');
+        const status = document.getElementById('retrainStatus');
 
-        fetch("/monitoring/" + id + "/actual", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ actualResult: parseFloat(value) })
-        })
-            .then(res => {
-                if (res.ok) {
-                    alert("Actual value saved!");
-                    location.reload(); // reload to refresh metrics
+        btn.classList.add('loading');
+        icon.innerHTML = '<span class="spinner-icon"></span>';
+        label.textContent = 'Retraining…';
+        status.style.display = 'none';
+
+        fetch('http://localhost:8000/retrain', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                status.style.display = 'block';
+                if (data.status === 'improved') {
+                    status.className = 'retrain-status success';
+                    status.textContent = `✓ ${data.message}`;
+                    location.reload();
+                } else if (data.status === 'no_improvement') {
+                    status.className = 'retrain-status warning';
+                    status.textContent = `ℹ️ ${data.message}`;
                 } else {
-                    alert("Error saving value");
+                    status.className = 'retrain-status error';
+                    status.textContent = `✗ ${data.message}`;
                 }
+            })
+            .catch(() => {
+                status.style.display = 'block';
+                status.className = 'retrain-status error';
+                status.textContent = '✗ Network error. Please try again.';
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
+                icon.textContent = '🔄';
+                label.textContent = 'Retrain Model';
             });
+    }
+
+    function updateActual(id) {
+        const value = document.getElementById('actual-' + id).value;
+        if (!value) { alert('Please enter an actual value'); return; }
+
+        fetch('/monitoring/' + id + '/actual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actualResult: parseFloat(value) })
+        }).then(res => {
+            if (res.ok) { alert('Actual value saved!'); location.reload(); }
+            else { alert('Error saving value'); }
+        });
     }
 </script>
 
