@@ -1,0 +1,620 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Report Dashboard — Fabric Waste Prediction</title>
+    <link rel="stylesheet" href="/css/report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="brand-inline">
+                <div class="brand-icon-sm">🧵</div>
+                <span class="brand-name">FabricAI Predictor</span>
+            </div>
+            <div class="topbar-divider"></div>
+            <span class="page-badge">Reports Module</span>
+            <h1>Fabric Waste Report Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+            <div class="status-pill">
+                <div class="status-dot"></div>
+                Connected to DB
+            </div>
+            <span class="topbar-time" id="gen-time"></span>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- FILTERS -->
+        <div class="section-title">Report Filters</div>
+        <div class="filter-panel">
+            <div class="filter-top">
+                <div class="filter-icon">⚙️</div>
+                <h3>Filter & Generate Report</h3>
+            </div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Year</label>
+                    <select id="filter-year">
+                        <option value="all">All Years</option>
+                        <option value="2020" selected>2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Month From</label>
+                    <select id="filter-month-from">
+                        <option value="0">All</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Month To</label>
+                    <select id="filter-month-to">
+                        <option value="0">All</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5" selected>May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Fabric Type</label>
+                    <select id="filter-fabric">
+                        <option value="all">All Fabrics</option>
+                        <option value="Polyester">Polyester</option>
+                        <option value="Viscose">Viscose</option>
+                        <option value="Cotton">Cotton</option>
+                        <option value="Denim">Denim</option>
+                        <option value="Blended">Blended</option>
+                        <option value="Rayon">Rayon</option>
+                        <option value="Linen">Linen</option>
+                        <option value="Poplin">Poplin</option>
+                        <option value="Twill">Twill</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Shift</label>
+                    <select id="filter-shift">
+                        <option value="all">All Shifts</option>
+                        <option value="Day">Day Shift</option>
+                        <option value="Night">Night Shift</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Cutting Method</label>
+                    <select id="filter-cutting">
+                        <option value="all">All Methods</option>
+                        <option value="Manual">Manual</option>
+                        <option value="Auto">Auto</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
+                    <button class="btn-generate" onclick="generateReport()">▶ Generate Report</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="section-title">Key Performance Indicators</div>
+        <div class="kpi-grid">
+            <div class="kpi-card primary">
+                <div class="kpi-icon-wrap">📦</div>
+                <div class="kpi-label">Total Records</div>
+                <div class="kpi-value" id="kpi-total">51</div>
+                <div class="kpi-sub">entries in selection</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap">📊</div>
+                <div class="kpi-label">Avg Actual Waste</div>
+                <div class="kpi-value" id="kpi-actual">8.17<span>%</span></div>
+                <div class="kpi-sub">historical average</div>
+                <div class="kpi-trend trend-up">↑ Above target</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap">🤖</div>
+                <div class="kpi-label">Avg Predicted Waste</div>
+                <div class="kpi-value" id="kpi-predicted">8.62<span>%</span></div>
+                <div class="kpi-sub">model output (demo)</div>
+                <div class="kpi-trend trend-up">↑ Model estimate</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap">⚠️</div>
+                <div class="kpi-label">Highest Wastage</div>
+                <div class="kpi-value" id="kpi-max">12.24<span>%</span></div>
+                <div class="kpi-sub">Cotton · Mar 2020</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap">✅</div>
+                <div class="kpi-label">Lowest Wastage</div>
+                <div class="kpi-value" id="kpi-min">3.65<span>%</span></div>
+                <div class="kpi-sub">Viscose · Jan 2020</div>
+                <div class="kpi-trend trend-down">↓ Best performer</div>
+            </div>
+        </div>
+
+        <!-- CHARTS ROW 1 -->
+        <div class="section-title">Trend Analysis</div>
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h3>Actual vs Predicted Waste Trend</h3>
+                        <p>Monthly average · Jan – May 2020</p>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background:#2563eb;"></div> Actual</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div> Predicted</div>
+                    </div>
+                </div>
+                <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h3>Waste by Fabric Type</h3>
+                        <p>Average % across all records</p>
+                    </div>
+                </div>
+                <div class="chart-wrap"><canvas id="fabricChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- CHARTS ROW 2 -->
+        <div class="charts-row-2">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h3>Day vs Night Shift Comparison</h3>
+                        <p>Average wastage % per month by shift</p>
+                    </div>
+                </div>
+                <div class="chart-wrap"><canvas id="shiftChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h3>Cutting Method Impact</h3>
+                        <p>Manual vs Auto — waste distribution</p>
+                    </div>
+                </div>
+                <div class="chart-wrap"><canvas id="cuttingChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- DETAILED RECORDS TABLE -->
+        <div class="section-title">Detailed Records</div>
+        <div class="table-section">
+            <div class="table-top">
+                <div class="table-top-left">
+                    <h3>Detailed Wastage Records</h3>
+                    <p>Showing <span id="row-count">51</span> records · dummy predicted values for demo</p>
+                </div>
+                <div class="table-btns">
+                    <button class="btn-csv" onclick="showToast('📋 CSV export coming in Phase 2')">⬇ Export CSV</button>
+                    <button class="btn-pdf" onclick="downloadPDF()">📄 Download PDF</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Year</th><th>Month</th><th>Fabric Type</th><th>Pattern</th>
+                        <th>GSM</th><th>Shift</th><th>Cutting</th>
+                        <th>Actual Waste %</th><th>Predicted %</th><th>Difference</th>
+                    </tr>
+                </thead>
+                <tbody id="report-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- ── SAVED REPORTS FROM DATABASE ── -->
+        <div class="section-title">Saved Reports — Database</div>
+        <div class="table-section">
+            <div class="table-top">
+                <div class="table-top-left">
+                    <h3>Generated Reports Log</h3>
+                    <p>
+                        <span th:if="${reportCount > 0}">
+                            <span th:text="${reportCount}">0</span> report(s) saved in PostgreSQL · <strong>reports</strong> table
+                        </span>
+                        <span th:if="${reportCount == 0}">
+                            No reports saved yet — click <strong>Generate Report</strong> above to save one
+                        </span>
+                    </p>
+                </div>
+                <div class="table-btns">
+                    <span class="db-badge">🗄️ PostgreSQL · Fabric AI_V3</span>
+                </div>
+            </div>
+
+            <!-- Show table only if there are records -->
+            <div th:if="${reportCount > 0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID (UUID)</th>
+                            <th>Report Name</th>
+                            <th>Generated At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="report : ${reports}">
+                            <td class="uuid-cell" th:text="${report.id}">—</td>
+                            <td><strong th:text="${report.reportName}">—</strong></td>
+                            <td th:text="${#temporals.format(report.generatedAt, 'dd MMM yyyy · HH:mm')}">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${reportCount == 0}" class="empty-state">
+                <div class="empty-icon">🗄️</div>
+                <p>No reports in database yet.</p>
+                <p>Click <strong>▶ Generate Report</strong> above — it will be saved here automatically.</p>
+            </div>
+
+        </div>
+
+    </div><!-- /page-body -->
+</div><!-- /main-content -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toast-msg">Done</span>
+</div>
+
+<script>
+const MONTHS = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const rawData = [
+    {year:2020,month:1,fabric:"Viscose",pattern:"Checked",gsm:150,shift:"Night",cutting:"Manual",actual:8.17},
+    {year:2020,month:1,fabric:"Polyester",pattern:"Checked",gsm:140,shift:"Night",cutting:"Manual",actual:7.48},
+    {year:2020,month:1,fabric:"Blended",pattern:"Checked",gsm:170,shift:"Night",cutting:"Auto",actual:7.82},
+    {year:2020,month:1,fabric:"Viscose",pattern:"Floral",gsm:180,shift:"Night",cutting:"Manual",actual:6.35},
+    {year:2020,month:1,fabric:"Rayon",pattern:"Striped",gsm:200,shift:"Day",cutting:"Manual",actual:11.54},
+    {year:2020,month:1,fabric:"Twill",pattern:"Floral",gsm:190,shift:"Day",cutting:"Manual",actual:8.05},
+    {year:2020,month:1,fabric:"Twill",pattern:"Printed",gsm:140,shift:"Night",cutting:"Auto",actual:4.04},
+    {year:2020,month:1,fabric:"Polyester",pattern:"Printed",gsm:200,shift:"Night",cutting:"Manual",actual:11.67},
+    {year:2020,month:1,fabric:"Blended",pattern:"Solid",gsm:160,shift:"Night",cutting:"Auto",actual:8.32},
+    {year:2020,month:1,fabric:"Blended",pattern:"Floral",gsm:150,shift:"Day",cutting:"Manual",actual:9.82},
+    {year:2020,month:1,fabric:"Polyester",pattern:"Striped",gsm:150,shift:"Day",cutting:"Auto",actual:6.72},
+    {year:2020,month:1,fabric:"Denim",pattern:"Striped",gsm:170,shift:"Day",cutting:"Auto",actual:8.95},
+    {year:2020,month:1,fabric:"Cotton",pattern:"Solid",gsm:150,shift:"Day",cutting:"Manual",actual:9.45},
+    {year:2020,month:1,fabric:"Linen",pattern:"Floral",gsm:180,shift:"Night",cutting:"Auto",actual:5.72},
+    {year:2020,month:1,fabric:"Viscose",pattern:"Printed",gsm:180,shift:"Day",cutting:"Auto",actual:3.65},
+    {year:2020,month:2,fabric:"Denim",pattern:"Solid",gsm:210,shift:"Day",cutting:"Auto",actual:5.18},
+    {year:2020,month:2,fabric:"Blended",pattern:"Floral",gsm:140,shift:"Night",cutting:"Manual",actual:10.28},
+    {year:2020,month:2,fabric:"Rayon",pattern:"Solid",gsm:210,shift:"Day",cutting:"Manual",actual:7.72},
+    {year:2020,month:2,fabric:"Viscose",pattern:"Floral",gsm:140,shift:"Night",cutting:"Auto",actual:6.05},
+    {year:2020,month:2,fabric:"Linen",pattern:"Checked",gsm:180,shift:"Night",cutting:"Auto",actual:10.47},
+    {year:2020,month:2,fabric:"Cotton",pattern:"Floral",gsm:170,shift:"Night",cutting:"Auto",actual:8.21},
+    {year:2020,month:2,fabric:"Poplin",pattern:"Striped",gsm:160,shift:"Day",cutting:"Manual",actual:8.64},
+    {year:2020,month:2,fabric:"Denim",pattern:"Solid",gsm:190,shift:"Night",cutting:"Auto",actual:5.50},
+    {year:2020,month:2,fabric:"Polyester",pattern:"Solid",gsm:170,shift:"Night",cutting:"Auto",actual:7.07},
+    {year:2020,month:2,fabric:"Polyester",pattern:"Printed",gsm:180,shift:"Day",cutting:"Manual",actual:8.53},
+    {year:2020,month:3,fabric:"Poplin",pattern:"Striped",gsm:170,shift:"Day",cutting:"Manual",actual:9.73},
+    {year:2020,month:3,fabric:"Polyester",pattern:"Floral",gsm:150,shift:"Day",cutting:"Auto",actual:5.14},
+    {year:2020,month:3,fabric:"Cotton",pattern:"Solid",gsm:160,shift:"Night",cutting:"Manual",actual:9.58},
+    {year:2020,month:3,fabric:"Rayon",pattern:"Floral",gsm:160,shift:"Day",cutting:"Auto",actual:6.74},
+    {year:2020,month:3,fabric:"Denim",pattern:"Floral",gsm:190,shift:"Day",cutting:"Auto",actual:7.82},
+    {year:2020,month:3,fabric:"Cotton",pattern:"Striped",gsm:170,shift:"Night",cutting:"Manual",actual:12.24},
+    {year:2020,month:3,fabric:"Poplin",pattern:"Printed",gsm:200,shift:"Day",cutting:"Auto",actual:3.74},
+    {year:2020,month:3,fabric:"Cotton",pattern:"Printed",gsm:150,shift:"Day",cutting:"Auto",actual:4.90},
+    {year:2020,month:3,fabric:"Linen",pattern:"Striped",gsm:160,shift:"Night",cutting:"Manual",actual:9.70},
+    {year:2020,month:3,fabric:"Denim",pattern:"Striped",gsm:150,shift:"Night",cutting:"Manual",actual:10.59},
+    {year:2020,month:4,fabric:"Poplin",pattern:"Checked",gsm:150,shift:"Night",cutting:"Manual",actual:9.07},
+    {year:2020,month:4,fabric:"Cotton",pattern:"Printed",gsm:170,shift:"Day",cutting:"Auto",actual:4.42},
+    {year:2020,month:4,fabric:"Denim",pattern:"Solid",gsm:150,shift:"Day",cutting:"Auto",actual:9.03},
+    {year:2020,month:4,fabric:"Blended",pattern:"Striped",gsm:160,shift:"Day",cutting:"Auto",actual:7.28},
+    {year:2020,month:4,fabric:"Denim",pattern:"Floral",gsm:170,shift:"Night",cutting:"Manual",actual:12.15},
+    {year:2020,month:4,fabric:"Linen",pattern:"Checked",gsm:170,shift:"Night",cutting:"Manual",actual:9.80},
+    {year:2020,month:4,fabric:"Polyester",pattern:"Striped",gsm:200,shift:"Night",cutting:"Manual",actual:7.27},
+    {year:2020,month:4,fabric:"Viscose",pattern:"Solid",gsm:150,shift:"Night",cutting:"Auto",actual:8.18},
+    {year:2020,month:4,fabric:"Rayon",pattern:"Striped",gsm:140,shift:"Night",cutting:"Auto",actual:7.72},
+    {year:2020,month:5,fabric:"Twill",pattern:"Floral",gsm:150,shift:"Night",cutting:"Manual",actual:8.10},
+    {year:2020,month:5,fabric:"Rayon",pattern:"Solid",gsm:200,shift:"Night",cutting:"Manual",actual:9.30},
+    {year:2020,month:5,fabric:"Viscose",pattern:"Floral",gsm:160,shift:"Day",cutting:"Manual",actual:7.70},
+    {year:2020,month:5,fabric:"Twill",pattern:"Floral",gsm:170,shift:"Night",cutting:"Auto",actual:9.75},
+    {year:2020,month:5,fabric:"Poplin",pattern:"Floral",gsm:180,shift:"Day",cutting:"Auto",actual:4.64},
+    {year:2020,month:5,fabric:"Blended",pattern:"Striped",gsm:180,shift:"Night",cutting:"Manual",actual:7.63},
+    {year:2020,month:5,fabric:"Denim",pattern:"Floral",gsm:170,shift:"Night",cutting:"Manual",actual:8.46},
+];
+
+const offsets = [0.73,0.62,0.45,0.88,0.61,0.94,0.55,0.72,0.41,0.85,0.38,0.66,0.79,0.52,0.43,
+                 0.67,0.55,0.91,0.48,0.63,0.72,0.58,0.34,0.47,0.83,0.69,0.44,0.77,0.52,0.39,
+                 0.85,0.41,0.62,0.73,0.56,0.68,0.39,0.51,0.82,0.94,0.47,0.58,0.61,0.37,0.79,
+                 0.53,0.41,0.88,0.44,0.67,0.72];
+const signs = [1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,
+               1,-1,1,-1,1,1,-1,1,-1,1,-1,1,-1,1,1,-1,1,-1,1,-1,1];
+
+const dataset = rawData.map((row,i) => ({
+    ...row,
+    predicted: +(row.actual + signs[i] * (offsets[i] || 0.5)).toFixed(2)
+}));
+
+// CHARTS
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#e2e8f0';
+
+const tooltipStyle = {
+    backgroundColor:'#0f172a', borderColor:'#1e4db7', borderWidth:1,
+    titleColor:'#f1f5f9', bodyColor:'#94a3b8', padding:10, cornerRadius:8
+};
+
+new Chart(document.getElementById('trendChart'), {
+    type:'line',
+    data:{
+        labels:['Jan','Feb','Mar','Apr','May'],
+        datasets:[
+            { label:'Actual Waste %', data:[8.21,7.83,8.44,8.07,8.61], borderColor:'#2563eb',
+              backgroundColor:'rgba(37,99,235,0.08)', tension:0.4, fill:true,
+              pointBackgroundColor:'#2563eb', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:5, borderWidth:2.5 },
+            { label:'Predicted Waste %', data:[8.79,8.26,8.91,8.55,9.05], borderColor:'#f59e0b',
+              backgroundColor:'rgba(245,158,11,0.06)', tension:0.4, fill:true,
+              pointBackgroundColor:'#f59e0b', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:5,
+              borderWidth:2.5, borderDash:[6,3] }
+        ]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:tooltipStyle },
+        scales:{ x:{grid:{color:'#f1f5f9'}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}, min:7, max:10} }
+    }
+});
+
+new Chart(document.getElementById('fabricChart'), {
+    type:'bar',
+    data:{
+        labels:['Polyester','Viscose','Cotton','Denim','Blended','Rayon','Linen','Poplin','Twill'],
+        datasets:[{ label:'Avg Waste %',
+            data:[8.14,6.97,8.12,9.05,8.57,8.40,8.92,7.20,7.89],
+            backgroundColor:['#2563eb','#3b82f6','#60a5fa','#1e4db7','#93c5fd','#2563eb','#3b82f6','#60a5fa','#1e4db7'],
+            borderRadius:5, borderWidth:0 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+        plugins:{ legend:{display:false}, tooltip:tooltipStyle },
+        scales:{ x:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}, min:0}, y:{grid:{display:false}} }
+    }
+});
+
+new Chart(document.getElementById('shiftChart'), {
+    type:'bar',
+    data:{
+        labels:['Jan','Feb','Mar','Apr','May'],
+        datasets:[
+            { label:'Day Shift',   data:[7.62,7.41,7.82,7.20,7.85], backgroundColor:'#3b82f6', borderRadius:4 },
+            { label:'Night Shift', data:[8.78,8.22,9.08,8.90,9.25], backgroundColor:'#1e4db7', borderRadius:4 }
+        ]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:true, position:'top', labels:{color:'#64748b', boxWidth:10, font:{size:11}}}, tooltip:tooltipStyle },
+        scales:{ x:{grid:{display:false}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}} }
+    }
+});
+
+new Chart(document.getElementById('cuttingChart'), {
+    type:'doughnut',
+    data:{
+        labels:['Manual Cutting','Auto Cutting'],
+        datasets:[{ data:[9.38,7.51], backgroundColor:['#2563eb','#93c5fd'], borderColor:'#fff', borderWidth:3 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
+        plugins:{
+            legend:{display:true, position:'bottom', labels:{color:'#64748b', boxWidth:12, padding:16}},
+            tooltip:{...tooltipStyle, callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}%`}}
+        }
+    }
+});
+
+// ── RENDER TABLE ──
+function renderTable(data) {
+    document.getElementById('row-count').textContent = data.length;
+    const tbody = document.getElementById('report-tbody');
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#94a3b8;">No records match the selected filters.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = data.map(row => {
+        const diff = (row.predicted - row.actual).toFixed(2);
+        const diffSign = diff > 0 ? '+' : '';
+        const diffClass = diff > 0 ? 'diff-pos' : 'diff-neg';
+        const badgeClass = row.actual >= 10 ? 'badge-high' : row.actual >= 7.5 ? 'badge-mid' : 'badge-low';
+        const shiftChip = row.shift === 'Day' ? 'chip-day' : 'chip-night';
+        const cutChip   = row.cutting === 'Auto' ? 'chip-auto' : 'chip-manual';
+        return `<tr>
+            <td>${row.year}</td>
+            <td>${MONTHS[row.month]}</td>
+            <td><strong>${row.fabric}</strong></td>
+            <td>${row.pattern}</td>
+            <td>${row.gsm}</td>
+            <td><span class="chip ${shiftChip}">${row.shift}</span></td>
+            <td><span class="chip ${cutChip}">${row.cutting}</span></td>
+            <td><span class="badge ${badgeClass}">${row.actual}%</span></td>
+            <td style="font-weight:600;color:#1e4db7;">${row.predicted}%</td>
+            <td class="${diffClass}">${diffSign}${diff}%</td>
+        </tr>`;
+    }).join('');
+}
+
+renderTable(dataset);
+
+// ── GENERATE REPORT — filter + save to DB ──
+async function generateReport() {
+    const year    = document.getElementById('filter-year').value;
+    const mFrom   = parseInt(document.getElementById('filter-month-from').value) || 0;
+    const mTo     = parseInt(document.getElementById('filter-month-to').value) || 12;
+    const fabric  = document.getElementById('filter-fabric').value;
+    const shift   = document.getElementById('filter-shift').value;
+    const cutting = document.getElementById('filter-cutting').value;
+
+    const filtered = dataset.filter(row => {
+        if (year !== 'all' && row.year !== parseInt(year)) return false;
+        if (mFrom > 0 && row.month < mFrom) return false;
+        if (mTo > 0 && row.month > mTo) return false;
+        if (fabric !== 'all' && row.fabric !== fabric) return false;
+        if (shift  !== 'all' && row.shift  !== shift)  return false;
+        if (cutting !== 'all' && row.cutting !== cutting) return false;
+        return true;
+    });
+
+    renderTable(filtered);
+
+    if (filtered.length > 0) {
+        const actuals = filtered.map(r => r.actual);
+        const preds   = filtered.map(r => r.predicted);
+        const avg = arr => (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2);
+        document.getElementById('kpi-total').textContent   = filtered.length;
+        document.getElementById('kpi-actual').innerHTML    = avg(actuals) + '<span>%</span>';
+        document.getElementById('kpi-predicted').innerHTML = avg(preds)   + '<span>%</span>';
+        document.getElementById('kpi-max').innerHTML       = Math.max(...actuals).toFixed(2) + '<span>%</span>';
+        document.getElementById('kpi-min').innerHTML       = Math.min(...actuals).toFixed(2) + '<span>%</span>';
+    }
+
+    // ── Save to DB ──
+    const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const mFromLabel = mFrom > 0 ? monthNames[mFrom] : 'Jan';
+    const mToLabel   = mTo > 0 && mTo <= 12 ? monthNames[mTo] : 'May';
+    const fabricLabel  = fabric  !== 'all' ? fabric  : 'All Fabrics';
+    const shiftLabel   = shift   !== 'all' ? shift   : 'All Shifts';
+    const cuttingLabel = cutting !== 'all' ? cutting : 'All Methods';
+    const yearLabel    = year    !== 'all' ? year    : 'All Years';
+    const reportName   = `Waste Report — ${yearLabel} · ${mFromLabel}-${mToLabel} · ${fabricLabel} · ${shiftLabel} · ${cuttingLabel}`;
+
+    try {
+        const formData = new URLSearchParams();
+        formData.append('reportName', reportName);
+        const res = await fetch('/api/report/save', { method:'POST', body:formData });
+        const json = await res.json();
+        if (json.success) {
+            showToast('✅ Report generated & saved to database!');
+        }
+    } catch(e) {
+        showToast('✅ Report generated! (DB save failed — check connection)');
+    }
+}
+
+function resetFilters() {
+    document.getElementById('filter-year').value       = '2020';
+    document.getElementById('filter-month-from').value = '0';
+    document.getElementById('filter-month-to').value   = '5';
+    document.getElementById('filter-fabric').value     = 'all';
+    document.getElementById('filter-shift').value      = 'all';
+    document.getElementById('filter-cutting').value    = 'all';
+    renderTable(dataset);
+    showToast('↺ Filters reset');
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function downloadPDF() {
+    const btn = document.querySelector('.btn-pdf');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Generating...';
+    btn.disabled = true;
+
+    try {
+        const tableRows = document.querySelectorAll('#report-tbody tr');
+        const reportData = [];
+        tableRows.forEach(row => {
+            if (row.cells.length >= 10) {
+                reportData.push({
+                    year:      parseInt(row.cells[0].textContent),
+                    month:     getMonthNumber(row.cells[1].textContent),
+                    fabric:    row.cells[2].textContent,
+                    pattern:   row.cells[3].textContent,
+                    gsm:       parseInt(row.cells[4].textContent),
+                    shift:     row.cells[5].textContent,
+                    cutting:   row.cells[6].textContent,
+                    actual:    parseFloat(row.cells[7].textContent),
+                    predicted: parseFloat(row.cells[8].textContent)
+                });
+            }
+        });
+
+        if (reportData.length === 0) { showToast("⚠️ No data to export"); return; }
+
+        const formData = new URLSearchParams();
+        formData.append("year",      document.getElementById("filter-year").value);
+        formData.append("monthFrom", document.getElementById("filter-month-from").options[document.getElementById("filter-month-from").selectedIndex].text);
+        formData.append("monthTo",   document.getElementById("filter-month-to").options[document.getElementById("filter-month-to").selectedIndex].text);
+        formData.append("fabric",    document.getElementById("filter-fabric").value);
+        formData.append("shift",     document.getElementById("filter-shift").value);
+        formData.append("cutting",   document.getElementById("filter-cutting").value);
+        formData.append("data",      JSON.stringify(reportData));
+
+        const response = await fetch("/api/report/pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData
+        });
+
+        if (!response.ok) throw new Error("PDF failed");
+
+        const blob = await response.blob();
+        const url  = window.URL.createObjectURL(blob);
+        const a    = document.createElement("a");
+        a.href     = url;
+        a.download = "fabric_waste_report_" + new Date().toISOString().slice(0,10) + ".pdf";
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showToast("✅ PDF downloaded successfully!");
+
+    } catch(e) {
+        console.error(e);
+        showToast("❌ PDF generation failed");
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled  = false;
+    }
+}
+
+function getMonthNumber(name) {
+    return {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12}[name] || 1;
+}
+
+const now = new Date();
+document.getElementById('gen-time').textContent =
+    now.toLocaleDateString('en-GB') + ' · ' + now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+</script>
+
+</body>
+</html>
