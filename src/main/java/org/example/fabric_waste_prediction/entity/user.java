@@ -1,4 +1,4 @@
-package org.example.fabric_waste_prediction.Entity;
+package org.example.fabric_waste_prediction.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

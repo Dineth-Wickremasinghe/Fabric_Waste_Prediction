@@ -8,9 +8,6 @@ import org.example.fabric_waste_prediction.repository.SustainabilityRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class ImpactCalculatorService {
