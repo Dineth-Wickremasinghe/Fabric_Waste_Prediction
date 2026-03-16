@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Fabric Wastage Prediction System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .top-header {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 48px auto;
+            padding: 0 20px;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        /* Welcome Card */
+        .welcome-card {
+            background: white;
+            border-radius: 14px;
+            padding: 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .avatar {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .welcome-card h2 {
+            font-size: 24px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .welcome-card p {
+            color: #888;
+            font-size: 15px;
+            margin-bottom: 0;
+        }
+
+        /* Navigation Cards */
+        .nav-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            padding-left: 4px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .nav-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            transition: transform 0.15s, box-shadow 0.15s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+
+        .nav-card.green  { border-left-color: #2ecc71; }
+        .nav-card.blue   { border-left-color: #1976d2; }
+        .nav-card.orange { border-left-color: #f39c12; }
+        .nav-card.purple { border-left-color: #9c27b0; }
+
+        .nav-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .nav-icon.green  { background: #e8f5e9; }
+        .nav-icon.blue   { background: #e3f2fd; }
+        .nav-icon.orange { background: #fff8e1; }
+        .nav-icon.purple { background: #f3e5f5; }
+
+        .nav-card-text h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 3px;
+        }
+
+        .nav-card-text p {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Logout */
+        .logout-section {
+            text-align: center;
+            padding-bottom: 40px;
+        }
+
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            padding: 11px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        .btn-logout:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+
+<div class="top-header">Fabric Wastage Prediction System</div>
+
+<div class="container">
+
+    <div th:if="${success}" class="alert-success" th:text="${success}"></div>
+
+    <!-- Welcome Card -->
+    <div class="welcome-card">
+        <div class="avatar" th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}"></div>
+        <h2 th:text="'Welcome, ' + ${user.fullName} + '!'"></h2>
+        <div class="role-badge" th:text="${user.role}"></div>
+        <p>You are logged in successfully. Use the modules below to navigate the system.</p>
+    </div>
+
+    <!-- Navigation Modules -->
+    <div class="nav-section-title">Available Modules</div>
+    <div class="nav-grid">
+
+        <a href="/user/historical" class="nav-card green">
+            <div class="nav-icon green">&#128202;</div>
+            <div class="nav-card-text">
+                <h3>Historical Data</h3>
+                <p>View and manage past production cutting records and model performance</p>
+            </div>
+        </a>
+
+        <!-- Placeholder cards for other team members' modules -->
+        <a href="#" class="nav-card blue">
+            <div class="nav-icon blue">&#9986;</div>
+            <div class="nav-card-text">
+                <h3>Cutting Risk Analysis</h3>
+                <p>View fabric waste trends and risk distribution charts</p>
+            </div>
+        </a>
+
+        <a href="#" class="nav-card orange">
+            <div class="nav-icon orange">&#128196;</div>
+            <div class="nav-card-text">
+                <h3>Report Generation</h3>
+                <p>Generate and download waste prediction reports</p>
+            </div>
+        </a>
+
+        <a href="#" class="nav-card purple">
+            <div class="nav-icon purple">&#127807;</div>
+            <div class="nav-card-text">
+                <h3>Sustainability Dashboard</h3>
+                <p>View carbon footprint and environmental impact data</p>
+            </div>
+        </a>
+
+    </div>
+
+    <!-- Logout -->
+    <div class="logout-section">
+        <a href="/user/logout" class="btn-logout">Logout</a>
+    </div>
+
+</div>
+</body>
+</html>
