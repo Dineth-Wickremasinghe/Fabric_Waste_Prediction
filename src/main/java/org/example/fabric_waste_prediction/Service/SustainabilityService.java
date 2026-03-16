@@ -1,13 +1,13 @@
-package org.example.fabric_waste_prediction.service;
+package org.example.fabric_waste_prediction.Service;
 
 import org.example.fabric_waste_prediction.dto.FabricBreakdownDTO;
 import org.example.fabric_waste_prediction.dto.ImpactMetricsDTO;
 import org.example.fabric_waste_prediction.dto.PredictionInputDTO;
-import org.example.fabric_waste_prediction.entity.FabricRisk;
-import org.example.fabric_waste_prediction.entity.SustainabilityMetrics;
-import org.example.fabric_waste_prediction.repository.DailyWastageRepository;
-import org.example.fabric_waste_prediction.repository.SustainabilityRepository;
-import org.example.fabric_waste_prediction.repository.WasteTrackingRepository;
+import org.example.fabric_waste_prediction.Entity.FabricRisk;
+import org.example.fabric_waste_prediction.Entity.SustainabilityMetrics;
+import org.example.fabric_waste_prediction.Repository.DailyWastageRepository;
+import org.example.fabric_waste_prediction.Repository.SustainabilityRepository;
+import org.example.fabric_waste_prediction.Repository.WasteTrackingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;

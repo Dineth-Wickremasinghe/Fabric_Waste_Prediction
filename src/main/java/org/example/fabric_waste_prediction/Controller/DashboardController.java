@@ -1,4 +1,4 @@
-package org.example.fabric_waste_prediction.controller;
+package org.example.fabric_waste_prediction.Controller;
 
 import org.example.fabric_waste_prediction.dto.PredictionInputDTO;
 import org.springframework.stereotype.Controller;

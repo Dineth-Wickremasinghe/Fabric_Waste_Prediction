@@ -1,6 +1,6 @@
-package org.example.fabric_waste_prediction.repository;
+package org.example.fabric_waste_prediction.Repository;
 
-import org.example.fabric_waste_prediction.entity.user;
+import org.example.fabric_waste_prediction.Entity.user;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

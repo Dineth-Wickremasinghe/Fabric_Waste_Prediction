@@ -1,6 +1,6 @@
-package org.example.fabric_waste_prediction.repository;
+package org.example.fabric_waste_prediction.Repository;
 
-import org.example.fabric_waste_prediction.entity.SustainabilityMetrics;
+import org.example.fabric_waste_prediction.Entity.SustainabilityMetrics;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
