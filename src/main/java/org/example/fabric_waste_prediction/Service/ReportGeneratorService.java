@@ -9,7 +9,7 @@ import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.example.fabric_waste_prediction.dto.FabricBreakdownDTO;
+import org.example.fabric_waste_prediction.DTO.FabricBreakdownDTO;
 import org.example.fabric_waste_prediction.Entity.SustainabilityMetrics;
 import org.example.fabric_waste_prediction.Repository.DailyWastageRepository;
 import org.example.fabric_waste_prediction.Repository.SustainabilityRepository;

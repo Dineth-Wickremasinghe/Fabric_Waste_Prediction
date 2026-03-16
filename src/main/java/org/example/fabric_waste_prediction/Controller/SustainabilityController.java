@@ -1,9 +1,9 @@
 package org.example.fabric_waste_prediction.Controller;
 
 import jakarta.validation.Valid;
-import org.example.fabric_waste_prediction.dto.FabricBreakdownDTO;
-import org.example.fabric_waste_prediction.dto.ImpactMetricsDTO;
-import org.example.fabric_waste_prediction.dto.PredictionInputDTO;
+import org.example.fabric_waste_prediction.DTO.FabricBreakdownDTO;
+import org.example.fabric_waste_prediction.DTO.ImpactMetricsDTO;
+import org.example.fabric_waste_prediction.DTO.PredictionInputDTO;
 import org.example.fabric_waste_prediction.Entity.FabricRisk;
 import org.example.fabric_waste_prediction.Service.ReportGeneratorService;
 import org.example.fabric_waste_prediction.Service.SustainabilityService;

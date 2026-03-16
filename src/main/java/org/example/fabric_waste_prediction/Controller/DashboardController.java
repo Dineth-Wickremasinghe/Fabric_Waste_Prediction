@@ -1,6 +1,6 @@
 package org.example.fabric_waste_prediction.Controller;
 
-import org.example.fabric_waste_prediction.dto.PredictionInputDTO;
+import org.example.fabric_waste_prediction.DTO.PredictionInputDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

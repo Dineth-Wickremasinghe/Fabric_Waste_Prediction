@@ -1,7 +1,7 @@
 package org.example.fabric_waste_prediction.Service;
 
-import org.example.fabric_waste_prediction.dto.ImpactMetricsDTO;
-import org.example.fabric_waste_prediction.dto.PredictionInputDTO;
+import org.example.fabric_waste_prediction.DTO.ImpactMetricsDTO;
+import org.example.fabric_waste_prediction.DTO.PredictionInputDTO;
 import org.example.fabric_waste_prediction.Entity.SustainabilityMetrics;
 import org.example.fabric_waste_prediction.Repository.DailyWastageRepository;
 import org.example.fabric_waste_prediction.Repository.SustainabilityRepository;

@@ -1,4 +1,4 @@
-package org.example.fabric_waste_prediction.dto;
+package org.example.fabric_waste_prediction.DTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
