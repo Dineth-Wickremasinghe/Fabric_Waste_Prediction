@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Fabric AI </title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy:      #0a1f44;
+            --blue:      #1652a8;
+            --sky:       #3b82f6;
+            --light-sky: #dbeafe;
+            --pale:      #f0f6ff;
+            --white:     #ffffff;
+            --border:    #c9ddf7;
+            --muted:     #6b8ab8;
+            --text:      #0d1f3c;
+            --radius:    14px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--pale);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ─── Header ─── */
+        header {
+            background: var(--navy);
+            padding: 0 28px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--sky), var(--blue));
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .brand-icon svg { width: 18px; height: 18px; fill: white; }
+
+        .brand-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 18px;
+            color: white;
+            letter-spacing: 0.01em;
+        }
+
+        .brand-tag {
+            font-size: 11px;
+            color: var(--sky);
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: rgba(59,130,246,0.15);
+            border: 1px solid rgba(59,130,246,0.3);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .status-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 6px rgba(52,211,153,0.6);
+            animation: pulse 2.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ─── Layout ─── */
+        .app {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ─── Sidebar ─── */
+        .sidebar {
+            width: 240px;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            padding: 20px 16px;
+            gap: 8px;
+        }
+
+        .sidebar-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 4px 8px;
+            margin-top: 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 13.5px;
+            color: var(--text);
+            font-weight: 400;
+            transition: background 0.15s;
+        }
+
+        .sidebar-item:hover { background: var(--pale); }
+        .sidebar-item.active {
+            background: var(--light-sky);
+            color: var(--blue);
+            font-weight: 500;
+        }
+
+        .sidebar-item svg {
+            width: 16px; height: 16px;
+            flex-shrink: 0;
+            stroke: currentColor;
+            fill: none;
+        }
+
+        .new-chat-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: 9px;
+            padding: 10px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, transform 0.1s;
+            margin-bottom: 4px;
+        }
+
+        .new-chat-btn:hover { background: #1246a0; }
+        .new-chat-btn:active { transform: scale(0.98); }
+
+        /* ─── Chat main ─── */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Sub-header */
+        .chat-subheader {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .rag-badge {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--blue);
+            background: var(--light-sky);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.04em;
+        }
+
+        /* Messages */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 28px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .messages::-webkit-scrollbar { width: 6px; }
+        .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        /* Welcome */
+        .welcome {
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeUp 0.5s ease;
+        }
+
+        .welcome-icon {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, var(--sky), var(--blue));
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 24px rgba(22,82,168,0.25);
+        }
+
+        .welcome-icon svg { width: 28px; height: 28px; fill: white; }
+
+        .welcome h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            font-size: 14px;
+            color: var(--muted);
+            max-width: 380px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        .suggestion-chip {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12.5px;
+            color: var(--blue);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--light-sky);
+            border-color: var(--sky);
+        }
+
+        /* Message bubbles */
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 820px;
+            animation: fadeUp 0.3s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+        .avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 600;
+        }
+
+        .avatar.bot {
+            background: linear-gradient(135deg, var(--sky), var(--blue));
+            color: white;
+        }
+
+        .avatar.user {
+            background: var(--navy);
+            color: white;
+        }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            line-height: 1.65;
+            max-width: 600px;
+        }
+
+        .message.bot .bubble {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+            color: var(--text);
+        }
+
+        .message.user .bubble {
+            background: var(--blue);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        .source-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--muted);
+            background: var(--pale);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 8px;
+            cursor: default;
+        }
+
+        .source-tag svg { width: 11px; height: 11px; stroke: currentColor; fill: none; }
+
+        .sources-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+        /* Typing indicator */
+        .typing .bubble {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 14px 18px;
+        }
+
+        .dot {
+            width: 7px; height: 7px;
+            background: var(--sky);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+            40% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        /* ─── Input area ─── */
+        .input-area {
+            padding: 16px 28px 20px;
+            background: var(--white);
+            border-top: 1px solid var(--border);
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            background: var(--pale);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--sky);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            resize: none;
+            max-height: 120px;
+            line-height: 1.5;
+        }
+
+        textarea::placeholder { color: var(--muted); }
+
+        .send-btn {
+            width: 36px; height: 36px;
+            border-radius: 9px;
+            background: var(--blue);
+            border: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .send-btn:hover { background: #1246a0; }
+        .send-btn:active { transform: scale(0.93); }
+        .send-btn svg { width: 16px; height: 16px; stroke: white; fill: none; }
+        .send-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+        .input-hint {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 8px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        </div>
+        <span class="brand-name">Fabric AI</span>
+        <span class="brand-tag">RAG Powered</span>
+    </div>
+    <div class="header-status">
+        <div class="status-dot"></div>
+        Knowledge base active
+    </div>
+</header>
+
+<!-- APP BODY -->
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <button class="new-chat-btn" onclick="clearChat()">
+            <svg width="14" height="14" viewBox="0 0 24 24" stroke="white" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Chat
+        </button>
+
+        <div class="sidebar-label">Navigation</div>
+
+        <div class="sidebar-item active">
+            <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Chat Assistant
+        </div>
+
+        <div class="sidebar-item">
+            <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Documents
+        </div>
+
+        <div class="sidebar-item">
+            <svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            History
+        </div>
+
+        <div class="sidebar-label">Recent</div>
+        <div class="sidebar-item" style="font-size:12.5px; color: var(--muted);">Textile offcut reuse...</div>
+        <div class="sidebar-item" style="font-size:12.5px; color: var(--muted);">Cost of fabric waste...</div>
+        <div class="sidebar-item" style="font-size:12.5px; color: var(--muted);">Recycling strategies...</div>
+    </aside>
+
+    <!-- MAIN CHAT -->
+    <main class="chat-main">
+        <div class="chat-subheader">
+            <span class="chat-title">Decision Support Assistant</span>
+            <span class="rag-badge">Retrieval-Augmented Generation</span>
+        </div>
+
+        <div class="messages" id="messages">
+            <!-- Welcome screen -->
+            <div class="welcome" id="welcome">
+                <div class="welcome-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <h2>Fabric Waste Decision Support</h2>
+                <p>Ask me anything about fabric waste management, recycling strategies, cost reduction, and sustainable textile decisions.</p>
+                <div class="suggestions">
+                    <button class="suggestion-chip" onclick="sendSuggestion(this)">What are the best recycling methods for cotton offcuts?</button>
+                    <button class="suggestion-chip" onclick="sendSuggestion(this)">How can we reduce fabric waste during cutting?</button>
+                    <button class="suggestion-chip" onclick="sendSuggestion(this)">What is zero-waste pattern making?</button>
+                    <button class="suggestion-chip" onclick="sendSuggestion(this)">Recommend disposal options for synthetic blends</button>
+                    <button class="suggestion-chip" onclick="sendSuggestion(this)">Compare upcycling vs recycling for denim waste</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- INPUT -->
+        <div class="input-area">
+            <div class="input-wrapper">
+        <textarea
+                id="chatInput"
+                placeholder="Ask about fabric waste decisions, recycling, cost strategies…"
+                rows="1"
+                onkeydown="handleKey(event)"
+                oninput="autoResize(this)"
+        ></textarea>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+                    <svg viewBox="0 0 24 24" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
+            <div class="input-hint">Press Enter to send &nbsp;·&nbsp; Shift+Enter for new line</div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const demo = [
+        {
+            q: "What are the best recycling methods for cotton offcuts?",
+            a: "Based on the knowledge base, cotton offcuts can be effectively managed through several approaches:\n\n<b>Mechanical Recycling</b> is the most common method — offcuts are shredded into fibers and respun into lower-grade yarn, suitable for industrial rags, insulation, or blended fabrics.\n\n<b>Chemical Recycling</b> (e.g., using processes like Lyocell dissolution) preserves fiber quality better and can produce near-virgin-quality cotton from waste, though it is more costly.\n\n<b>Upcycling</b> into smaller finished goods (accessories, patches, stuffing) avoids the need for reprocessing and typically yields the highest value recovery.\n\nThe optimal choice depends on the volume of waste, fiber purity, and available local infrastructure.",
+            sources: ["Cotton Recycling Handbook v2.3", "Textile Waste Directive 2022"]
+        },
+        {
+            q: "How can we reduce fabric waste during cutting?",
+            a: "Cutting-stage waste typically accounts for 15–25% of total fabric input. Key strategies identified in the knowledge base include:\n\n<b>Marker Efficiency Optimization:</b> Using CAD marker planning software can improve fabric utilization from an industry average of 80% to over 90%.\n\n<b>Nesting Algorithms:</b> AI-driven nesting tools minimize inter-pattern gaps and are especially effective for complex shapes.\n\n<b>Zero-Waste Pattern Design:</b> Designing patterns that tile perfectly together eliminates offcuts at the design stage itself.\n\n<b>Fabric Width Standardization:</b> Sourcing fabrics in widths that align with your pattern dimensions reduces edge waste significantly.",
+            sources: ["Cutting Room Best Practices", "CAD Nesting Efficiency Study 2023"]
+        },
+    ];
+
+    let typing = false;
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    function handleKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
+    function sendSuggestion(btn) {
+        document.getElementById('chatInput').value = btn.textContent;
+        sendMessage();
+    }
+
+    function clearChat() {
+        const msg = document.getElementById('messages');
+        msg.innerHTML = `
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <h2>Fabric Waste Decision Support</h2>
+        <p>Ask me anything about fabric waste management, recycling strategies, cost reduction, and sustainable textile decisions.</p>
+        <div class="suggestions">
+          <button class="suggestion-chip" onclick="sendSuggestion(this)">What are the best recycling methods for cotton offcuts?</button>
+          <button class="suggestion-chip" onclick="sendSuggestion(this)">How can we reduce fabric waste during cutting?</button>
+          <button class="suggestion-chip" onclick="sendSuggestion(this)">What is zero-waste pattern making?</button>
+          <button class="suggestion-chip" onclick="sendSuggestion(this)">Recommend disposal options for synthetic blends</button>
+          <button class="suggestion-chip" onclick="sendSuggestion(this)">Compare upcycling vs recycling for denim waste</button>
+        </div>
+      </div>`;
+    }
+
+    function sendMessage() {
+        if (typing) return;
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        // Hide welcome
+        const welcome = document.getElementById('welcome');
+        if (welcome) welcome.remove();
+
+        input.value = '';
+        input.style.height = 'auto';
+
+        appendMessage('user', text);
+
+        // Show typing
+        typing = true;
+        document.getElementById('sendBtn').disabled = true;
+        const typingEl = appendTyping();
+
+        // Simulate RAG response delay
+        setTimeout(() => {
+            typingEl.remove();
+            typing = false;
+            document.getElementById('sendBtn').disabled = false;
+
+            // Find a matching demo answer or use default
+            const match = demo.find(d => d.q.toLowerCase().includes(text.toLowerCase().slice(0,20)) || text.toLowerCase().includes(d.q.toLowerCase().slice(0,20)));
+            if (match) {
+                appendBotMessage(match.a, match.sources);
+            } else {
+                appendBotMessage(
+                    "I've searched the knowledge base for information on <b>\"" + escapeHtml(text) + "\"</b>.\n\nWhile a precise match wasn't found in the indexed documents, I can suggest exploring the recycling strategies section or the waste reduction guidelines for closely related guidance. Would you like me to refine the search with a more specific query?",
+                    ["General Fabric Waste KB", "Sustainability Guidelines v1.1"]
+                );
+            }
+        }, 1400 + Math.random() * 600);
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function appendMessage(role, text) {
+        const msgs = document.getElementById('messages');
+        const div = document.createElement('div');
+        div.className = `message ${role}`;
+        const initials = role === 'user' ? 'You' : 'AI';
+        div.innerHTML = `
+      <div class="avatar ${role}">${initials}</div>
+      <div class="bubble">${escapeHtml(text)}</div>`;
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function appendBotMessage(html, sources) {
+        const msgs = document.getElementById('messages');
+        const div = document.createElement('div');
+        div.className = 'message bot';
+        const sourceTags = sources.map(s => `
+      <span class="source-tag">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        ${s}
+      </span>`).join('');
+        div.innerHTML = `
+      <div class="avatar bot">AI</div>
+      <div>
+        <div class="bubble">${html.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')}</div>
+        <div class="sources-row">${sourceTags}</div>
+      </div>`;
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function appendTyping() {
+        const msgs = document.getElementById('messages');
+        const div = document.createElement('div');
+        div.className = 'message bot typing';
+        div.innerHTML = `
+      <div class="avatar bot">AI</div>
+      <div class="bubble">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>`;
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+        return div;
+    }
+</script>
+</body>
+</html>
