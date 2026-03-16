@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @Controller
 public class DashboardController {
 
-    @GetMapping("/")
+    @GetMapping("/sustainability-dashboard")
     public String index(Model model) {
         model.addAttribute("predictionInput", new PredictionInputDTO());
         return "redirect:/sustainability/dashboard";
