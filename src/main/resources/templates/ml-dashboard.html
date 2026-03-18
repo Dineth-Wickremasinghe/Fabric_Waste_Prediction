@@ -465,52 +465,52 @@
         <div class="table-header">Recent Predictions — Submit Actual Values</div>
         <table>
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Timestamp</th>
-                    <th>Predicted</th>
-                    <th>Actual</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Predicted</th>
+                <th>Actual</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
             </thead>
             <tbody>
-                <!-- Real rows from controller -->
-                <tr th:each="pred : ${predictions}">
-                    <td th:text="${pred.id}">—</td>
-                    <td th:text="${pred.timestamp}">—</td>
-                    <td th:text="${pred.predictedValue}">—</td>
-                    <td th:text="${pred.actualValue ?: '—'}">—</td>
-                    <td>
+            <!-- Real rows from controller -->
+            <tr th:each="pred : ${predictions}">
+                <td th:text="${pred.id}">—</td>
+                <td th:text="${pred.timestamp}">—</td>
+                <td th:text="${pred.predictedValue}">—</td>
+                <td th:text="${pred.actualValue ?: '—'}">—</td>
+                <td>
                         <span class="badge"
                               th:classappend="${pred.actualValue != null ? 'badge-done' : 'badge-pending'}"
                               th:text="${pred.actualValue != null ? 'Submitted' : 'Pending'}">Pending</span>
-                    </td>
-                    <td>
-                        <button class="btn-sm" th:if="${pred.actualValue == null}"
-                                th:attr="onclick='openModal(\'' + ${pred.id} + '\', \'' + ${pred.predictedValue} + '\')'">
-                            Add Actual
-                        </button>
-                        <span th:unless="${pred.actualValue == null}" style="color:#94a3b8;font-size:12px">Done</span>
-                    </td>
-                </tr>
+                </td>
+                <td>
+                    <button class="btn-sm" th:if="${pred.actualValue == null}"
+                            th:attr="onclick='openModal(\'' + ${pred.id} + '\', \'' + ${pred.predictedValue} + '\')'">
+                        Add Actual
+                    </button>
+                    <span th:unless="${pred.actualValue == null}" style="color:#94a3b8;font-size:12px">Done</span>
+                </td>
+            </tr>
 
-                <!-- Static preview rows (shown when list is empty) -->
-                <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
-                    <td>#1041</td><td>2025-02-21 09:14</td><td>284.50</td><td>—</td>
-                    <td><span class="badge badge-pending">Pending</span></td>
-                    <td><button class="btn-sm" onclick="openModal('1041','284.50')">Add Actual</button></td>
-                </tr>
-                <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
-                    <td>#1040</td><td>2025-02-21 08:55</td><td>412.10</td><td>398.00</td>
-                    <td><span class="badge badge-done">Submitted</span></td>
-                    <td><span style="color:#94a3b8;font-size:12px">Done</span></td>
-                </tr>
-                <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
-                    <td>#1039</td><td>2025-02-21 08:33</td><td>189.30</td><td>—</td>
-                    <td><span class="badge badge-pending">Pending</span></td>
-                    <td><button class="btn-sm" onclick="openModal('1039','189.30')">Add Actual</button></td>
-                </tr>
+            <!-- Static preview rows (shown when list is empty) -->
+            <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
+                <td>#1041</td><td>2025-02-21 09:14</td><td>284.50</td><td>—</td>
+                <td><span class="badge badge-pending">Pending</span></td>
+                <td><button class="btn-sm" onclick="openModal('1041','284.50')">Add Actual</button></td>
+            </tr>
+            <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
+                <td>#1040</td><td>2025-02-21 08:55</td><td>412.10</td><td>398.00</td>
+                <td><span class="badge badge-done">Submitted</span></td>
+                <td><span style="color:#94a3b8;font-size:12px">Done</span></td>
+            </tr>
+            <tr th:if="${predictions == null or #lists.isEmpty(predictions)}">
+                <td>#1039</td><td>2025-02-21 08:33</td><td>189.30</td><td>—</td>
+                <td><span class="badge badge-pending">Pending</span></td>
+                <td><button class="btn-sm" onclick="openModal('1039','189.30')">Add Actual</button></td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -639,12 +639,12 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ actualValue: parseFloat(actual) })
         })
-        .then(res => {
-            closeModal();
-            showToast(res.ok ? 'Feedback submitted successfully' : 'Submission failed. Please try again.');
-            if (res.ok) setTimeout(() => location.reload(), 1500);
-        })
-        .catch(() => showToast('Network error. Please try again.'));
+            .then(res => {
+                closeModal();
+                showToast(res.ok ? 'Feedback submitted successfully' : 'Submission failed. Please try again.');
+                if (res.ok) setTimeout(() => location.reload(), 1500);
+            })
+            .catch(() => showToast('Network error. Please try again.'));
     }
 
     function showToast(msg) {
