@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cutting Risk Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="toast">✅ Prediction Saved Successfully!</div>
+
+<!-- SPINNER -->
+<div id="spinner" class="spinner-overlay" style="display:none">
+    <div class="spinner"></div>
+    <p class="spinner-text">Running AI Prediction...</p>
+</div>
+
+<!-- GLOBAL ERROR BANNER -->
+<div id="globalError" style="display:none"></div>
+
+<div class="header">Cutting Risk Analysis Dashboard</div>
+
+<div class="container">
+
+    <!-- SECTION 1 — SUMMARY KPIs -->
+    <div class="kpi-container" style="margin-top:25px">
+        <div class="kpi">
+            <img src="1st.jpg" alt="Avg Waste" class="kpi-icon">
+            <h3>Avg Daily Waste</h3>
+            <h2 id="avgWaste">--</h2>
+        </div>
+        <div class="kpi">
+            <img src="2nd.jpg" alt="High Risk Days" class="kpi-icon">
+            <h3>High Risk Days</h3>
+            <h2 id="highRiskDays">--</h2>
+        </div>
+        <div class="kpi">
+            <img src="3rd.jpg" alt="Best Fabric" class="kpi-icon">
+            <h3>Best Fabric</h3>
+            <h2 id="bestFabric">--</h2>
+        </div>
+        <div class="kpi">
+            <img src="Fabricimage1.jpg" alt="Worst Shift" class="kpi-icon">
+            <h3>Worst Shift</h3>
+            <h2 id="worstShift">--</h2>
+        </div>
+    </div>
+
+    <!-- SECTION 2 — TREND CHART -->
+    <div class="card" style="margin-top:25px">
+        <h3>Predicted vs Actual Waste Over Time</h3>
+        <canvas id="trendChart"></canvas>
+    </div>
+
+    <!-- SECTION 3 — SHIFT + CUTTING METHOD -->
+    <div class="grid-equal" style="margin-top:25px">
+        <div class="card">
+            <h3>Waste by Shift</h3>
+            <canvas id="shiftChart"></canvas>
+        </div>
+        <div class="card">
+            <h3>Waste by Cutting Method</h3>
+            <canvas id="cuttingMethodChart"></canvas>
+        </div>
+    </div>
+
+    <!-- SECTION 4 — RISK DISTRIBUTION + ACCURACY GAP -->
+    <div class="grid-equal" style="margin-top:25px">
+        <div class="card">
+            <h3>Risk Distribution</h3>
+            <canvas id="riskDistributionChart"></canvas>
+        </div>
+        <div class="card">
+            <h3>Prediction Accuracy Gap</h3>
+            <canvas id="accuracyGapChart"></canvas>
+        </div>
+    </div>
+
+    <!-- SECTION 5 — FABRIC + PATTERN -->
+    <div class="grid-equal" style="margin-top:25px">
+        <div class="card">
+            <h3>Fabric-wise Waste</h3>
+            <canvas id="fabricChart"></canvas>
+        </div>
+        <div class="card">
+            <h3>Pattern-wise Waste</h3>
+            <canvas id="styleChart"></canvas>
+        </div>
+    </div>
+
+    <!-- SECTION 6 — LAST 5 + MODEL ACCURACY -->
+    <div class="grid-equal" style="margin-top:25px">
+        <div class="card">
+            <h3>Last 5 Predictions</h3>
+            <div id="last5Container"></div>
+        </div>
+        <div class="card">
+            <h3>Model Accuracy by Fabric</h3>
+            <div id="accuracyContainer"></div>
+        </div>
+    </div>
+
+    <!-- SECTION 7 — PREDICTION HISTORY TABLE -->
+    <div class="card" style="margin-top:25px">
+        <h3>Prediction History</h3>
+        <div id="historyContainer"></div>
+    </div>
+
+    <!-- SECTION 8 — CUTTING RISK FORM -->
+    <div class="card predict-top" style="margin-top:25px">
+        <h3>✂️ Add Cutting Risk Record</h3>
+        <p style="color:#6b7280; font-size:14px; margin-bottom:15px;">
+            Select an existing prediction and add cutting-specific details.
+        </p>
+
+        <label style="font-weight:600; color:#1f3d7a; font-size:14px;">
+            Step 1 — Select Prediction Record
+        </label>
+        <select id="predictionSelect" style="margin-top:6px">
+            <option value="" disabled selected>Loading predictions...</option>
+        </select>
+        <span class="field-error-msg" id="err-prediction"></span>
+
+        <div id="selectedPredictionInfo"
+             style="display:none; margin:10px 0; padding:12px;
+                    background:#e8f0fe; border-radius:10px;
+                    font-size:14px; color:#1f3d7a;">
+        </div>
+
+        <label style="font-weight:600; color:#1f3d7a; font-size:14px;
+                      margin-top:15px; display:block;">
+            Step 2 — Add Cutting Details
+        </label>
+
+        <input type="number" id="noOfLayers"
+               placeholder="Number of Layers" min="1" max="200">
+        <span class="field-error-msg" id="err-layers"></span>
+
+        <input type="number" id="fabricGsm"
+               placeholder="Fabric GSM (e.g. 180)" min="50" max="500">
+        <span class="field-error-msg" id="err-gsm"></span>
+
+        <input type="number" id="cuttingOverlapMm"
+               placeholder="Cutting Overlap (mm)" min="0" max="50">
+
+        <input type="number" id="markerEfficiency"
+               placeholder="Marker Efficiency % (e.g. 85)" min="0" max="100">
+
+        <input type="number" id="actualWaste"
+               placeholder="Actual Waste % (fill after cutting)" min="0" max="100">
+
+        <select id="cuttingMethodSelect">
+            <option value="" disabled selected>Select Cutting Method</option>
+            <option value="Manual">Manual</option>
+            <option value="Auto">Auto</option>
+        </select>
+        <span class="field-error-msg" id="err-method"></span>
+
+        <select id="shiftSelect">
+            <option value="" disabled selected>Select Shift</option>
+            <option value="Day">Day</option>
+            <option value="Night">Night</option>
+        </select>
+        <span class="field-error-msg" id="err-shift"></span>
+
+        <textarea id="notes"
+                  placeholder="Additional notes (optional)"
+                  rows="3"
+                  style="width:100%; padding:12px; border-radius:12px;
+                         border:1.5px solid #cfd8dc; margin:8px 0;
+                         font-size:15px; font-family:'Segoe UI',sans-serif;
+                         resize:vertical; display:block; box-sizing:border-box;">
+        </textarea>
+
+        <div class="btn-row">
+            <button onclick="saveCuttingRisk()">💾 Save Risk Record</button>
+            <button class="reset-btn" onclick="resetRiskForm()">Reset</button>
+        </div>
+
+        <div id="riskSaveSuccess"
+             style="display:none; margin-top:15px; padding:14px;
+                    background:#d1fae5; color:#065f46; border-radius:12px;
+                    text-align:center; font-weight:600; font-size:15px;">
+            ✅ Cutting Risk Record Saved Successfully!
+        </div>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
