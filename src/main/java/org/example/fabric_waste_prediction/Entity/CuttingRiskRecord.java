@@ -1,5 +1,6 @@
 package org.example.fabric_waste_prediction.Entity;
 
+
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -16,7 +17,7 @@ public class CuttingRiskRecord {
 
     @ManyToOne
     @JoinColumn(name = "prediction_id", nullable = false)
-    private DailyWastage prediction;
+    private Prediction prediction;
 
     @Column(name = "no_of_layers")
     private Integer noOfLayers;
@@ -56,7 +57,7 @@ public class CuttingRiskRecord {
 
     // ── Getters ──
     public UUID getId()                     { return id; }
-    public DailyWastage getPrediction()     { return prediction; }
+    public Prediction getPrediction()     { return prediction; }
     public Integer getNoOfLayers()          { return noOfLayers; }
     public Integer getFabricGsm()           { return fabricGsm; }
     public CuttingMethod getCuttingMethod() { return cuttingMethod; }
@@ -69,7 +70,7 @@ public class CuttingRiskRecord {
     public String getNotes()                { return notes; }
 
     // ── Setters ──
-    public void setPrediction(DailyWastage p)     { this.prediction = p; }
+    public void setPrediction(Prediction p)     { this.prediction = p; }
     public void setNoOfLayers(Integer n)           { this.noOfLayers = n; }
     public void setFabricGsm(Integer g)            { this.fabricGsm = g; }
     public void setCuttingMethod(CuttingMethod c)  { this.cuttingMethod = c; }

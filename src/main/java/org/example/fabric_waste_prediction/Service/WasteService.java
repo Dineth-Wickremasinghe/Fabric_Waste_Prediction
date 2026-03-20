@@ -1,17 +1,12 @@
 package org.example.fabric_waste_prediction.Service;
 
 
-import org.example.fabric_waste_prediction.Entity.CuttingMethod;        // ← ADD
-import org.example.fabric_waste_prediction.Entity.CuttingRiskRecord;    // ← ADD
-import org.example.fabric_waste_prediction.Entity.CuttingRiskRequest;   // ← ADD
-import org.example.fabric_waste_prediction.Entity.DailyWastage;
-import org.example.fabric_waste_prediction.Entity.ShiftType;            // ← ADD
-import org.example.fabric_waste_prediction.Entity.WasteRequest;
-import org.example.fabric_waste_prediction.Entity.WasteResponse;
+import org.example.fabric_waste_prediction.Entity.*;
 import org.example.fabric_waste_prediction.Repository.CuttingJobRepository;
 import org.example.fabric_waste_prediction.Repository.CuttingRiskRecordRepository; // ← ADD
 import org.example.fabric_waste_prediction.Repository.DailyWastageRepository;
 import org.example.fabric_waste_prediction.Repository.MaterialAccuracyRepository;
+import org.example.fabric_waste_prediction.Repository.PredictionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -29,72 +24,85 @@ public class WasteService {
     private MaterialAccuracyRepository materialAccuracyRepository;
 
     @Autowired
+    private PredictionRepository predictionRepository;
+
+    @Autowired
     private CuttingRiskRecordRepository cuttingRiskRecordRepository;
     // ─── Trend Chart ──────────────────────────────────────────────────────────
     public double[] getTrendData() {
-        List<DailyWastage> records = dailyWastageRepository.findAllOrderedByDate();
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
+        Collections.reverse(records);
         return records.stream()
-                .mapToDouble(r -> r.getActualWastagePct() != null ? r.getActualWastagePct() : 0.0)
+                .mapToDouble(r -> r.getActualResult() != null
+                        ? r.getActualResult() : 0.0)
                 .toArray();
     }
 
     public double[] getTrendPredicted() {
-        List<DailyWastage> records = dailyWastageRepository.findAllOrderedByDate();
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
+        Collections.reverse(records);
         return records.stream()
-                .mapToDouble(r -> r.getPredictedWastagePct() != null ? r.getPredictedWastagePct() : 0.0)
+                .mapToDouble(r -> r.getPredictionResult() != null
+                        ? r.getPredictionResult() : 0.0)
                 .toArray();
     }
 
     public String[] getTrendLabels() {
-        List<DailyWastage> records = dailyWastageRepository.findAllOrderedByDate();
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
+        Collections.reverse(records);
         return records.stream()
-                .map(r -> r.getTrackingDate().toString())
+                .map(r -> r.getCreatedAt().toLocalDate().toString())
                 .toArray(String[]::new);
     }
 
     // ─── Fabric Chart ─────────────────────────────────────────────────────────
     public String[] getFabricLabels() {
-        List<Object[]> results = cuttingJobRepository.getAvgWasteByMaterial();
+        List<Object[]> results = predictionRepository.getAvgWasteByFabric();
         return results.stream()
                 .map(row -> row[0] != null ? row[0].toString() : "Unknown")
                 .toArray(String[]::new);
     }
 
     public double[] getFabricWasteData() {
-        List<Object[]> results = cuttingJobRepository.getAvgWasteByMaterial();
+        List<Object[]> results = predictionRepository.getAvgWasteByFabric();
         return results.stream()
-                .mapToDouble(row -> row[1] != null ? ((Number) row[1]).doubleValue() : 0.0)
+                .mapToDouble(row -> row[1] != null
+                        ? ((Number) row[1]).doubleValue() : 0.0)
                 .toArray();
     }
 
     // ─── Pattern Chart ────────────────────────────────────────────────────────
     public String[] getStyleLabels() {
-        List<Object[]> results = cuttingJobRepository.getAvgWasteByPattern();
+        List<Object[]> results = predictionRepository.getAvgWasteByPattern();
         return results.stream()
                 .map(row -> row[0] != null ? row[0].toString() : "Unknown")
                 .toArray(String[]::new);
     }
 
     public double[] getStyleWasteData() {
-        List<Object[]> results = cuttingJobRepository.getAvgWasteByPattern();
+        List<Object[]> results = predictionRepository.getAvgWasteByPattern();
         return results.stream()
-                .mapToDouble(row -> row[1] != null ? ((Number) row[1]).doubleValue() : 0.0)
+                .mapToDouble(row -> row[1] != null
+                        ? ((Number) row[1]).doubleValue() : 0.0)
                 .toArray();
     }
 
     // ─── Last 5 Predictions ───────────────────────────────────────────────────
     public List<Map<String, Object>> getLast5Predictions() {
-        List<DailyWastage> records = dailyWastageRepository.findAllOrderedByDate();
-        Collections.reverse(records);
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
         List<Map<String, Object>> result = new ArrayList<>();
         int count = 0;
-        for (DailyWastage r : records) {
+        for (Prediction r : records) {
             if (count >= 5) break;
-            if (r.getPredictedWastagePct() != null) {
+            if (r.getPredictionResult() != null) {
                 Map<String, Object> item = new HashMap<>();
-                item.put("date",      r.getTrackingDate().toString());
-                item.put("predicted", r.getPredictedWastagePct());
-                double p = r.getPredictedWastagePct();
+                item.put("date",      r.getCreatedAt().toLocalDate().toString());
+                item.put("predicted", r.getPredictionResult());
+                double p = r.getPredictionResult();
                 item.put("risk", p <= 5 ? "Low" : p <= 10 ? "Medium" : "High");
                 result.add(item);
                 count++;
@@ -105,12 +113,13 @@ public class WasteService {
 
     // ─── Material Accuracy ────────────────────────────────────────────────────
     public List<Map<String, Object>> getMaterialAccuracy() {
-        List<Object[]> results = materialAccuracyRepository.getAccuracyByMaterial();
+        List<Object[]> results = predictionRepository.getAccuracyByFabric();
         List<Map<String, Object>> list = new ArrayList<>();
         for (Object[] row : results) {
             Map<String, Object> item = new HashMap<>();
             item.put("material", row[0] != null ? row[0].toString() : "Unknown");
-            item.put("accuracy", row[1] != null ? ((Number) row[1]).doubleValue() : 0.0);
+            item.put("accuracy", row[1] != null
+                    ? ((Number) row[1]).doubleValue() : 0.0);
             list.add(item);
         }
         return list;
@@ -118,15 +127,18 @@ public class WasteService {
 
     // ─── Prediction History ───────────────────────────────────────────────────
     public List<Map<String, Object>> getPredictionHistory() {
-        List<DailyWastage> records = dailyWastageRepository.findAllOrderedByDate();
-        Collections.reverse(records);
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
         List<Map<String, Object>> result = new ArrayList<>();
-        for (DailyWastage r : records) {
+        for (Prediction r : records) {
             Map<String, Object> item = new HashMap<>();
-            item.put("date",      r.getTrackingDate().toString());
-            item.put("predicted", r.getPredictedWastagePct() != null ? r.getPredictedWastagePct() : "--");
-            item.put("actual",    r.getActualWastagePct()    != null ? r.getActualWastagePct()    : "--");
-            double p = r.getPredictedWastagePct() != null ? r.getPredictedWastagePct() : 0;
+            item.put("date",      r.getCreatedAt().toLocalDate().toString());
+            item.put("predicted", r.getPredictionResult() != null
+                    ? r.getPredictionResult() : "--");
+            item.put("actual",    r.getActualResult() != null
+                    ? r.getActualResult() : "--");
+            double p = r.getPredictionResult() != null
+                    ? r.getPredictionResult() : 0;
             item.put("risk", p <= 5 ? "Low" : p <= 10 ? "Medium" : "High");
             result.add(item);
         }
@@ -242,64 +254,79 @@ public class WasteService {
     }
     // ─── Shift Chart ──────────────────────────────────────────
     public String[] getShiftLabels() {
-        List<Object[]> results = cuttingJobRepository.getAvgWasteByShift();
+        List<Object[]> results = cuttingRiskRecordRepository.getAvgWasteByShift();
         return results.stream()
                 .map(row -> row[0] != null ? row[0].toString() : "Unknown")
                 .toArray(String[]::new);
     }
 
     public double[] getShiftWasteData() {
-        List<Object[]> results = cuttingJobRepository.getAvgWasteByShift();
+        List<Object[]> results = cuttingRiskRecordRepository.getAvgWasteByShift();
         return results.stream()
-                .mapToDouble(row -> row[1] != null ? ((Number) row[1]).doubleValue() : 0.0)
+                .mapToDouble(row -> row[1] != null
+                        ? ((Number) row[1]).doubleValue() : 0.0)
                 .toArray();
     }
 
     // ─── Cutting Method Chart ─────────────────────────────────
     public String[] getCuttingMethodLabels() {
-        List<Object[]> results = cuttingJobRepository.getAvgWasteByCuttingMethod();
+        List<Object[]> results = predictionRepository.getAvgWasteByCuttingMethod();
         return results.stream()
-                .map(row -> row[0] != null ? row[0].toString() : "Unknown")
+                .map(row -> {
+                    if (row[0] == null) return "Unknown";
+                    String val = row[0].toString().trim();
+                    return val.equals("0.0") ? "Manual" : "Auto";
+                })
                 .toArray(String[]::new);
     }
 
     public double[] getCuttingMethodData() {
-        List<Object[]> results = cuttingJobRepository.getAvgWasteByCuttingMethod();
+        List<Object[]> results = predictionRepository.getAvgWasteByCuttingMethod();
         return results.stream()
-                .mapToDouble(row -> row[1] != null ? ((Number) row[1]).doubleValue() : 0.0)
+                .mapToDouble(row -> row[1] != null
+                        ? ((Number) row[1]).doubleValue() : 0.0)
                 .toArray();
     }
 
     // ─── Risk Distribution ────────────────────────────────────
     public Map<String, Object> getRiskDistribution() {
-        List<DailyWastage> records = dailyWastageRepository.findAllOrderedByDate();
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
         long low = 0, medium = 0, high = 0;
-        for (DailyWastage r : records) {
-            if (r.getPredictedWastagePct() == null) continue;
-            double p = r.getPredictedWastagePct();
+        for (Prediction r : records) {
+            if (r.getPredictionResult() == null) continue;
+            double p = r.getPredictionResult();
             if (p <= 5) low++;
             else if (p <= 10) medium++;
             else high++;
         }
         Map<String, Object> result = new HashMap<>();
         result.put("labels", new String[]{"Low", "Medium", "High"});
-        result.put("data", new long[]{low, medium, high});
+        result.put("data",   new long[]{low, medium, high});
         return result;
     }
 
     // ─── Accuracy Gap ─────────────────────────────────────────
     public String[] getAccuracyGapLabels() {
-        List<DailyWastage> records = dailyWastageRepository.findAllWithActual();
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
+        Collections.reverse(records);
         return records.stream()
-                .map(r -> r.getTrackingDate().toString())
+                .filter(r -> r.getActualResult() != null
+                        && r.getPredictionResult() != null)
+                .map(r -> r.getCreatedAt().toLocalDate().toString())
                 .toArray(String[]::new);
     }
 
     public double[] getAccuracyGapData() {
-        List<DailyWastage> records = dailyWastageRepository.findAllWithActual();
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
+        Collections.reverse(records);
         return records.stream()
+                .filter(r -> r.getActualResult() != null
+                        && r.getPredictionResult() != null)
                 .mapToDouble(r -> Math.abs(
-                        r.getPredictedWastagePct() - r.getActualWastagePct()))
+                        r.getPredictionResult() - r.getActualResult()))
                 .toArray();
     }
 
@@ -307,29 +334,34 @@ public class WasteService {
     public Map<String, Object> getSummaryKPIs() {
         Map<String, Object> summary = new HashMap<>();
 
-        // Average daily waste
-        Double avg = cuttingJobRepository.getAvgWaste();
-        summary.put("avgWaste", avg != null ? Math.round(avg * 100.0) / 100.0 : 0);
+        // Avg waste from prediction
+        Double avg = predictionRepository.getAvgWaste();
+        summary.put("avgWaste", avg != null
+                ? Math.round(avg * 100.0) / 100.0 : 0);
 
-        // Count HIGH risk days
-        long highRiskDays = dailyWastageRepository.findAllOrderedByDate()
-                .stream()
-                .filter(r -> r.getPredictedWastagePct() != null && r.getPredictedWastagePct() > 10)
+        // High risk days from prediction
+        List<Prediction> records = predictionRepository
+                .findAllByOrderByCreatedAtDesc();
+        long highRiskDays = records.stream()
+                .filter(r -> r.getPredictionResult() != null
+                        && r.getPredictionResult() > 10)
                 .count();
         summary.put("highRiskDays", highRiskDays);
 
-        // Best fabric (lowest avg waste)
-        List<Object[]> fabricData = cuttingJobRepository.getAvgWasteByMaterial();
+        // Best fabric (lowest avg waste) from prediction
+        List<Object[]> fabricData = predictionRepository.getAvgWasteByFabric();
         String bestFabric = fabricData.stream()
-                .min(Comparator.comparingDouble(row -> ((Number) row[1]).doubleValue()))
+                .min(Comparator.comparingDouble(
+                        row -> ((Number) row[1]).doubleValue()))
                 .map(row -> row[0].toString())
                 .orElse("N/A");
         summary.put("bestFabric", bestFabric);
 
-        // Worst shift (highest avg waste)
-        List<Object[]> shiftData = cuttingJobRepository.getAvgWasteByShift();
+        // Worst shift from cutting_risk_records
+        List<Object[]> shiftData = cuttingRiskRecordRepository.getAvgWasteByShift();
         String worstShift = shiftData.stream()
-                .max(Comparator.comparingDouble(row -> ((Number) row[1]).doubleValue()))
+                .max(Comparator.comparingDouble(
+                        row -> ((Number) row[1]).doubleValue()))
                 .map(row -> row[0].toString())
                 .orElse("N/A");
         summary.put("worstShift", worstShift);
@@ -338,19 +370,17 @@ public class WasteService {
     }
     // ─── Get predictions for dropdown ─────────────────────
     public List<Map<String, Object>> getPredictionsForDropdown() {
-        List<DailyWastage> records =
-                dailyWastageRepository.findAllOrderedByDate();
-        Collections.reverse(records);
+        // Query from Prediction table where data actually exists
+        List<Prediction> records = predictionRepository.findAllByOrderByCreatedAtDesc();
         List<Map<String, Object>> list = new ArrayList<>();
-        for (DailyWastage r : records) {
-            if (r.getPredictedWastagePct() != null) {
+        for (Prediction r : records) {
+            if (r.getPredictionResult() != null) {
                 Map<String, Object> item = new HashMap<>();
                 item.put("id",        r.getId().toString());
-                item.put("date",      r.getTrackingDate().toString());
-                item.put("predicted", r.getPredictedWastagePct());
-                double p = r.getPredictedWastagePct();
-                item.put("risk",
-                        p <= 5 ? "Low" : p <= 10 ? "Medium" : "High");
+                item.put("date",      r.getCreatedAt().toLocalDate().toString());
+                item.put("predicted", r.getPredictionResult());
+                double p = r.getPredictionResult();
+                item.put("risk", p <= 5 ? "Low" : p <= 10 ? "Medium" : "High");
                 list.add(item);
             }
         }
@@ -358,19 +388,17 @@ public class WasteService {
     }
 
     // ─── Save cutting risk record ──────────────────────────
-    public Map<String, Object> saveCuttingRiskRecord(
-            CuttingRiskRequest req) {
-
+    public Map<String, Object> saveCuttingRiskRecord(CuttingRiskRequest req) {
         Map<String, Object> response = new HashMap<>();
 
-        DailyWastage prediction = dailyWastageRepository
+        // ✅ Look up in prediction table, not daily_wastage
+        Prediction prediction = predictionRepository
                 .findById(Long.parseLong(req.getPredictionId()))
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Prediction not found"));
+                        new IllegalArgumentException("Prediction not found"));
 
         CuttingRiskRecord record = new CuttingRiskRecord();
-        record.setPrediction(prediction);
+        record.setPrediction(prediction);           // ✅ now accepts Prediction
         record.setNoOfLayers(req.getNoOfLayers());
         record.setFabricGsm(req.getFabricGsm());
         record.setCuttingMethod(
@@ -388,8 +416,7 @@ public class WasteService {
         cuttingRiskRecordRepository.save(record);
 
         response.put("status",  "saved");
-        response.put("message",
-                "Cutting risk record saved successfully!");
+        response.put("message", "Cutting risk record saved successfully!");
         return response;
     }
 
