@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability Dashboard - Fabric Waste Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/sustainability.css}">
+</head>
+<body>
+<div class="container-fluid">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-recycle"></i>
+                EcoCut - Sustainability Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="bi bi-house-door"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="downloadReport('pdf')">
+                            <i class="bi bi-file-pdf"></i> PDF Report
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="downloadReport('excel')">
+                            <i class="bi bi-file-excel"></i> Excel Report
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Column - Prediction Form -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-calculator"></i> Calculate Environmental Impact</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/sustainability/predict}" method="post" th:object="${predictionInput}">
+                        <div class="mb-3">
+                            <label class="form-label">Fabric Type</label>
+                            <select class="form-select" th:field="*{fabricType}" required>
+                                <option value="">Select Fabric</option>
+                                <option th:each="type : ${fabricTypes}" th:value="${type}" th:text="${type}"></option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fabric Pattern</label>
+                            <select class="form-select" th:field="*{fabricPattern}" required>
+                                <option value="">Select Pattern</option>
+                                <option th:each="pattern : ${fabricPatterns}" th:value="${pattern}" th:text="${pattern}"></option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">GSM</label>
+                                <input type="number" class="form-control" th:field="*{fabricGSM}" required min="50" max="500" placeholder="150">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Width (inches)</label>
+                                <input type="number" class="form-control" th:field="*{fabricWidth}" required min="30" max="120" placeholder="60">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Number of Layers</label>
+                                <input type="number" class="form-control" th:field="*{numberOfLayers}" required min="1" max="100" placeholder="20">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Order Quantity (m)</label>
+                                <input type="number" class="form-control" th:field="*{orderQuantity}" required min="10" step="0.1" placeholder="100">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-calculator"></i> Calculate Impact
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Dashboard Metrics -->
+        <div class="col-lg-8">
+            <!-- Flash Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Updated Sustainability Score Card with kg units -->
+            <div class="card shadow mb-4 bg-gradient-primary">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center">
+                            <h2 class="display-4 fw-bold text-success mb-0"
+                                th:text="${#numbers.formatDecimal(summary.overallSustainabilityScore, 1, 1)} + '%'">85%</h2>
+                            <p class="text-muted mb-0">Overall Sustainability Score</p>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-sm-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-droplet fs-2 text-primary"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">Water Saved</h6>
+                                            <h4 class="mb-0" th:text="${#numbers.formatDecimal(summary.totalWaterSaved, 1, 0)} + 'L'">45,200L</h4>
+                                            <small class="text-muted">liters</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-cloud fs-2 text-secondary"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">CO₂ Avoided</h6>
+                                            <h4 class="mb-0" th:text="${#numbers.formatDecimal(summary.totalCarbonAvoided, 1, 0)} + ' kg'">12,400 kg</h4>
+                                            <small class="text-muted">kilograms</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-trash3 fs-2 text-danger"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">Landfill Avoided</h6>
+                                            <h4 class="mb-0" th:text="${#numbers.formatDecimal(summary.totalWasteReduced, 1, 0)} + ' kg'">2,800 kg</h4>
+                                            <small class="text-muted">kilograms</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-cash-stack fs-2 text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">Cost Saved</h6>
+                                            <h4 class="mb-0" th:text="'Rs. ' + ${#numbers.formatDecimal(summary.totalCostSaved, 1, 0)}">Rs. 12,500</h4>
+                                            <small class="text-muted">Sri Lankan Rupees</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impact Chart -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Environmental Impact Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="impactChart" height="100"></canvas>
+                    <div class="mt-2 small text-muted">
+                        <span class="me-3"><span class="badge bg-success">●</span> CO2 Savings (kg)</span>
+                        <span><span class="badge bg-primary">●</span> Water Saved (10L)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Updated Recent Impact Metrics with Cost Saved included -->
+            <div th:if="${impact}" class="card shadow mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Latest Prediction Impact</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="metric-box p-3 bg-light rounded">
+                                <small class="text-muted">CO2 Saved</small>
+                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.co2SavedKg, 1, 0)} + ' kg'">125 kg</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="metric-box p-3 bg-light rounded">
+                                <small class="text-muted">Water Saved</small>
+                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.waterSavedL, 1, 0)} + ' L'">7,530 L</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="metric-box p-3 bg-light rounded">
+                                <small class="text-muted">Fabric Saved</small>
+                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.fabricSavedKg, 1, 1)} + ' kg'">50.2 kg</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="metric-box p-3 bg-light rounded">
+                                <small class="text-muted">Energy Saved</small>
+                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.energySavedKwh, 1, 0)} + ' kWh'">2,259 kWh</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="metric-box p-3 bg-light rounded">
+                                <small class="text-muted">Cost Saved</small>
+                                <h5 class="mb-0" th:text="'Rs. ' + ${#numbers.formatDecimal(impact.costSavedLkr, 1, 0)}">Rs. 37,500</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="metric-box p-3 bg-light rounded">
+                                <small class="text-muted">Landfill Avoided</small>
+                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.landfillAvoidedKg, 1, 1)} + ' kg'">15.8 kg</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Risk Level:</strong>
+                                <span class="badge" th:classappend="${impact.riskLevel == 'HIGH' ? 'bg-danger' :
+                                        (impact.riskLevel == 'MEDIUM' ? 'bg-warning' : 'bg-success')}"
+                                      th:text="${impact.riskLevel}">LOW</span>
+                            </p>
+                            <p><strong>Recommendations:</strong> <span th:text="${impact.recommendations}"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fabric Breakdown Section -->
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Fabric Breakdown by Wastage</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="fabricChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> High Risk Fabrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Fabric Type</th>
+                                <th>Wastage %</th>
+                                <th>Risk Level</th>
+                                <th>Optimization</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="fabric : ${highRiskFabrics}" th:classappend="${fabric.riskLevel == 'HIGH' ? 'table-danger' : 'table-warning'}">
+                                <td th:text="${fabric.fabricType}">Cotton</td>
+                                <td th:text="${#numbers.formatDecimal(fabric.avgWastagePct, 1, 1)} + '%'">15.2%</td>
+                                <td>
+                                    <span class="badge" th:classappend="${fabric.riskLevel == 'HIGH' ? 'bg-danger' : 'bg-warning'}"
+                                          th:text="${fabric.riskLevel}">HIGH</span>
+                                </td>
+                                <td>
+                                    <span th:if="${fabric.optimizationNeeded}" class="badge bg-danger">Needed</span>
+                                    <span th:unless="${fabric.optimizationNeeded}" class="badge bg-success">Good</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    function downloadReport(format) {
+        const startDate = prompt("Enter start date (YYYY-MM-DD) or leave empty for last 30 days:",
+            new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0]);
+        const endDate = prompt("Enter end date (YYYY-MM-DD) or leave empty for today:",
+            new Date().toISOString().split('T')[0]);
+
+        if (startDate && endDate) {
+            window.location.href = '/sustainability/report/' + format +
+                '?startDate=' + startDate + '&endDate=' + endDate;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get fabric breakdown data
+        fetch('/sustainability/api/fabric-breakdown')
+            .then(response => response.json())
+            .then(data => {
+                const fabricCtx = document.getElementById('fabricChart').getContext('2d');
+                new Chart(fabricCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.map(f => f.fabricType),
+                        datasets: [{
+                            data: data.map(f => f.wastagePercentage),
+                            backgroundColor: data.map(f => f.colorCode || '#28a745'),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            });
+
+        const impactCtx = document.getElementById('impactChart').getContext('2d');
+        new Chart(impactCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'CO2 Savings (kg)',
+                        data: [1200, 1350, 1100, 1600, 1450, 1700],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Water Saved (10L)',
+                        data: [850, 920, 780, 1100, 980, 1250],
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount'
+                        }
+                    }
+                }
+            }
+        });
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Fabric Wastage Prediction System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-header {
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            color: white;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+
+        .container {
+            flex: 1;
+            padding: 36px 40px;
+            width: 100%;
+        }
+
+        .alert {
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+        .alert-error   { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .card-header h2 { font-size: 20px; color: #1a1a2e; }
+
+        .btn-add {
+            background: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-add:hover { background: #27ae60; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        thead tr { background: #1a1a2e; color: white; }
+        th, td { padding: 12px 14px; text-align: left; font-size: 13px; }
+        th { font-weight: 600; }
+        tbody tr { border-bottom: 1px solid #f0f0f0; }
+        tbody tr:hover { background: #f8f9ff; }
+
+        .actions-cell { display: flex; gap: 8px; align-items: center; }
+
+        .btn-update {
+            background: #f39c12;
+            color: white;
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-update:hover { background: #e67e22; }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-delete:hover { background: #c0392b; }
+
+        .no-users { text-align: center; color: #999; padding: 40px; font-size: 15px; }
+
+        .logout-section { text-align: center; padding: 24px; }
+
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            padding: 11px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-logout:hover { background: #c0392b; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            padding: 20px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-header h3 { color: white; font-size: 17px; }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .modal-body { padding: 28px; }
+
+        .form-group { margin-bottom: 18px; }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .form-group input:focus { border-color: #1976d2; }
+
+        .modal-footer {
+            padding: 0 28px 28px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-back-modal {
+            flex: 1;
+            padding: 11px;
+            background: #f0f0f0;
+            color: #555;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-back-modal:hover { background: #e0e0e0; }
+
+        .btn-submit {
+            flex: 2;
+            padding: 11px;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+
+        .field-error {
+            display: none;
+            color: #c62828;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-header">Fabric Wastage Prediction System - Admin</div>
+
+<div class="container">
+
+    <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+    <div th:if="${errorMsg}"   class="alert alert-error"   th:text="${errorMsg}"></div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Registered Users</h2>
+            <button class="btn-add" onclick="openAddModal()">+ Add New User</button>
+        </div>
+
+        <table th:if="${users != null and !users.isEmpty()}">
+            <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.id}"></td>
+                <td th:text="${u.fullName}"></td>
+                <td th:text="${u.email}"></td>
+                <td th:text="${u.phoneNumber}"></td>
+                <td th:text="${u.username}"></td>
+                <td th:text="${u.role}"></td>
+                <td th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td>
+                    <div class="actions-cell">
+                        <button class="btn-update"
+                                th:data-id="${u.id}"
+                                th:data-fullname="${u.fullName}"
+                                th:data-email="${u.email}"
+                                th:data-phone="${u.phoneNumber}"
+                                th:data-username="${u.username}"
+                                th:data-role="${u.role}"
+                                onclick="handleUpdate(this)">
+                            Update
+                        </button>
+                        <form th:action="@{'/admin/users/delete/' + ${u.id}}" method="post" style="margin:0"
+                              onsubmit="return confirm('Are you sure you want to delete this user?')">
+                            <button type="submit" class="btn-delete">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="no-users" th:if="${users == null or users.isEmpty()}">
+            No users registered yet. Click "+ Add New User" to get started.
+        </div>
+    </div>
+</div>
+
+<div class="logout-section">
+    <a href="/admin/logout" class="btn-logout">Logout</a>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Add New User</h3>
+            <button class="modal-close" onclick="closeAddModal()">&#x2715;</button>
+        </div>
+        <form th:action="@{/admin/users/create}" method="post" id="addForm" novalidate>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="add-fullName" name="fullName" placeholder="Enter full name" />
+                    <span class="field-error" id="err-add-fullName"></span>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" id="add-email" name="email" placeholder="Enter email address" />
+                    <span class="field-error" id="err-add-email"></span>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="add-phone" name="phoneNumber" placeholder="Enter 10-digit phone number" maxlength="10" />
+                    <span class="field-error" id="err-add-phone"></span>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="add-username" name="username" placeholder="Enter username" />
+                    <span class="field-error" id="err-add-username"></span>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="add-password" name="password" placeholder="More than 7 characters" />
+                    <span class="field-error" id="err-add-password"></span>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" id="add-role" name="role" placeholder="e.g. Manager, Supervisor, Analyst" />
+                    <span class="field-error" id="err-add-role"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-back-modal" onclick="closeAddModal()">&#8592; Back</button>
+                <button type="button" class="btn-submit" onclick="submitAddForm()">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Update User Modal -->
+<div class="modal-overlay" id="updateModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Update User</h3>
+            <button class="modal-close" onclick="closeUpdateModal()">&#x2715;</button>
+        </div>
+        <form id="updateForm" method="post" novalidate>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="upd-fullName" name="fullName" />
+                    <span class="field-error" id="err-upd-fullName"></span>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" id="upd-email" name="email" />
+                    <span class="field-error" id="err-upd-email"></span>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="upd-phone" name="phoneNumber" maxlength="10" />
+                    <span class="field-error" id="err-upd-phone"></span>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="upd-username" name="username" />
+                    <span class="field-error" id="err-upd-username"></span>
+                </div>
+                <div class="form-group">
+                    <label>New Password <span style="font-weight:400;text-transform:none;color:#999">(leave blank to keep current)</span></label>
+                    <input type="password" id="upd-password" name="password" placeholder="Enter new password (optional)" />
+                    <span class="field-error" id="err-upd-password"></span>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" id="upd-role" name="role" />
+                    <span class="field-error" id="err-upd-role"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-back-modal" onclick="closeUpdateModal()">&#8592; Back</button>
+                <button type="button" class="btn-submit" onclick="submitUpdateForm()">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAddModal()  { document.getElementById('addModal').classList.add('active'); }
+    function closeAddModal() { document.getElementById('addModal').classList.remove('active'); clearErrors('add'); }
+    function closeUpdateModal() { document.getElementById('updateModal').classList.remove('active'); clearErrors('upd'); }
+
+    // Read data from data-* attributes instead of inline onclick strings
+    function handleUpdate(btn) {
+        document.getElementById('upd-fullName').value = btn.getAttribute('data-fullname');
+        document.getElementById('upd-email').value    = btn.getAttribute('data-email');
+        document.getElementById('upd-phone').value    = btn.getAttribute('data-phone');
+        document.getElementById('upd-username').value = btn.getAttribute('data-username');
+        document.getElementById('upd-role').value     = btn.getAttribute('data-role');
+        document.getElementById('upd-password').value = '';
+        document.getElementById('updateForm').action  = '/admin/users/update/' + btn.getAttribute('data-id');
+        document.getElementById('updateModal').classList.add('active');
+    }
+
+    document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) closeAddModal(); });
+    document.getElementById('updateModal').addEventListener('click', function(e) { if (e.target === this) closeUpdateModal(); });
+
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = msg; el.style.display = 'block'; }
+    }
+    function clearErrors(prefix) {
+        document.querySelectorAll('.field-error').forEach(el => {
+            if (el.id.startsWith('err-' + prefix)) { el.textContent = ''; el.style.display = 'none'; }
+        });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\d{10}$/;
+
+    function validateForm(prefix, requirePassword) {
+        clearErrors(prefix);
+        let valid = true;
+
+        const fullName = document.getElementById(prefix + '-fullName').value.trim();
+        const email    = document.getElementById(prefix + '-email').value.trim();
+        const phone    = document.getElementById(prefix + '-phone').value.trim();
+        const username = document.getElementById(prefix + '-username').value.trim();
+        const passEl   = document.getElementById(prefix + '-password');
+        const password = passEl ? passEl.value : '';
+        const role     = document.getElementById(prefix + '-role').value.trim();
+
+        if (!fullName) { showError('err-' + prefix + '-fullName', 'Full name is required.'); valid = false; }
+        else if (fullName.length < 3) { showError('err-' + prefix + '-fullName', 'Must be at least 3 characters.'); valid = false; }
+
+        if (!email) { showError('err-' + prefix + '-email', 'Email is required.'); valid = false; }
+        else if (!emailRegex.test(email)) { showError('err-' + prefix + '-email', 'Enter a valid email (e.g. user@example.com).'); valid = false; }
+
+        if (!phone) { showError('err-' + prefix + '-phone', 'Phone number is required.'); valid = false; }
+        else if (!phoneRegex.test(phone)) { showError('err-' + prefix + '-phone', 'Must be exactly 10 digits.'); valid = false; }
+
+        if (!username) { showError('err-' + prefix + '-username', 'Username is required.'); valid = false; }
+        else if (username.length < 3) { showError('err-' + prefix + '-username', 'Must be at least 3 characters.'); valid = false; }
+
+        if (requirePassword) {
+            if (!password) { showError('err-' + prefix + '-password', 'Password is required.'); valid = false; }
+            else if (password.length < 8) { showError('err-' + prefix + '-password', 'Must be more than 7 characters.'); valid = false; }
+        } else {
+            if (password && password.length < 8) { showError('err-' + prefix + '-password', 'Must be more than 7 characters.'); valid = false; }
+        }
+
+        if (!role) { showError('err-' + prefix + '-role', 'Role is required.'); valid = false; }
+
+        return valid;
+    }
+
+    function submitAddForm()    { if (validateForm('add', true))  document.getElementById('addForm').submit(); }
+    function submitUpdateForm() { if (validateForm('upd', false)) document.getElementById('updateForm').submit(); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        ['add-phone', 'upd-phone'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', function() { this.value = this.value.replace(/\D/g, ''); });
+        });
+    });
+</script>
+</body>
+</html>
