@@ -5,157 +5,423 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Fabric Wastage Prediction System</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --navy:     #0f1f35;
+            --navy-2:   #1a3352;
+            --green:    #059669;
+            --green-lt: #ecfdf5;
+            --green-md: #a7f3d0;
+            --blue:     #2563eb;
+            --blue-lt:  #eff6ff;
+            --amber:    #d97706;
+            --amber-lt: #fffbeb;
+            --purple:   #7c3aed;
+            --purple-lt:#f5f3ff;
+            --teal:     #0891b2;
+            --teal-lt:  #ecfeff;
+            --rose:     #e11d48;
+            --rose-lt:  #fff1f2;
+            --orange:   #ea580c;
+            --orange-lt:#fff7ed;
+            --red:      #dc2626;
+            --red-lt:   #fef2f2;
+            --surface:  #f1f5f9;
+            --border:   #e2e8f0;
+            --text:     #1e293b;
+            --muted:    #64748b;
+            --radius:   14px;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f0f2f5;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface);
+            color: var(--text);
             min-height: 100vh;
         }
 
-        .top-header {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-            padding: 20px 40px;
-            text-align: center;
-            font-size: 22px;
-            font-weight: 700;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        /* ── Topbar ─────────────────────────────────────── */
+        .topbar {
+            background: var(--navy);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: -0.01em;
+        }
+        .topbar-brand svg { opacity: 0.85; }
+        .topbar-meta {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.4);
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
-        .container {
+        /* ── Page wrapper ───────────────────────────────── */
+        .page {
             max-width: 960px;
-            margin: 48px auto;
-            padding: 0 20px;
+            margin: 0 auto;
+            padding: 40px 24px 100px;
         }
 
-        /* Welcome Card */
-        .welcome-card {
-            background: white;
-            border-radius: 14px;
-            padding: 40px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            text-align: center;
-            margin-bottom: 28px;
+        /* ── Welcome row ────────────────────────────────── */
+        .welcome-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--card-shadow);
+            animation: fadeUp 0.35s ease both;
         }
-
         .avatar {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            width: 60px; height: 60px;
             border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), #047857);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            color: white;
-            font-weight: 700;
-            margin: 0 auto 20px;
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 4px rgba(5,150,105,0.18);
         }
-
-        .welcome-card h2 { font-size: 24px; color: #1a1a2e; margin-bottom: 8px; }
+        .welcome-text { flex: 1; }
+        .welcome-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--navy);
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+        .welcome-name span { color: var(--green); }
+        .welcome-sub { font-size: 0.82rem; color: var(--muted); }
 
         .role-badge {
-            display: inline-block;
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 5px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--green-lt);
+            border: 1px solid var(--green-md);
+            color: #065f46;
+            padding: 5px 14px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 0.72rem;
             font-weight: 600;
-            margin-bottom: 16px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .role-dot {
+            width: 6px; height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.35; }
         }
 
-        .welcome-card p { color: #888; font-size: 15px; }
-
-        /* Nav Cards */
-        .nav-section-title {
-            font-size: 16px;
+        /* ── Section label ──────────────────────────────── */
+        .section-label {
+            font-size: 0.68rem;
             font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 16px;
-            padding-left: 4px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 14px;
+            padding-left: 2px;
         }
 
+        /* ── Nav grid ───────────────────────────────────── */
         .nav-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 18px;
-            margin-bottom: 28px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 36px;
         }
 
         .nav-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 20px;
             text-decoration: none;
             display: flex;
-            align-items: center;
-            gap: 18px;
-            transition: transform 0.15s, box-shadow 0.15s;
-            border-left: 4px solid transparent;
-            cursor: pointer;
+            align-items: flex-start;
+            gap: 16px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.4s ease both;
         }
+
+        /* staggered entry — up to 6 cards */
+        .nav-card:nth-child(1) { animation-delay: 0.08s; }
+        .nav-card:nth-child(2) { animation-delay: 0.13s; }
+        .nav-card:nth-child(3) { animation-delay: 0.18s; }
+        .nav-card:nth-child(4) { animation-delay: 0.23s; }
+        .nav-card:nth-child(5) { animation-delay: 0.28s; }
+        .nav-card:nth-child(6) { animation-delay: 0.33s; }
 
         .nav-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.09);
         }
 
-        .nav-card.green  { border-left-color: #2ecc71; }
-        .nav-card.blue   { border-left-color: #1976d2; }
-        .nav-card.orange { border-left-color: #f39c12; }
-        .nav-card.purple { border-left-color: #9c27b0; }
-        .nav-card.teal   { border-left-color: #00897b; }
-        .nav-card.red    { border-left-color: #e74c3c; }
+        /* Sweep accent line on hover */
+        .nav-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.25s ease;
+        }
+        .nav-card:hover::after { transform: scaleX(1); }
 
+        /* Per-colour accent + hover border */
+        .nav-card.green::after   { background: var(--green); }
+        .nav-card.blue::after    { background: var(--blue); }
+        .nav-card.orange::after  { background: var(--orange); }
+        .nav-card.purple::after  { background: var(--purple); }
+        .nav-card.teal::after    { background: var(--teal); }
+        .nav-card.red::after     { background: var(--red); }
+
+        .nav-card.green:hover    { border-color: #a7f3d0; }
+        .nav-card.blue:hover     { border-color: #bfdbfe; }
+        .nav-card.orange:hover   { border-color: #fed7aa; }
+        .nav-card.purple:hover   { border-color: #ddd6fe; }
+        .nav-card.teal:hover     { border-color: #a5f3fc; }
+        .nav-card.red:hover      { border-color: #fca5a5; }
+
+        /* Icon */
         .nav-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
-            display: flex; align-items: center;
+            width: 44px; height: 44px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            font-size: 22px; flex-shrink: 0;
+            font-size: 20px;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+        .nav-card:hover .nav-icon { transform: scale(1.08); }
+
+        .nav-icon.green  { background: var(--green-lt); }
+        .nav-icon.blue   { background: var(--blue-lt); }
+        .nav-icon.orange { background: var(--orange-lt); }
+        .nav-icon.purple { background: var(--purple-lt); }
+        .nav-icon.teal   { background: var(--teal-lt); }
+        .nav-icon.red    { background: var(--red-lt); }
+
+        /* Card text */
+        .nav-card-body { flex: 1; min-width: 0; }
+        .nav-card-body h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+        .nav-card-body p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.5;
         }
 
-        .nav-icon.green  { background: #e8f5e9; }
-        .nav-icon.blue   { background: #e3f2fd; }
-        .nav-icon.orange { background: #fff8e1; }
-        .nav-icon.purple { background: #f3e5f5; }
-        .nav-icon.teal   { background: #e0f2f1; }
-        .nav-icon.red    { background: #ffebee; }
+        /* Arrow */
+        .nav-arrow {
+            color: var(--border);
+            font-size: 1.1rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .nav-card:hover .nav-arrow { color: var(--muted); transform: translateX(3px); }
 
-        .nav-card-text h3 { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
-        .nav-card-text p  { font-size: 12px; color: #888; }
-
-        /* Logout */
-        .logout-section { text-align: center; padding-bottom: 40px; }
+        /* ── Logout ─────────────────────────────────────── */
+        .logout-row {
+            display: flex;
+            justify-content: center;
+        }
         .btn-logout {
-            background: #e74c3c; color: white;
-            padding: 11px 32px; border: none;
-            border-radius: 8px; font-size: 15px;
-            font-weight: 600; text-decoration: none; display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 9px 22px;
+            border-radius: 9px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            text-decoration: none;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
         }
-        .btn-logout:hover { background: #c0392b; }
+        .btn-logout:hover {
+            border-color: #fca5a5;
+            color: #dc2626;
+            background: #fef2f2;
+        }
+
+        /* ── Floating chat button ───────────────────────── */
+        .chat-fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .chat-fab-label {
+            position: relative;
+            background: var(--navy);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 7px 13px;
+            border-radius: 8px;
+            white-space: nowrap;
+            margin-right: 10px;
+            opacity: 0;
+            transform: translateX(6px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            letter-spacing: -0.01em;
+        }
+        .chat-fab-label::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 5px solid var(--navy);
+        }
+        .chat-fab:hover .chat-fab-label {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .chat-fab-btn {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a3352, #0f1f35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 18px rgba(15,31,53,0.4), 0 1px 4px rgba(0,0,0,0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .chat-fab:hover .chat-fab-btn {
+            transform: scale(1.1);
+            box-shadow: 0 8px 28px rgba(15,31,53,0.45), 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .chat-fab-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(15,31,53,0.25);
+            animation: fabRing 2.6s ease-out infinite;
+            pointer-events: none;
+        }
+        @keyframes fabRing {
+            0%   { transform: scale(1);    opacity: 0.8; }
+            100% { transform: scale(1.55); opacity: 0; }
+        }
+        .chat-fab-dot {
+            position: absolute;
+            top: 4px; right: 4px;
+            width: 11px; height: 11px;
+            background: var(--green);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 2px rgba(5,150,105,0.25);
+        }
+
+        /* ── Animations ─────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Responsive ─────────────────────────────────── */
+        @media (max-width: 640px) {
+            .nav-grid { grid-template-columns: 1fr; }
+            .topbar { padding: 0 20px; }
+            .topbar-meta { display: none; }
+            .welcome-row { flex-wrap: wrap; gap: 14px; }
+            .role-badge { align-self: flex-start; }
+            .chat-fab { bottom: 20px; right: 20px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="top-header">Fabric Wastage Prediction System</div>
+<!-- ── Topbar ────────────────────────────────────────────── -->
+<header class="topbar">
+    <div class="topbar-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+            <path d="M13 13l6 6"/>
+        </svg>
+        Fabric AI
+    </div>
+    <div class="topbar-meta">Wastage Prediction System</div>
+</header>
 
-<div class="container">
+<!-- ── Page ──────────────────────────────────────────────── -->
+<div class="page">
 
-    <!-- Welcome Card -->
-    <div class="welcome-card">
-        <div class="avatar" th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}"></div>
-        <h2 th:text="'Welcome, ' + ${user.fullName} + '!'"></h2>
-        <div class="role-badge" th:text="${user.role}"></div>
-        <p>You are logged in successfully. Use the modules below to navigate the system.</p>
+    <!-- Welcome row -->
+    <div class="welcome-row">
+        <div class="avatar" th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}">A</div>
+        <div class="welcome-text">
+            <div class="welcome-name">
+                Welcome back, <span th:text="${user.fullName}">User</span>
+            </div>
+            <div class="welcome-sub">Logged in successfully. Use the modules below to navigate the system.</div>
+        </div>
+        <div class="role-badge">
+            <span class="role-dot"></span>
+            <span th:text="${user.role}">ANALYST</span>
+        </div>
     </div>
 
-    <!-- Navigation Modules — shown based on role -->
-    <div class="nav-section-title">Available Modules</div>
+    <!-- Module cards — visibility controlled by Spring Security roles -->
+    <div class="section-label">Available Modules</div>
     <div class="nav-grid">
 
         <!-- Historical Data — Business Analyst + Managing Director -->
@@ -163,10 +429,11 @@
            sec:authorize="hasAnyRole('BUSINESS_ANALYST', 'MANAGING_DIRECTOR')"
            class="nav-card green">
             <div class="nav-icon green">&#128202;</div>
-            <div class="nav-card-text">
+            <div class="nav-card-body">
                 <h3>Historical Data</h3>
                 <p>View and manage past production cutting records and model performance</p>
             </div>
+            <div class="nav-arrow">&#x2192;</div>
         </a>
 
         <!-- Report Generation — Business Analyst + Managing Director -->
@@ -174,10 +441,11 @@
            sec:authorize="hasAnyRole('BUSINESS_ANALYST', 'MANAGING_DIRECTOR')"
            class="nav-card orange">
             <div class="nav-icon orange">&#128196;</div>
-            <div class="nav-card-text">
+            <div class="nav-card-body">
                 <h3>Report Generation</h3>
                 <p>Generate and download waste prediction reports</p>
             </div>
+            <div class="nav-arrow">&#x2192;</div>
         </a>
 
         <!-- Sustainability Dashboard — Sustainability Officer + Managing Director -->
@@ -185,10 +453,11 @@
            sec:authorize="hasAnyRole('SUSTAINABILITY_OFFICER', 'MANAGING_DIRECTOR')"
            class="nav-card purple">
             <div class="nav-icon purple">&#127807;</div>
-            <div class="nav-card-text">
+            <div class="nav-card-body">
                 <h3>Sustainability Dashboard</h3>
                 <p>View carbon footprint and environmental impact data</p>
             </div>
+            <div class="nav-arrow">&#x2192;</div>
         </a>
 
         <!-- Model Monitoring — Technical Officer + Managing Director -->
@@ -196,10 +465,11 @@
            sec:authorize="hasAnyRole('TECHNICAL_OFFICER', 'MANAGING_DIRECTOR')"
            class="nav-card teal">
             <div class="nav-icon teal">&#128300;</div>
-            <div class="nav-card-text">
+            <div class="nav-card-body">
                 <h3>Model Performance Monitoring</h3>
-                <p>View R², MAE and detailed model performance metrics</p>
+                <p>View R&#178;, MAE and detailed model performance metrics</p>
             </div>
+            <div class="nav-arrow">&#x2192;</div>
         </a>
 
         <!-- Cutting Parameter Input — Cutting Manager + Managing Director -->
@@ -207,30 +477,52 @@
            sec:authorize="hasAnyRole('CUTTING_MANAGER', 'MANAGING_DIRECTOR')"
            class="nav-card blue">
             <div class="nav-icon blue">&#9986;</div>
-            <div class="nav-card-text">
+            <div class="nav-card-body">
                 <h3>Cutting Parameter Input</h3>
                 <p>Enter and validate fabric and cutting parameters</p>
             </div>
+            <div class="nav-arrow">&#x2192;</div>
         </a>
 
         <!-- Cutting Risk Analysis — Cutting Manager + Managing Director -->
-        <a href="/cutting/risk"
+        <a href="/cutting-risk-dashboard.html"
            sec:authorize="hasAnyRole('CUTTING_MANAGER', 'MANAGING_DIRECTOR')"
            class="nav-card red">
             <div class="nav-icon red">&#128200;</div>
-            <div class="nav-card-text">
+            <div class="nav-card-body">
                 <h3>Cutting Risk Analysis</h3>
                 <p>View fabric waste trends and risk distribution charts</p>
             </div>
+            <div class="nav-arrow">&#x2192;</div>
         </a>
 
     </div>
 
     <!-- Logout -->
-    <div class="logout-section">
-        <a href="/logout" class="btn-logout">Logout</a>
+    <div class="logout-row">
+        <a href="/logout" class="btn-logout">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sign out
+        </a>
     </div>
 
 </div>
+
+<!-- ── Floating chat button ───────────────────────────────── -->
+<a href="/chat.html" class="chat-fab" title="Open Chat">
+    <span class="chat-fab-label">AI Assistant</span>
+    <div class="chat-fab-btn">
+        <span class="chat-fab-dot"></span>
+        <svg width="24" height="24" fill="none" stroke="white" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+    </div>
+</a>
+
 </body>
 </html>
