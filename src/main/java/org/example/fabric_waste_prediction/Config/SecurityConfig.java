@@ -85,7 +85,7 @@ public class SecurityConfig {
                         .requestMatchers("/report/**").hasAnyRole("BUSINESS_ANALYST", "MANAGING_DIRECTOR")
                         .requestMatchers("/monitoring/**").hasAnyRole("TECHNICAL_OFFICER", "MANAGING_DIRECTOR")
                         .requestMatchers("/dashboard/**").hasAnyRole("CUTTING_MANAGER", "MANAGING_DIRECTOR")
-                        .requestMatchers("/cutting/risk/**").hasAnyRole("CUTTING_MANAGER", "MANAGING_DIRECTOR")
+                        .requestMatchers("/cutting-risk-dashboard.html").hasAnyRole("CUTTING_MANAGER", "MANAGING_DIRECTOR")
                         .anyRequest().authenticated()
                 )
                 // ── Single formLogin handles BOTH admin and user ──────────────────
