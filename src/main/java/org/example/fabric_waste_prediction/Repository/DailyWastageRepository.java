@@ -30,4 +30,10 @@ public interface DailyWastageRepository extends JpaRepository<DailyWastage, Long
 
     @Query("SELECT SUM(d.wasteAmountKg) FROM DailyWastage d WHERE d.trackingDate = :date")
     Double getTotalWasteForDate(@Param("date") LocalDate date);
+
+    @Query("SELECT d FROM DailyWastage d ORDER BY d.trackingDate ASC")
+    List<DailyWastage> findAllOrderedByDate();
+
+    @Query("SELECT d FROM DailyWastage d WHERE d.actualWastagePct IS NOT NULL ORDER BY d.trackingDate ASC")
+    List<DailyWastage> findAllWithActual();
 }
