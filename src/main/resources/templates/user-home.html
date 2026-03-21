@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Fabric Wastage Prediction System</title>
+    <title>Home - Fabric Wastage Prediction System</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -24,20 +25,9 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 960px;
             margin: 48px auto;
             padding: 0 20px;
-        }
-
-        .alert-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #a5d6a7;
-            padding: 12px 18px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 20px;
         }
 
         /* Welcome Card */
@@ -64,11 +54,7 @@
             margin: 0 auto 20px;
         }
 
-        .welcome-card h2 {
-            font-size: 24px;
-            color: #1a1a2e;
-            margin-bottom: 8px;
-        }
+        .welcome-card h2 { font-size: 24px; color: #1a1a2e; margin-bottom: 8px; }
 
         .role-badge {
             display: inline-block;
@@ -81,13 +67,9 @@
             margin-bottom: 16px;
         }
 
-        .welcome-card p {
-            color: #888;
-            font-size: 15px;
-            margin-bottom: 0;
-        }
+        .welcome-card p { color: #888; font-size: 15px; }
 
-        /* Navigation Cards */
+        /* Nav Cards */
         .nav-section-title {
             font-size: 16px;
             font-weight: 700;
@@ -114,6 +96,7 @@
             gap: 18px;
             transition: transform 0.15s, box-shadow 0.15s;
             border-left: 4px solid transparent;
+            cursor: pointer;
         }
 
         .nav-card:hover {
@@ -125,53 +108,34 @@
         .nav-card.blue   { border-left-color: #1976d2; }
         .nav-card.orange { border-left-color: #f39c12; }
         .nav-card.purple { border-left-color: #9c27b0; }
+        .nav-card.teal   { border-left-color: #00897b; }
+        .nav-card.red    { border-left-color: #e74c3c; }
 
         .nav-icon {
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px;
             border-radius: 12px;
-            display: flex;
-            align-items: center;
+            display: flex; align-items: center;
             justify-content: center;
-            font-size: 22px;
-            flex-shrink: 0;
+            font-size: 22px; flex-shrink: 0;
         }
 
         .nav-icon.green  { background: #e8f5e9; }
         .nav-icon.blue   { background: #e3f2fd; }
         .nav-icon.orange { background: #fff8e1; }
         .nav-icon.purple { background: #f3e5f5; }
+        .nav-icon.teal   { background: #e0f2f1; }
+        .nav-icon.red    { background: #ffebee; }
 
-        .nav-card-text h3 {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 3px;
-        }
-
-        .nav-card-text p {
-            font-size: 12px;
-            color: #888;
-        }
+        .nav-card-text h3 { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
+        .nav-card-text p  { font-size: 12px; color: #888; }
 
         /* Logout */
-        .logout-section {
-            text-align: center;
-            padding-bottom: 40px;
-        }
-
+        .logout-section { text-align: center; padding-bottom: 40px; }
         .btn-logout {
-            background: #e74c3c;
-            color: white;
-            padding: 11px 32px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: background 0.2s;
+            background: #e74c3c; color: white;
+            padding: 11px 32px; border: none;
+            border-radius: 8px; font-size: 15px;
+            font-weight: 600; text-decoration: none; display: inline-block;
         }
         .btn-logout:hover { background: #c0392b; }
     </style>
@@ -182,8 +146,6 @@
 
 <div class="container">
 
-    <div th:if="${success}" class="alert-success" th:text="${success}"></div>
-
     <!-- Welcome Card -->
     <div class="welcome-card">
         <div class="avatar" th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}"></div>
@@ -192,11 +154,14 @@
         <p>You are logged in successfully. Use the modules below to navigate the system.</p>
     </div>
 
-    <!-- Navigation Modules -->
+    <!-- Navigation Modules — shown based on role -->
     <div class="nav-section-title">Available Modules</div>
     <div class="nav-grid">
 
-        <a href="/user/historical" class="nav-card green">
+        <!-- Historical Data — Business Analyst + Managing Director -->
+        <a href="/user/historical"
+           sec:authorize="hasAnyRole('BUSINESS_ANALYST', 'MANAGING_DIRECTOR')"
+           class="nav-card green">
             <div class="nav-icon green">&#128202;</div>
             <div class="nav-card-text">
                 <h3>Historical Data</h3>
@@ -204,16 +169,10 @@
             </div>
         </a>
 
-        <!-- Placeholder cards for other team members' modules -->
-        <a href="#" class="nav-card blue">
-            <div class="nav-icon blue">&#9986;</div>
-            <div class="nav-card-text">
-                <h3>Cutting Risk Analysis</h3>
-                <p>View fabric waste trends and risk distribution charts</p>
-            </div>
-        </a>
-
-        <a href="#" class="nav-card orange">
+        <!-- Report Generation — Business Analyst + Managing Director -->
+        <a href="/report"
+           sec:authorize="hasAnyRole('BUSINESS_ANALYST', 'MANAGING_DIRECTOR')"
+           class="nav-card orange">
             <div class="nav-icon orange">&#128196;</div>
             <div class="nav-card-text">
                 <h3>Report Generation</h3>
@@ -221,11 +180,47 @@
             </div>
         </a>
 
-        <a href="#" class="nav-card purple">
+        <!-- Sustainability Dashboard — Sustainability Officer + Managing Director -->
+        <a href="/sustainability/dashboard"
+           sec:authorize="hasAnyRole('SUSTAINABILITY_OFFICER', 'MANAGING_DIRECTOR')"
+           class="nav-card purple">
             <div class="nav-icon purple">&#127807;</div>
             <div class="nav-card-text">
                 <h3>Sustainability Dashboard</h3>
                 <p>View carbon footprint and environmental impact data</p>
+            </div>
+        </a>
+
+        <!-- Model Monitoring — Technical Officer + Managing Director -->
+        <a href="/monitoring/show"
+           sec:authorize="hasAnyRole('TECHNICAL_OFFICER', 'MANAGING_DIRECTOR')"
+           class="nav-card teal">
+            <div class="nav-icon teal">&#128300;</div>
+            <div class="nav-card-text">
+                <h3>Model Performance Monitoring</h3>
+                <p>View R², MAE and detailed model performance metrics</p>
+            </div>
+        </a>
+
+        <!-- Cutting Parameter Input — Cutting Manager + Managing Director -->
+        <a href="/dashboard"
+           sec:authorize="hasAnyRole('CUTTING_MANAGER', 'MANAGING_DIRECTOR')"
+           class="nav-card blue">
+            <div class="nav-icon blue">&#9986;</div>
+            <div class="nav-card-text">
+                <h3>Cutting Parameter Input</h3>
+                <p>Enter and validate fabric and cutting parameters</p>
+            </div>
+        </a>
+
+        <!-- Cutting Risk Analysis — Cutting Manager + Managing Director -->
+        <a href="/cutting/risk"
+           sec:authorize="hasAnyRole('CUTTING_MANAGER', 'MANAGING_DIRECTOR')"
+           class="nav-card red">
+            <div class="nav-icon red">&#128200;</div>
+            <div class="nav-card-text">
+                <h3>Cutting Risk Analysis</h3>
+                <p>View fabric waste trends and risk distribution charts</p>
             </div>
         </a>
 
