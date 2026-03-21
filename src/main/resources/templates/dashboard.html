@@ -633,9 +633,9 @@
                 } else if (num < 1) {
                     isValid = false;
                     message = 'Minimum experience is 1 year';
-                } else if (num > 50) {
+                } else if (num > 60) {
                     isValid = false;
-                    message = 'Maximum experience is 50 years';
+                    message = 'Maximum experience is 60 years';
                 }
             }
             else if (field.tagName === 'SELECT' && value === '') {
@@ -805,10 +805,15 @@
             const previousLatest = historyBody.querySelector('.highlight-latest');
             if (previousLatest) previousLatest.classList.remove('highlight-latest');
 
-            historyBody.insertBefore(newRow, historyBody.firstChild);
-            countBadge.textContent = `${predictionCount} record${predictionCount === 1 ? '' : 's'}`;
+            // Append new row at the end to maintain 1,2,3 numbering
+            historyBody.appendChild(newRow);
 
-            // Reset form
+            // Update numbering
+            Array.from(historyBody.querySelectorAll('tr')).forEach((tr,index)=>{
+                tr.querySelector('td:first-child').textContent=index+1;
+            });
+
+            countBadge.textContent=`${historyBody.querySelectorAll('tr').length} record${historyBody.querySelectorAll('tr').length===1?'':'s'}`;
             resetFormToDefault();
         });
 
