@@ -17,8 +17,6 @@ public class HistoricalDataController {
     @Autowired
     private HistoricalDataService historicalDataService;
 
-    // ── Main Dashboard ────────────────────────────────────────────────────────
-
     @GetMapping
     public String historicalDashboard(HttpSession session, Model model,
                                       @RequestParam(defaultValue = "cutting") String tab) {
@@ -31,49 +29,37 @@ public class HistoricalDataController {
         return "historical-data";
     }
 
-    // ── Cutting Jobs Update ───────────────────────────────────────────────────
-
     @PostMapping("/cutting/update/{id}")
     public String updateCuttingJob(@PathVariable Long id,
                                    @ModelAttribute CuttingJob cuttingJob,
                                    HttpSession session,
                                    RedirectAttributes redirectAttributes) {
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/user/login";
-        }
+        if (session.getAttribute("loggedInUser") == null) return "redirect:/user/login";
         String result = historicalDataService.updateCuttingJob(id, cuttingJob);
         if (!result.equals("success")) {
             redirectAttributes.addFlashAttribute("errorMsg", result);
         } else {
-            redirectAttributes.addFlashAttribute("successMsg", "Cutting job updated successfully!");
+            redirectAttributes.addFlashAttribute("successMsg", "Cutting record updated successfully!");
         }
         return "redirect:/user/historical?tab=cutting";
     }
-
-    // ── Cutting Jobs Delete ───────────────────────────────────────────────────
 
     @PostMapping("/cutting/delete/{id}")
     public String deleteCuttingJob(@PathVariable Long id,
                                    HttpSession session,
                                    RedirectAttributes redirectAttributes) {
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/user/login";
-        }
+        if (session.getAttribute("loggedInUser") == null) return "redirect:/user/login";
         historicalDataService.deleteCuttingJob(id);
-        redirectAttributes.addFlashAttribute("successMsg", "Cutting job deleted successfully!");
+        redirectAttributes.addFlashAttribute("successMsg", "Cutting record deleted successfully!");
         return "redirect:/user/historical?tab=cutting";
     }
-
-    // ── Model Performance Update ──────────────────────────────────────────────
 
     @PostMapping("/performance/update/{id}")
     public String updateModelPerformance(@PathVariable Long id,
                                          @ModelAttribute ModelPerformance modelPerformance,
                                          HttpSession session,
                                          RedirectAttributes redirectAttributes) {
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/user/login";
-        }
+        if (session.getAttribute("loggedInUser") == null) return "redirect:/user/login";
         String result = historicalDataService.updateModelPerformance(id, modelPerformance);
         if (!result.equals("success")) {
             redirectAttributes.addFlashAttribute("errorMsg", result);
@@ -83,15 +69,11 @@ public class HistoricalDataController {
         return "redirect:/user/historical?tab=performance";
     }
 
-    // ── Model Performance Delete ──────────────────────────────────────────────
-
     @PostMapping("/performance/delete/{id}")
     public String deleteModelPerformance(@PathVariable Long id,
                                          HttpSession session,
                                          RedirectAttributes redirectAttributes) {
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/user/login";
-        }
+        if (session.getAttribute("loggedInUser") == null) return "redirect:/user/login";
         historicalDataService.deleteModelPerformance(id);
         redirectAttributes.addFlashAttribute("successMsg", "Performance record deleted successfully!");
         return "redirect:/user/historical?tab=performance";

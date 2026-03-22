@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "cutting_jobs")
@@ -14,46 +15,62 @@ public class CuttingJob {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String jobId;
+    // ── FK references to source tables ───────────────────────────────────────
+    @Column(name = "prediction_id")
+    private Long predictionId;
 
-    @Column(nullable = false)
-    private String fabricLotId;
+    @Column(name = "cutting_risk_record_id")
+    private UUID cuttingRiskRecordId;
 
-    @Column(nullable = false)
-    private String materialId;
+    // ── From Prediction table ─────────────────────────────────────────────────
+    @Column(name = "fabric_type")
+    private String fabricType;
 
-    @Column(nullable = false)
-    private String operatorId;
+    @Column(name = "fabric_pattern")
+    private String fabricPattern;
 
-    @Column(nullable = false)
-    private Double cuttingOverlapMm;
-
-    @Column(nullable = false)
-    private Integer noOfLayers;
-
-    @Column(nullable = false)
+    @Column(name = "cutting_method")
     private String cuttingMethod;
 
-    @Column(nullable = false)
-    private String shift;
+    @Column(name = "marker_loss_pct")
+    private Double markerLossPct;
 
-    @Column(nullable = false)
-    private Double actualWastagePct;
+    @Column(name = "pattern_complexity")
+    private Double patternComplexity;
 
-    @Column(nullable = false)
+    @Column(name = "operator_experience")
+    private Double operatorExperience;
+
+    @Column(name = "predicted_waste_pct")
     private Double predictedWastePct;
 
-    @Column(nullable = false)
+    // ── From CuttingRiskRecord table ──────────────────────────────────────────
+    @Column(name = "no_of_layers")
+    private Integer noOfLayers;
+
+    @Column(name = "fabric_gsm")
+    private Integer fabricGsm;
+
+    @Column(name = "shift")
+    private String shift;
+
+    @Column(name = "cutting_overlap_mm")
+    private Integer cuttingOverlapMm;
+
+    @Column(name = "marker_efficiency_pct")
     private Double markerEfficiencyPct;
 
-    @Column(nullable = false)
-    private String status;
+    @Column(name = "actual_wastage_pct")
+    private Double actualWastagePct;
 
-    @Column(nullable = false)
+    @Column(name = "job_date")
     private LocalDate jobDate;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "notes")
+    private String notes;
+
+    // ── Auto generated ────────────────────────────────────────────────────────
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

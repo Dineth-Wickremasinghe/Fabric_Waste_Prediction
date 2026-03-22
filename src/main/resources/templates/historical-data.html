@@ -8,105 +8,32 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; }
-
-        .top-header {
-            background: linear-gradient(135deg, #1976d2, #42a5f5);
-            color: white; padding: 20px 40px; text-align: center;
-            font-size: 22px; font-weight: 700; letter-spacing: 0.5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        }
-
+        .top-header { background: linear-gradient(135deg, #1976d2, #42a5f5); color: white; padding: 20px 40px; text-align: center; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
         .container { flex: 1; padding: 36px 40px; width: 100%; }
-
-        .page-title {
-            font-size: 26px; font-weight: 700; color: #1a1a2e;
-            margin-bottom: 24px; border-left: 4px solid #1976d2; padding-left: 14px;
-        }
-
+        .page-title { font-size: 26px; font-weight: 700; color: #1a1a2e; margin-bottom: 24px; border-left: 4px solid #1976d2; padding-left: 14px; }
         .alert { padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; }
         .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
         .alert-error   { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
-
-        /* Tabs */
         .tab-nav { display: flex; margin-bottom: 28px; border-bottom: 2px solid #e0e0e0; }
-        .tab-btn {
-            padding: 13px 32px; border: none; background: none;
-            font-size: 14px; font-weight: 600; color: #888; cursor: pointer;
-            border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s;
-        }
+        .tab-btn { padding: 13px 32px; border: none; background: none; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
         .tab-btn:hover { color: #1976d2; background: #f5f8ff; }
         .tab-btn.active { color: #1976d2; border-bottom-color: #1976d2; }
         .tab-icon { margin-right: 8px; font-size: 15px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        /* Card */
-        .card {
-            background: white; border-radius: 12px; padding: 28px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow-x: auto; margin-bottom: 28px;
-        }
-        .card-header {
-            display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 20px;
-        }
+        .card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow-x: auto; margin-bottom: 28px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .card-header h2 { font-size: 18px; color: #1a1a2e; font-weight: 700; }
-
         .card-header-right { display: flex; align-items: center; gap: 12px; }
-
-        .record-count {
-            background: #e3f2fd; color: #1565c0;
-            padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
-        }
-
-        /* Filter Button */
-        .btn-open-filter {
-            display: flex; align-items: center; gap: 7px;
-            padding: 8px 18px;
-            background: white;
-            border: 2px solid #1976d2;
-            color: #1976d2;
-            border-radius: 8px;
-            font-size: 13px; font-weight: 700;
-            cursor: pointer; transition: all 0.2s;
-        }
+        .record-count { background: #e3f2fd; color: #1565c0; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .btn-open-filter { display: flex; align-items: center; gap: 7px; padding: 8px 18px; background: white; border: 2px solid #1976d2; color: #1976d2; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         .btn-open-filter:hover { background: #1976d2; color: white; }
-
-        .btn-open-filter.active-filter {
-            background: #1976d2; color: white;
-        }
-
-        .filter-dot {
-            width: 8px; height: 8px;
-            background: #e74c3c; border-radius: 50%;
-            display: none;
-        }
+        .btn-open-filter.active-filter { background: #1976d2; color: white; }
+        .filter-dot { width: 8px; height: 8px; background: #e74c3c; border-radius: 50%; display: none; }
         .btn-open-filter.active-filter .filter-dot { display: inline-block; }
-
-        /* Active filter info strip */
-        .filter-active-strip {
-            display: none;
-            background: #e3f2fd;
-            border: 1px solid #90caf9;
-            border-radius: 8px;
-            padding: 8px 14px;
-            margin-bottom: 14px;
-            font-size: 12px;
-            color: #1565c0;
-            font-weight: 600;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
+        .filter-active-strip { display: none; background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 8px 14px; margin-bottom: 14px; font-size: 12px; color: #1565c0; font-weight: 600; align-items: center; justify-content: space-between; gap: 10px; }
         .filter-active-strip.visible { display: flex; }
-
-        .btn-strip-reset {
-            background: none; border: none; color: #e74c3c;
-            font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
-        }
-        .btn-strip-reset:hover { text-decoration: underline; }
-
-        /* Table */
+        .btn-strip-reset { background: none; border: none; color: #e74c3c; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         thead tr { background: #1a1a2e; color: white; }
         th, td { padding: 11px 13px; text-align: left; font-size: 13px; }
@@ -114,25 +41,17 @@
         tbody tr { border-bottom: 1px solid #f0f0f0; }
         tbody tr:hover { background: #f8f9ff; }
         tbody tr.hidden-row { display: none; }
-
         .actions-cell { display: flex; gap: 8px; align-items: center; }
         .btn-update { background: #f39c12; color: white; padding: 6px 13px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .btn-update:hover { background: #e67e22; }
         .btn-delete { background: #e74c3c; color: white; padding: 6px 13px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .btn-delete:hover { background: #c0392b; }
-
         .badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .badge-completed { background: #e8f5e9; color: #2e7d32; }
-        .badge-progress  { background: #fff8e1; color: #f57f17; }
-        .badge-cancelled { background: #ffebee; color: #c62828; }
-        .badge-healthy   { background: #e8f5e9; color: #2e7d32; }
-        .badge-warning   { background: #fff8e1; color: #f57f17; }
-        .badge-critical  { background: #ffebee; color: #c62828; }
-
+        .badge-healthy  { background: #e8f5e9; color: #2e7d32; }
+        .badge-warning  { background: #fff8e1; color: #f57f17; }
+        .badge-critical { background: #ffebee; color: #c62828; }
         .no-data { text-align: center; color: #999; padding: 40px; font-size: 15px; }
         .no-filter-results { display: none; text-align: center; color: #f39c12; padding: 28px; font-size: 14px; font-weight: 600; background: #fffbf0; border-radius: 8px; }
-
-        /* Charts */
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
         .chart-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
         .chart-card.full-width { grid-column: 1 / -1; }
@@ -140,101 +59,29 @@
         .chart-subtitle { font-size: 12px; color: #888; margin-bottom: 18px; }
         .chart-container { position: relative; height: 260px; }
         .chart-container-tall { position: relative; height: 280px; }
-
-        /* Logout */
         .logout-section { text-align: center; padding: 24px; }
         .btn-logout { background: #e74c3c; color: white; padding: 11px 32px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-block; }
         .btn-logout:hover { background: #c0392b; }
-
-        /* ══ Filter Popup Modal ══ */
-        .filter-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45); z-index: 2000;
-            align-items: center; justify-content: center;
-        }
+        .filter-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 2000; align-items: center; justify-content: center; }
         .filter-overlay.active { display: flex; }
-
-        .filter-popup {
-            background: white; border-radius: 16px;
-            width: 100%; max-width: 520px;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.25);
-            overflow: hidden;
-            animation: popIn 0.2s ease;
-        }
-
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
-            to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .filter-popup-header {
-            background: linear-gradient(135deg, #1976d2, #42a5f5);
-            padding: 18px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .filter-popup { background: white; border-radius: 16px; width: 100%; max-width: 520px; box-shadow: 0 24px 64px rgba(0,0,0,0.25); overflow: hidden; animation: popIn 0.2s ease; }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .filter-popup-header { background: linear-gradient(135deg, #1976d2, #42a5f5); padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
         .filter-popup-header h3 { color: white; font-size: 16px; font-weight: 700; }
         .filter-popup-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
-
         .filter-popup-body { padding: 24px; }
-
-        .filter-section {
-            margin-bottom: 22px;
-        }
-
-        .filter-section-title {
-            font-size: 11px; font-weight: 800; color: #1976d2;
-            text-transform: uppercase; letter-spacing: 0.8px;
-            margin-bottom: 12px; padding-bottom: 6px;
-            border-bottom: 2px solid #e3f2fd;
-            display: flex; align-items: center; gap: 6px;
-        }
-
+        .filter-section { margin-bottom: 22px; }
+        .filter-section-title { font-size: 11px; font-weight: 800; color: #1976d2; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #e3f2fd; }
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .filter-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
         .fgroup { display: flex; flex-direction: column; gap: 5px; }
         .fgroup.full { grid-column: 1 / -1; }
-
-        .fgroup label {
-            font-size: 11px; font-weight: 700; color: #666;
-            text-transform: uppercase; letter-spacing: 0.4px;
-        }
-
-        .fgroup input, .fgroup select {
-            padding: 9px 12px; border: 2px solid #e8e8e8;
-            border-radius: 8px; font-size: 13px;
-            font-family: 'Segoe UI', sans-serif; outline: none; background: #fafafa;
-        }
+        .fgroup label { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.4px; }
+        .fgroup input, .fgroup select { padding: 9px 12px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 13px; font-family: 'Segoe UI', sans-serif; outline: none; background: #fafafa; }
         .fgroup input:focus, .fgroup select:focus { border-color: #1976d2; background: white; }
-
-        .filter-popup-footer {
-            padding: 16px 24px;
-            background: #f8f9ff;
-            border-top: 1px solid #eef0f8;
-            display: flex; gap: 10px; justify-content: flex-end;
-        }
-
-        .btn-filter-apply {
-            padding: 10px 28px;
-            background: linear-gradient(135deg, #1976d2, #42a5f5);
-            color: white; border: none; border-radius: 8px;
-            font-size: 14px; font-weight: 700; cursor: pointer;
-        }
-        .btn-filter-apply:hover { opacity: 0.9; }
-
-        .btn-filter-reset {
-            padding: 10px 20px; background: #f0f0f0; color: #555;
-            border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        }
-        .btn-filter-reset:hover { background: #e0e0e0; }
-
-        .btn-filter-cancel {
-            padding: 10px 20px; background: white; color: #888;
-            border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        }
-        .btn-filter-cancel:hover { border-color: #bbb; color: #555; }
-
-        /* ══ Update Modals ══ */
+        .filter-popup-footer { padding: 16px 24px; background: #f8f9ff; border-top: 1px solid #eef0f8; display: flex; gap: 10px; justify-content: flex-end; }
+        .btn-filter-apply { padding: 10px 28px; background: linear-gradient(135deg, #1976d2, #42a5f5); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .btn-filter-reset { padding: 10px 20px; background: #f0f0f0; color: #555; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .btn-filter-cancel { padding: 10px 20px; background: white; color: #888; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 14px; width: 100%; max-width: 580px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
@@ -246,7 +93,7 @@
         .form-group { margin-bottom: 4px; }
         .form-group.full { grid-column: 1 / -1; }
         .form-group label { display: block; font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px 13px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 13px; outline: none; font-family: 'Segoe UI', sans-serif; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 13px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 13px; outline: none; font-family: 'Segoe UI', sans-serif; background: white; }
         .form-group input:focus, .form-group select:focus { border-color: #1976d2; }
         .field-error { display: none; color: #c62828; font-size: 11px; margin-top: 3px; margin-bottom: 4px; }
         .modal-footer { padding: 8px 28px 24px; display: flex; gap: 10px; }
@@ -265,7 +112,6 @@
     <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
     <div th:if="${errorMsg}"   class="alert alert-error"   th:text="${errorMsg}"></div>
 
-    <!-- Tab Navigation -->
     <div class="tab-nav">
         <button class="tab-btn active" id="tab-cutting-btn" onclick="switchTab('cutting')">
             <span class="tab-icon">&#9986;</span>Production Cutting Records
@@ -275,7 +121,7 @@
         </button>
     </div>
 
-    <!-- ══ Production Cutting Records Tab ══ -->
+    <!-- Production Cutting Records Tab -->
     <div class="tab-content active" id="tab-cutting">
         <div class="card">
             <div class="card-header">
@@ -288,59 +134,75 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Active filter strip -->
             <div class="filter-active-strip" id="c-filter-strip">
                 <span id="c-strip-text"></span>
                 <button class="btn-strip-reset" onclick="resetFilter('cutting')">&#10006; Clear Filters</button>
             </div>
-
             <table th:if="${cuttingJobs != null and !cuttingJobs.isEmpty()}">
                 <thead>
                 <tr>
-                    <th>ID</th><th>Job ID</th><th>Fabric Lot</th><th>Material</th>
-                    <th>Operator</th><th>Overlap (mm)</th><th>Layers</th><th>Method</th>
-                    <th>Shift</th><th>Actual Waste %</th><th>Predicted %</th>
-                    <th>Marker Eff. %</th><th>Status</th><th>Job Date</th><th>Actions</th>
+                    <th>Fabric Type</th>
+                    <th>Fabric Pattern</th>
+                    <th>Cutting Method</th>
+                    <th>Pattern Complexity</th>
+                    <th>Operator Experience</th>
+                    <th>Marker Loss %</th>
+                    <th>No. of Layers</th>
+                    <th>Fabric GSM</th>
+                    <th>Shift</th>
+                    <th>Overlap (mm)</th>
+                    <th>Marker Eff. %</th>
+                    <th>Predicted Waste %</th>
+                    <th>Actual Waste %</th>
+                    <th>Job Date</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="cutting-tbody">
                 <tr th:each="j : ${cuttingJobs}"
                     th:data-jobdate="${j.jobDate}"
+                    th:data-fabrictype="${j.fabricType}"
                     th:data-method="${j.cuttingMethod}"
-                    th:data-status="${j.status}"
-                    th:data-operator="${j.operatorId}">
-                    <td th:text="${j.id}"></td>
-                    <td th:text="${j.jobId}"></td>
-                    <td th:text="${j.fabricLotId}"></td>
-                    <td th:text="${j.materialId}"></td>
-                    <td th:text="${j.operatorId}"></td>
-                    <td th:text="${j.cuttingOverlapMm}"></td>
-                    <td th:text="${j.noOfLayers}"></td>
+                    th:data-shift="${j.shift}">
+                    <td th:text="${j.fabricType}"></td>
+                    <td th:text="${j.fabricPattern}"></td>
                     <td th:text="${j.cuttingMethod}"></td>
+                    <td th:text="${j.patternComplexity}"></td>
+                    <td th:text="${j.operatorExperience}"></td>
+                    <td th:text="${j.markerLossPct}"></td>
+                    <td th:text="${j.noOfLayers}"></td>
+                    <td th:text="${j.fabricGsm}"></td>
                     <td th:text="${j.shift}"></td>
-                    <td th:text="${j.actualWastagePct}"></td>
-                    <td th:text="${j.predictedWastePct}"></td>
+                    <td th:text="${j.cuttingOverlapMm}"></td>
                     <td th:text="${j.markerEfficiencyPct}"></td>
-                    <td>
-                            <span th:class="${j.status == 'Completed'} ? 'badge badge-completed' : (${j.status == 'In Progress'} ? 'badge badge-progress' : 'badge badge-cancelled')"
-                                  th:text="${j.status}"></span>
-                    </td>
+                    <td th:text="${j.predictedWastePct}"></td>
+                    <td th:text="${j.actualWastagePct}"></td>
                     <td th:text="${j.jobDate}"></td>
+                    <td th:text="${j.notes}"></td>
                     <td>
                         <div class="actions-cell">
                             <button class="btn-update"
-                                    th:data-id="${j.id}" th:data-jobid="${j.jobId}"
-                                    th:data-fabriclotid="${j.fabricLotId}" th:data-materialid="${j.materialId}"
-                                    th:data-operatorid="${j.operatorId}" th:data-overlap="${j.cuttingOverlapMm}"
-                                    th:data-layers="${j.noOfLayers}" th:data-method="${j.cuttingMethod}"
-                                    th:data-shift="${j.shift}" th:data-actualwaste="${j.actualWastagePct}"
-                                    th:data-predictedwaste="${j.predictedWastePct}" th:data-markereff="${j.markerEfficiencyPct}"
-                                    th:data-status="${j.status}" th:data-jobdate="${j.jobDate}"
+                                    th:data-id="${j.id}"
+                                    th:data-fabrictype="${j.fabricType}"
+                                    th:data-fabricpattern="${j.fabricPattern}"
+                                    th:data-cuttingmethod="${j.cuttingMethod}"
+                                    th:data-markerloss="${j.markerLossPct}"
+                                    th:data-patterncomplexity="${j.patternComplexity}"
+                                    th:data-operatorexperience="${j.operatorExperience}"
+                                    th:data-predictedwaste="${j.predictedWastePct}"
+                                    th:data-nooflayers="${j.noOfLayers}"
+                                    th:data-fabricgsm="${j.fabricGsm}"
+                                    th:data-shift="${j.shift}"
+                                    th:data-overlapmm="${j.cuttingOverlapMm}"
+                                    th:data-markereff="${j.markerEfficiencyPct}"
+                                    th:data-actualwaste="${j.actualWastagePct}"
+                                    th:data-jobdate="${j.jobDate}"
+                                    th:data-notes="${j.notes}"
                                     onclick="openCuttingUpdateModal(this)">Update
                             </button>
                             <form th:action="@{'/user/historical/cutting/delete/' + ${j.id}}" method="post" style="margin:0"
-                                  onsubmit="return confirm('Are you sure you want to delete this production cutting record?')">
+                                  onsubmit="return confirm('Are you sure you want to delete this record?')">
                                 <button type="submit" class="btn-delete">Delete</button>
                             </form>
                         </div>
@@ -348,7 +210,7 @@
                 </tr>
                 </tbody>
             </table>
-            <div class="no-filter-results" id="c-no-results">&#9888; No records match the selected filters. Try different values or clear filters.</div>
+            <div class="no-filter-results" id="c-no-results">&#9888; No records match the selected filters.</div>
             <div class="no-data" th:if="${cuttingJobs == null or cuttingJobs.isEmpty()}">No production cutting records found.</div>
         </div>
 
@@ -356,18 +218,18 @@
         <div class="charts-grid" th:if="${cuttingJobs != null and !cuttingJobs.isEmpty()}">
             <div class="chart-card full-width">
                 <div class="chart-title">Actual vs Predicted Fabric Wastage</div>
-                <div class="chart-subtitle">Comparison of actual and predicted waste percentages across all production cutting records</div>
+                <div class="chart-subtitle">Comparison across all production cutting records</div>
                 <div class="chart-container-tall"><canvas id="wasteLineChart"></canvas></div>
             </div>
             <div class="chart-card full-width">
-                <div class="chart-title">Marker Efficiency by Job</div>
-                <div class="chart-subtitle">Marker efficiency per production job — green &#8805; 85%, orange &#8805; 78%, red &lt; 78%</div>
+                <div class="chart-title">Marker Efficiency per Record</div>
+                <div class="chart-subtitle">Green &#8805; 85%, orange &#8805; 78%, red &lt; 78%</div>
                 <div class="chart-container"><canvas id="markerEffChart"></canvas></div>
             </div>
         </div>
     </div>
 
-    <!-- ══ Prediction Model Analytics Tab ══ -->
+    <!-- Prediction Model Analytics Tab -->
     <div class="tab-content" id="tab-performance">
         <div class="card">
             <div class="card-header">
@@ -380,18 +242,13 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Active filter strip -->
             <div class="filter-active-strip" id="p-filter-strip">
                 <span id="p-strip-text"></span>
                 <button class="btn-strip-reset" onclick="resetFilter('performance')">&#10006; Clear Filters</button>
             </div>
-
             <table th:if="${modelPerformances != null and !modelPerformances.isEmpty()}">
                 <thead>
-                <tr>
-                    <th>ID</th><th>Recorded At</th><th>MSE Error</th><th>Health Status</th><th>Actions</th>
-                </tr>
+                <tr><th>ID</th><th>Recorded At</th><th>MSE Error</th><th>Health Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="perf-tbody">
                 <tr th:each="p : ${modelPerformances}"
@@ -410,11 +267,12 @@
                             <button class="btn-update"
                                     th:data-id="${p.id}"
                                     th:data-recordedat="${#temporals.format(p.recordedAt, 'yyyy-MM-dd') + 'T' + #temporals.format(p.recordedAt, 'HH:mm')}"
-                                    th:data-mseerror="${p.mseError}" th:data-healthstatus="${p.healthStatus}"
+                                    th:data-mseerror="${p.mseError}"
+                                    th:data-healthstatus="${p.healthStatus}"
                                     onclick="openPerfUpdateModal(this)">Update
                             </button>
                             <form th:action="@{'/user/historical/performance/delete/' + ${p.id}}" method="post" style="margin:0"
-                                  onsubmit="return confirm('Are you sure you want to delete this performance record?')">
+                                  onsubmit="return confirm('Are you sure you want to delete this record?')">
                                 <button type="submit" class="btn-delete">Delete</button>
                             </form>
                         </div>
@@ -422,15 +280,13 @@
                 </tr>
                 </tbody>
             </table>
-            <div class="no-filter-results" id="p-no-results">&#9888; No records match the selected filters. Try different values or clear filters.</div>
+            <div class="no-filter-results" id="p-no-results">&#9888; No records match the selected filters.</div>
             <div class="no-data" th:if="${modelPerformances == null or modelPerformances.isEmpty()}">No model performance records found.</div>
         </div>
-
-        <!-- MSE Chart -->
         <div class="charts-grid" th:if="${modelPerformances != null and !modelPerformances.isEmpty()}">
             <div class="chart-card full-width">
                 <div class="chart-title">Model MSE Error Over Time</div>
-                <div class="chart-subtitle">Prediction model error trend — green = healthy, orange = warning, red = critical</div>
+                <div class="chart-subtitle">Green = healthy, orange = warning, red = critical</div>
                 <div class="chart-container-tall"><canvas id="mseLineChart"></canvas></div>
             </div>
         </div>
@@ -441,31 +297,21 @@
     <a href="/user/logout" class="btn-logout">Logout</a>
 </div>
 
-<!-- ══ Cutting Filter Popup ══ -->
+<!-- Cutting Filter Popup -->
 <div class="filter-overlay" id="cutting-filter-overlay">
     <div class="filter-popup">
         <div class="filter-popup-header">
-            <h3>&#9878; Filter Production Cutting Records</h3>
+            <h3>&#128269; Search Production Cutting Records</h3>
             <button class="filter-popup-close" onclick="closeFilterPopup('cutting')">&#x2715;</button>
         </div>
         <div class="filter-popup-body">
-
             <div class="filter-section">
                 <div class="filter-section-title">&#128197; Date Filters</div>
                 <div class="filter-grid">
-                    <div class="fgroup">
-                        <label>Single Date</label>
-                        <input type="date" id="c-single-date" />
-                    </div>
+                    <div class="fgroup"><label>Single Date</label><input type="date" id="c-single-date" /></div>
                     <div class="fgroup"></div>
-                    <div class="fgroup">
-                        <label>From Date</label>
-                        <input type="date" id="c-from-date" />
-                    </div>
-                    <div class="fgroup">
-                        <label>To Date</label>
-                        <input type="date" id="c-to-date" />
-                    </div>
+                    <div class="fgroup"><label>From Date</label><input type="date" id="c-from-date" /></div>
+                    <div class="fgroup"><label>To Date</label><input type="date" id="c-to-date" /></div>
                     <div class="fgroup">
                         <label>Month</label>
                         <select id="c-month">
@@ -482,76 +328,49 @@
                         <label>Year</label>
                         <select id="c-year">
                             <option value="">All Years</option>
-                            <option value="2023">2023</option><option value="2024">2024</option>
-                            <option value="2025">2025</option><option value="2026">2026</option>
+                            <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
                         </select>
                     </div>
                 </div>
             </div>
-
             <div class="filter-section">
                 <div class="filter-section-title">&#128269; Search by Field</div>
                 <div class="filter-grid">
-                    <div class="fgroup">
-                        <label>Cutting Method</label>
-                        <select id="c-filter-method">
-                            <option value="">All Methods</option>
-                            <option value="Straight Knife">Straight Knife</option>
-                            <option value="Band Knife">Band Knife</option>
-                            <option value="Rotary Knife">Rotary Knife</option>
-                            <option value="Die Cutting">Die Cutting</option>
+                    <div class="fgroup"><label>Fabric Type</label><input type="text" id="c-filter-fabric" placeholder="e.g. Cotton" /></div>
+                    <div class="fgroup"><label>Cutting Method</label><input type="text" id="c-filter-method" placeholder="e.g. Manual" /></div>
+                    <div class="fgroup"><label>Shift</label>
+                        <select id="c-filter-shift">
+                            <option value="">All Shifts</option>
+                            <option value="DAY">Day</option>
+                            <option value="NIGHT">Night</option>
                         </select>
-                    </div>
-                    <div class="fgroup">
-                        <label>Status</label>
-                        <select id="c-filter-status">
-                            <option value="">All Statuses</option>
-                            <option value="Completed">Completed</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="fgroup full">
-                        <label>Operator ID</label>
-                        <input type="text" id="c-filter-operator" placeholder="e.g. OP-101" />
                     </div>
                 </div>
             </div>
-
         </div>
         <div class="filter-popup-footer">
             <button class="btn-filter-cancel" onclick="closeFilterPopup('cutting')">Cancel</button>
             <button class="btn-filter-reset"  onclick="resetFilter('cutting')">&#10006; Clear All</button>
-            <button class="btn-filter-apply"  onclick="applyFilter('cutting')">&#128269; Apply Filters</button>
+            <button class="btn-filter-apply"  onclick="applyFilter('cutting')">&#128269; Apply</button>
         </div>
     </div>
 </div>
 
-<!-- ══ Performance Filter Popup ══ -->
+<!-- Performance Filter Popup -->
 <div class="filter-overlay" id="performance-filter-overlay">
     <div class="filter-popup">
         <div class="filter-popup-header">
-            <h3>&#9878; Filter Model Analytics Records</h3>
+            <h3>&#128269; Search Model Analytics Records</h3>
             <button class="filter-popup-close" onclick="closeFilterPopup('performance')">&#x2715;</button>
         </div>
         <div class="filter-popup-body">
-
             <div class="filter-section">
                 <div class="filter-section-title">&#128197; Date Filters</div>
                 <div class="filter-grid">
-                    <div class="fgroup">
-                        <label>Single Date</label>
-                        <input type="date" id="p-single-date" />
-                    </div>
+                    <div class="fgroup"><label>Single Date</label><input type="date" id="p-single-date" /></div>
                     <div class="fgroup"></div>
-                    <div class="fgroup">
-                        <label>From Date</label>
-                        <input type="date" id="p-from-date" />
-                    </div>
-                    <div class="fgroup">
-                        <label>To Date</label>
-                        <input type="date" id="p-to-date" />
-                    </div>
+                    <div class="fgroup"><label>From Date</label><input type="date" id="p-from-date" /></div>
+                    <div class="fgroup"><label>To Date</label><input type="date" id="p-to-date" /></div>
                     <div class="fgroup">
                         <label>Month</label>
                         <select id="p-month">
@@ -568,13 +387,11 @@
                         <label>Year</label>
                         <select id="p-year">
                             <option value="">All Years</option>
-                            <option value="2023">2023</option><option value="2024">2024</option>
-                            <option value="2025">2025</option><option value="2026">2026</option>
+                            <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
                         </select>
                     </div>
                 </div>
             </div>
-
             <div class="filter-section">
                 <div class="filter-section-title">&#128269; Search by Field</div>
                 <div class="filter-grid">
@@ -587,27 +404,20 @@
                             <option value="Critical">Critical</option>
                         </select>
                     </div>
-                    <div class="fgroup">
-                        <label>MSE Error Min</label>
-                        <input type="number" id="p-filter-mse-min" step="0.0001" placeholder="e.g. 0.01" />
-                    </div>
-                    <div class="fgroup">
-                        <label>MSE Error Max</label>
-                        <input type="number" id="p-filter-mse-max" step="0.0001" placeholder="e.g. 0.05" />
-                    </div>
+                    <div class="fgroup"><label>MSE Min</label><input type="number" id="p-filter-mse-min" step="0.0001" placeholder="e.g. 0.01" /></div>
+                    <div class="fgroup"><label>MSE Max</label><input type="number" id="p-filter-mse-max" step="0.0001" placeholder="e.g. 0.05" /></div>
                 </div>
             </div>
-
         </div>
         <div class="filter-popup-footer">
             <button class="btn-filter-cancel" onclick="closeFilterPopup('performance')">Cancel</button>
             <button class="btn-filter-reset"  onclick="resetFilter('performance')">&#10006; Clear All</button>
-            <button class="btn-filter-apply"  onclick="applyFilter('performance')">&#128269; Apply Filters</button>
+            <button class="btn-filter-apply"  onclick="applyFilter('performance')">&#128269; Apply</button>
         </div>
     </div>
 </div>
 
-<!-- ══ Update Cutting Modal ══ -->
+<!-- Update Cutting Modal -->
 <div class="modal-overlay" id="cuttingModal">
     <div class="modal">
         <div class="modal-header">
@@ -617,19 +427,27 @@
         <form id="cuttingUpdateForm" method="post" novalidate>
             <div class="modal-body">
                 <div class="form-row">
-                    <div class="form-group"><label>Job ID</label><input type="text" id="c-jobId" name="jobId" /><span class="field-error" id="err-c-jobId"></span></div>
-                    <div class="form-group"><label>Fabric Lot ID</label><input type="text" id="c-fabricLotId" name="fabricLotId" /><span class="field-error" id="err-c-fabricLotId"></span></div>
-                    <div class="form-group"><label>Material ID</label><input type="text" id="c-materialId" name="materialId" /><span class="field-error" id="err-c-materialId"></span></div>
-                    <div class="form-group"><label>Operator ID</label><input type="text" id="c-operatorId" name="operatorId" /><span class="field-error" id="err-c-operatorId"></span></div>
-                    <div class="form-group"><label>Cutting Overlap (mm)</label><input type="number" step="0.1" id="c-cuttingOverlapMm" name="cuttingOverlapMm" /><span class="field-error" id="err-c-cuttingOverlapMm"></span></div>
+                    <div class="form-group"><label>Fabric Type</label><input type="text" id="c-fabricType" name="fabricType" /><span class="field-error" id="err-c-fabricType"></span></div>
+                    <div class="form-group"><label>Fabric Pattern</label><input type="text" id="c-fabricPattern" name="fabricPattern" /></div>
+                    <div class="form-group"><label>Cutting Method</label><input type="text" id="c-cuttingMethod" name="cuttingMethod" /></div>
+                    <div class="form-group"><label>Marker Loss %</label><input type="number" step="0.01" id="c-markerLossPct" name="markerLossPct" /></div>
+                    <div class="form-group"><label>Pattern Complexity</label><input type="number" step="0.01" id="c-patternComplexity" name="patternComplexity" /></div>
+                    <div class="form-group"><label>Operator Experience</label><input type="number" step="0.01" id="c-operatorExperience" name="operatorExperience" /></div>
+                    <div class="form-group"><label>Predicted Waste %</label><input type="number" step="0.01" id="c-predictedWastePct" name="predictedWastePct" /></div>
                     <div class="form-group"><label>No. of Layers</label><input type="number" id="c-noOfLayers" name="noOfLayers" /><span class="field-error" id="err-c-noOfLayers"></span></div>
-                    <div class="form-group"><label>Cutting Method</label><select id="c-cuttingMethod" name="cuttingMethod"><option value="Straight Knife">Straight Knife</option><option value="Band Knife">Band Knife</option><option value="Rotary Knife">Rotary Knife</option><option value="Die Cutting">Die Cutting</option></select><span class="field-error" id="err-c-cuttingMethod"></span></div>
-                    <div class="form-group"><label>Shift</label><select id="c-shift" name="shift"><option value="Morning">Morning</option><option value="Afternoon">Afternoon</option><option value="Night">Night</option></select><span class="field-error" id="err-c-shift"></span></div>
-                    <div class="form-group"><label>Actual Wastage (%)</label><input type="number" step="0.01" id="c-actualWastagePct" name="actualWastagePct" /><span class="field-error" id="err-c-actualWastagePct"></span></div>
-                    <div class="form-group"><label>Predicted Waste (%)</label><input type="number" step="0.01" id="c-predictedWastePct" name="predictedWastePct" /><span class="field-error" id="err-c-predictedWastePct"></span></div>
-                    <div class="form-group"><label>Marker Efficiency (%)</label><input type="number" step="0.01" id="c-markerEfficiencyPct" name="markerEfficiencyPct" /><span class="field-error" id="err-c-markerEfficiencyPct"></span></div>
-                    <div class="form-group"><label>Status</label><select id="c-status" name="status"><option value="Completed">Completed</option><option value="In Progress">In Progress</option><option value="Cancelled">Cancelled</option></select><span class="field-error" id="err-c-status"></span></div>
-                    <div class="form-group full"><label>Job Date</label><input type="date" id="c-jobDate" name="jobDate" /><span class="field-error" id="err-c-jobDate"></span></div>
+                    <div class="form-group"><label>Fabric GSM</label><input type="number" id="c-fabricGsm" name="fabricGsm" /></div>
+                    <div class="form-group">
+                        <label>Shift</label>
+                        <select id="c-shift" name="shift">
+                            <option value="DAY">Day</option>
+                            <option value="NIGHT">Night</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Cutting Overlap (mm)</label><input type="number" id="c-cuttingOverlapMm" name="cuttingOverlapMm" /></div>
+                    <div class="form-group"><label>Marker Efficiency %</label><input type="number" step="0.01" id="c-markerEfficiencyPct" name="markerEfficiencyPct" /><span class="field-error" id="err-c-markerEfficiencyPct"></span></div>
+                    <div class="form-group"><label>Actual Wastage %</label><input type="number" step="0.01" id="c-actualWastagePct" name="actualWastagePct" /><span class="field-error" id="err-c-actualWastagePct"></span></div>
+                    <div class="form-group"><label>Job Date</label><input type="date" id="c-jobDate" name="jobDate" /><span class="field-error" id="err-c-jobDate"></span></div>
+                    <div class="form-group full"><label>Notes</label><input type="text" id="c-notes" name="notes" /></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -640,7 +458,7 @@
     </div>
 </div>
 
-<!-- ══ Update Performance Modal ══ -->
+<!-- Update Performance Modal -->
 <div class="modal-overlay" id="perfModal">
     <div class="modal">
         <div class="modal-header">
@@ -652,7 +470,14 @@
                 <div class="form-row">
                     <div class="form-group full"><label>Recorded At</label><input type="datetime-local" id="p-recordedAt" name="recordedAt" /><span class="field-error" id="err-p-recordedAt"></span></div>
                     <div class="form-group"><label>MSE Error</label><input type="number" step="0.0001" id="p-mseError" name="mseError" /><span class="field-error" id="err-p-mseError"></span></div>
-                    <div class="form-group"><label>Health Status</label><select id="p-healthStatus" name="healthStatus"><option value="Healthy">Healthy</option><option value="Warning">Warning</option><option value="Critical">Critical</option></select><span class="field-error" id="err-p-healthStatus"></span></div>
+                    <div class="form-group">
+                        <label>Health Status</label>
+                        <select id="p-healthStatus" name="healthStatus">
+                            <option value="Healthy">Healthy</option>
+                            <option value="Warning">Warning</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -664,7 +489,7 @@
 </div>
 
 <script th:inline="javascript">
-    const jobLabels      = /*[[${cuttingJobs.![jobId]}]]*/ [];
+    const chartLabels    = /*[[${cuttingJobs.![fabricType]}]]*/ [];
     const actualWaste    = /*[[${cuttingJobs.![actualWastagePct]}]]*/ [];
     const predictedWaste = /*[[${cuttingJobs.![predictedWastePct]}]]*/ [];
     const markerEff      = /*[[${cuttingJobs.![markerEfficiencyPct]}]]*/ [];
@@ -673,7 +498,6 @@
 </script>
 
 <script>
-    // ── Tab Switching ─────────────────────────────────────────────────────────
     function switchTab(tab) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -687,23 +511,15 @@
         buildCharts();
     });
 
-    // ── Filter Popup Open/Close ───────────────────────────────────────────────
-    function openFilterPopup(type) {
-        document.getElementById(type + '-filter-overlay').classList.add('active');
-    }
-    function closeFilterPopup(type) {
-        document.getElementById(type + '-filter-overlay').classList.remove('active');
-    }
-
-    // Close popup when clicking outside
+    function openFilterPopup(type)  { document.getElementById(type + '-filter-overlay').classList.add('active'); }
+    function closeFilterPopup(type) { document.getElementById(type + '-filter-overlay').classList.remove('active'); }
     document.addEventListener('click', function(e) {
-        ['cutting', 'performance'].forEach(type => {
+        ['cutting','performance'].forEach(type => {
             const overlay = document.getElementById(type + '-filter-overlay');
             if (e.target === overlay) closeFilterPopup(type);
         });
     });
 
-    // ── Apply Filter ──────────────────────────────────────────────────────────
     function applyFilter(type) {
         const isCutting = type === 'cutting';
         const prefix    = isCutting ? 'c' : 'p';
@@ -715,9 +531,9 @@
         const toDate     = document.getElementById(prefix + '-to-date').value;
         const month      = document.getElementById(prefix + '-month').value;
         const year       = document.getElementById(prefix + '-year').value;
-        const method     = isCutting ? document.getElementById('c-filter-method').value : '';
-        const status     = isCutting ? document.getElementById('c-filter-status').value : '';
-        const operator   = isCutting ? document.getElementById('c-filter-operator').value.trim().toLowerCase() : '';
+        const fabric     = isCutting ? document.getElementById('c-filter-fabric').value.trim().toLowerCase() : '';
+        const method     = isCutting ? document.getElementById('c-filter-method').value.trim().toLowerCase() : '';
+        const shift      = isCutting ? document.getElementById('c-filter-shift').value : '';
         const health     = !isCutting ? document.getElementById('p-filter-health').value : '';
         const mseMin     = !isCutting ? parseFloat(document.getElementById('p-filter-mse-min').value) : NaN;
         const mseMax     = !isCutting ? parseFloat(document.getElementById('p-filter-mse-max').value) : NaN;
@@ -727,20 +543,19 @@
 
         rows.forEach(row => {
             const rawDate   = isCutting ? row.getAttribute('data-jobdate') : row.getAttribute('data-recordedat');
-            const rowYear   = rawDate ? rawDate.substring(0, 4) : '';
-            const rowMonth  = rawDate ? rawDate.substring(5, 7) : '';
+            const rowYear   = rawDate ? rawDate.substring(0,4) : '';
+            const rowMonth  = rawDate ? rawDate.substring(5,7) : '';
             const rowDate   = rawDate ? new Date(rawDate) : null;
-            const rowMethod = row.getAttribute('data-method') || '';
-            const rowStatus = row.getAttribute('data-status') || '';
-            const rowOp     = (row.getAttribute('data-operator') || '').toLowerCase();
+            const rowFabric = (row.getAttribute('data-fabrictype') || '').toLowerCase();
+            const rowMethod = (row.getAttribute('data-method') || '').toLowerCase();
+            const rowShift  = row.getAttribute('data-shift') || '';
             const rowHealth = row.getAttribute('data-healthstatus') || '';
             const rowMse    = parseFloat(row.getAttribute('data-mseerror') || '0');
 
             let show = true;
 
-            if (singleDate) {
-                if (rawDate !== singleDate) show = false;
-            } else if (fromDate || toDate) {
+            if (singleDate) { if (rawDate !== singleDate) show = false; }
+            else if (fromDate || toDate) {
                 const from = fromDate ? new Date(fromDate) : null;
                 const to   = toDate   ? new Date(toDate)   : null;
                 if (from && rowDate && rowDate < from) show = false;
@@ -751,9 +566,9 @@
             }
 
             if (isCutting) {
-                if (method   && rowMethod !== method)      show = false;
-                if (status   && rowStatus !== status)      show = false;
-                if (operator && !rowOp.includes(operator)) show = false;
+                if (fabric && !rowFabric.includes(fabric))  show = false;
+                if (method && !rowMethod.includes(method))  show = false;
+                if (shift  && rowShift !== shift)            show = false;
             } else {
                 if (health           && rowHealth !== health) show = false;
                 if (!isNaN(mseMin)   && rowMse < mseMin)      show = false;
@@ -767,34 +582,31 @@
         document.getElementById(countId).textContent = visibleCount + ' Records Found';
         document.getElementById(prefix + '-no-results').style.display = visibleCount === 0 ? 'block' : 'none';
 
-        // Build active filter summary
         const activeFilters = [];
         if (singleDate)              activeFilters.push('Date: ' + singleDate);
-        else if (fromDate || toDate) activeFilters.push('Range: ' + (fromDate || '...') + ' → ' + (toDate || '...'));
-        else if (month || year)      activeFilters.push((month ? monthName(month) : '') + (month && year ? ' ' : '') + (year || ''));
-        if (method)   activeFilters.push('Method: ' + method);
-        if (status)   activeFilters.push('Status: ' + status);
-        if (operator) activeFilters.push('Operator: ' + operator.toUpperCase());
-        if (health)   activeFilters.push('Health: ' + health);
-        if (!isNaN(mseMin) || !isNaN(mseMax)) activeFilters.push('MSE: ' + (!isNaN(mseMin) ? mseMin : '0') + ' – ' + (!isNaN(mseMax) ? mseMax : '∞'));
+        else if (fromDate || toDate) activeFilters.push('Range: ' + (fromDate||'...') + ' → ' + (toDate||'...'));
+        else if (month || year)      activeFilters.push((month ? monthName(month) : '') + ' ' + (year||''));
+        if (fabric)  activeFilters.push('Fabric: ' + fabric);
+        if (method)  activeFilters.push('Method: ' + method);
+        if (shift)   activeFilters.push('Shift: '  + shift);
+        if (health)  activeFilters.push('Health: ' + health);
+        if (!isNaN(mseMin)||!isNaN(mseMax)) activeFilters.push('MSE: ' + (!isNaN(mseMin)?mseMin:'0') + ' – ' + (!isNaN(mseMax)?mseMax:'∞'));
 
-        const strip    = document.getElementById(prefix + '-filter-strip');
-        const stripTxt = document.getElementById(prefix + '-strip-text');
+        const strip     = document.getElementById(prefix + '-filter-strip');
+        const stripTxt  = document.getElementById(prefix + '-strip-text');
         const filterBtn = document.getElementById(prefix + '-filter-btn');
 
         if (activeFilters.length > 0) {
-            stripTxt.textContent = '&#128269; Active Filters: ' + activeFilters.join('  |  ');
+            stripTxt.textContent = 'Active Filters: ' + activeFilters.join('  |  ');
             strip.classList.add('visible');
             filterBtn.classList.add('active-filter');
         } else {
             strip.classList.remove('visible');
             filterBtn.classList.remove('active-filter');
         }
-
         closeFilterPopup(type);
     }
 
-    // ── Reset Filter ──────────────────────────────────────────────────────────
     function resetFilter(type) {
         const isCutting = type === 'cutting';
         const prefix    = isCutting ? 'c' : 'p';
@@ -807,38 +619,34 @@
         });
 
         if (isCutting) {
-            document.getElementById('c-filter-method').value   = '';
-            document.getElementById('c-filter-status').value   = '';
-            document.getElementById('c-filter-operator').value = '';
+            document.getElementById('c-filter-fabric').value = '';
+            document.getElementById('c-filter-method').value = '';
+            document.getElementById('c-filter-shift').value  = '';
         } else {
-            document.getElementById('p-filter-health').value   = '';
-            document.getElementById('p-filter-mse-min').value  = '';
-            document.getElementById('p-filter-mse-max').value  = '';
+            document.getElementById('p-filter-health').value  = '';
+            document.getElementById('p-filter-mse-min').value = '';
+            document.getElementById('p-filter-mse-max').value = '';
         }
 
         document.querySelectorAll('#' + tbodyId + ' tr').forEach(r => r.classList.remove('hidden-row'));
-        const total = document.querySelectorAll('#' + tbodyId + ' tr').length;
-        document.getElementById(countId).textContent = total + ' Records Found';
+        document.getElementById(countId).textContent = document.querySelectorAll('#' + tbodyId + ' tr').length + ' Records Found';
         document.getElementById(prefix + '-no-results').style.display = 'none';
         document.getElementById(prefix + '-filter-strip').classList.remove('visible');
         document.getElementById(prefix + '-filter-btn').classList.remove('active-filter');
-
         closeFilterPopup(type);
     }
 
     function monthName(m) {
-        const n = {'01':'January','02':'February','03':'March','04':'April','05':'May','06':'June',
-            '07':'July','08':'August','09':'September','10':'October','11':'November','12':'December'};
+        const n = {'01':'January','02':'February','03':'March','04':'April','05':'May','06':'June','07':'July','08':'August','09':'September','10':'October','11':'November','12':'December'};
         return n[m] || '';
     }
 
-    // ── Charts ────────────────────────────────────────────────────────────────
     function buildCharts() {
         const wasteCtx = document.getElementById('wasteLineChart');
-        if (wasteCtx && jobLabels.length > 0) {
+        if (wasteCtx && chartLabels.length > 0) {
             new Chart(wasteCtx, {
                 type: 'line',
-                data: { labels: jobLabels, datasets: [
+                data: { labels: chartLabels, datasets: [
                         { label: 'Actual Wastage (%)', data: actualWaste, borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.08)', borderWidth: 2.5, pointBackgroundColor: '#e74c3c', pointRadius: 5, pointHoverRadius: 7, tension: 0.35, fill: true },
                         { label: 'Predicted Wastage (%)', data: predictedWaste, borderColor: '#1976d2', backgroundColor: 'rgba(25,118,210,0.06)', borderWidth: 2.5, borderDash: [6,3], pointBackgroundColor: '#1976d2', pointRadius: 5, pointHoverRadius: 7, tension: 0.35, fill: true }
                     ]},
@@ -850,11 +658,12 @@
         }
 
         const markerCtx = document.getElementById('markerEffChart');
-        if (markerCtx && jobLabels.length > 0) {
+        if (markerCtx && chartLabels.length > 0) {
             new Chart(markerCtx, {
                 type: 'bar',
-                data: { labels: jobLabels, datasets: [{ label: 'Marker Efficiency (%)', data: markerEff, backgroundColor: markerEff.map(v => v >= 85 ? 'rgba(46,204,113,0.75)' : v >= 78 ? 'rgba(243,156,18,0.75)' : 'rgba(231,76,60,0.75)'), borderColor: markerEff.map(v => v >= 85 ? '#27ae60' : v >= 78 ? '#e67e22' : '#c0392b'), borderWidth: 1.5, borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Efficiency: ' + ctx.parsed.y.toFixed(2) + '%' } } },
+                data: { labels: chartLabels, datasets: [{ label: 'Marker Efficiency (%)', data: markerEff, backgroundColor: markerEff.map(v => v >= 85 ? 'rgba(46,204,113,0.75)' : v >= 78 ? 'rgba(243,156,18,0.75)' : 'rgba(231,76,60,0.75)'), borderColor: markerEff.map(v => v >= 85 ? '#27ae60' : v >= 78 ? '#e67e22' : '#c0392b'), borderWidth: 1.5, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Efficiency: ' + ctx.parsed.y.toFixed(2) + '%' } } },
                     scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { grid: { color: '#f0f0f0' }, min: 70, max: 100, ticks: { font: { size: 11 }, callback: v => v + '%' }, title: { display: true, text: 'Efficiency (%)', font: { size: 12 } } } }
                 }
             });
@@ -865,32 +674,35 @@
             new Chart(mseCtx, {
                 type: 'line',
                 data: { labels: perfLabels, datasets: [{ label: 'MSE Error', data: mseErrors, borderColor: '#9c27b0', backgroundColor: 'rgba(156,39,176,0.08)', borderWidth: 2.5, pointBackgroundColor: mseErrors.map(v => v <= 0.025 ? '#27ae60' : v <= 0.04 ? '#f39c12' : '#e74c3c'), pointRadius: 6, pointHoverRadius: 8, tension: 0.35, fill: true }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'MSE: ' + ctx.parsed.y.toFixed(4) } } },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'MSE: ' + ctx.parsed.y.toFixed(4) } } },
                     scales: { x: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 } } }, y: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 } }, title: { display: true, text: 'MSE Error', font: { size: 12 } } } }
                 }
             });
         }
     }
 
-    // ── Update Modals ─────────────────────────────────────────────────────────
     function openCuttingUpdateModal(btn) {
-        document.getElementById('c-jobId').value               = btn.getAttribute('data-jobid');
-        document.getElementById('c-fabricLotId').value         = btn.getAttribute('data-fabriclotid');
-        document.getElementById('c-materialId').value          = btn.getAttribute('data-materialid');
-        document.getElementById('c-operatorId').value          = btn.getAttribute('data-operatorid');
-        document.getElementById('c-cuttingOverlapMm').value    = btn.getAttribute('data-overlap');
-        document.getElementById('c-noOfLayers').value          = btn.getAttribute('data-layers');
-        document.getElementById('c-cuttingMethod').value       = btn.getAttribute('data-method');
-        document.getElementById('c-shift').value               = btn.getAttribute('data-shift');
-        document.getElementById('c-actualWastagePct').value    = btn.getAttribute('data-actualwaste');
-        document.getElementById('c-predictedWastePct').value   = btn.getAttribute('data-predictedwaste');
-        document.getElementById('c-markerEfficiencyPct').value = btn.getAttribute('data-markereff');
-        document.getElementById('c-status').value              = btn.getAttribute('data-status');
-        document.getElementById('c-jobDate').value             = btn.getAttribute('data-jobdate');
-        document.getElementById('cuttingUpdateForm').action    = '/user/historical/cutting/update/' + btn.getAttribute('data-id');
+        document.getElementById('c-fabricType').value         = btn.getAttribute('data-fabrictype') || '';
+        document.getElementById('c-fabricPattern').value      = btn.getAttribute('data-fabricpattern') || '';
+        document.getElementById('c-cuttingMethod').value      = btn.getAttribute('data-cuttingmethod') || '';
+        document.getElementById('c-markerLossPct').value      = btn.getAttribute('data-markerloss') || '';
+        document.getElementById('c-patternComplexity').value  = btn.getAttribute('data-patterncomplexity') || '';
+        document.getElementById('c-operatorExperience').value = btn.getAttribute('data-operatorexperience') || '';
+        document.getElementById('c-predictedWastePct').value  = btn.getAttribute('data-predictedwaste') || '';
+        document.getElementById('c-noOfLayers').value         = btn.getAttribute('data-nooflayers') || '';
+        document.getElementById('c-fabricGsm').value          = btn.getAttribute('data-fabricgsm') || '';
+        document.getElementById('c-shift').value              = btn.getAttribute('data-shift') || '';
+        document.getElementById('c-cuttingOverlapMm').value   = btn.getAttribute('data-overlapmm') || '';
+        document.getElementById('c-markerEfficiencyPct').value = btn.getAttribute('data-markereff') || '';
+        document.getElementById('c-actualWastagePct').value   = btn.getAttribute('data-actualwaste') || '';
+        document.getElementById('c-jobDate').value            = btn.getAttribute('data-jobdate') || '';
+        document.getElementById('c-notes').value              = btn.getAttribute('data-notes') || '';
+        document.getElementById('cuttingUpdateForm').action   = '/user/historical/cutting/update/' + btn.getAttribute('data-id');
         document.getElementById('cuttingModal').classList.add('active');
     }
-    function closeCuttingModal() { document.getElementById('cuttingModal').classList.remove('active'); clearErrors('c'); }
+    function closeCuttingModal() { document.getElementById('cuttingModal').classList.remove('active'); }
+    document.getElementById('cuttingModal').addEventListener('click', function(e) { if (e.target === this) closeCuttingModal(); });
 
     function openPerfUpdateModal(btn) {
         document.getElementById('p-recordedAt').value    = btn.getAttribute('data-recordedat');
@@ -899,40 +711,16 @@
         document.getElementById('perfUpdateForm').action = '/user/historical/performance/update/' + btn.getAttribute('data-id');
         document.getElementById('perfModal').classList.add('active');
     }
-    function closePerfModal() { document.getElementById('perfModal').classList.remove('active'); clearErrors('p'); }
-
-    document.getElementById('cuttingModal').addEventListener('click', function(e) { if (e.target === this) closeCuttingModal(); });
+    function closePerfModal() { document.getElementById('perfModal').classList.remove('active'); }
     document.getElementById('perfModal').addEventListener('click', function(e) { if (e.target === this) closePerfModal(); });
 
-    // ── Validation ────────────────────────────────────────────────────────────
     function showError(id, msg) { const el = document.getElementById(id); if (el) { el.textContent = msg; el.style.display = 'block'; } }
-    function clearErrors(prefix) {
-        document.querySelectorAll('.field-error').forEach(el => {
-            if (el.id.startsWith('err-' + prefix)) { el.textContent = ''; el.style.display = 'none'; }
-        });
-    }
+    function clearErrors(prefix) { document.querySelectorAll('.field-error').forEach(el => { if (el.id.startsWith('err-' + prefix)) { el.textContent = ''; el.style.display = 'none'; } }); }
 
     function validateCuttingForm() {
         clearErrors('c'); let valid = true;
-        const fields = [
-            { id: 'c-jobId', label: 'Job ID', type: 'text' }, { id: 'c-fabricLotId', label: 'Fabric Lot ID', type: 'text' },
-            { id: 'c-materialId', label: 'Material ID', type: 'text' }, { id: 'c-operatorId', label: 'Operator ID', type: 'text' },
-            { id: 'c-cuttingOverlapMm', label: 'Cutting Overlap', type: 'number', min: 0 },
-            { id: 'c-noOfLayers', label: 'No. of Layers', type: 'integer', min: 1 },
-            { id: 'c-actualWastagePct', label: 'Actual Wastage %', type: 'number', min: 0, max: 100 },
-            { id: 'c-predictedWastePct', label: 'Predicted Waste %', type: 'number', min: 0, max: 100 },
-            { id: 'c-markerEfficiencyPct', label: 'Marker Efficiency %', type: 'number', min: 0, max: 100 },
-            { id: 'c-jobDate', label: 'Job Date', type: 'date' }
-        ];
-        fields.forEach(f => {
-            const val = document.getElementById(f.id)?.value.trim() || '';
-            const err = 'err-' + f.id;
-            if (!val) { showError(err, f.label + ' is required.'); valid = false; }
-            else if ((f.type === 'number' || f.type === 'integer') && isNaN(Number(val))) { showError(err, f.label + ' must be a valid number.'); valid = false; }
-            else if (f.type === 'integer' && !Number.isInteger(Number(val))) { showError(err, f.label + ' must be a whole number.'); valid = false; }
-            else if (f.min !== undefined && Number(val) < f.min) { showError(err, f.label + ' must be at least ' + f.min + '.'); valid = false; }
-            else if (f.max !== undefined && Number(val) > f.max) { showError(err, f.label + ' must not exceed ' + f.max + '.'); valid = false; }
-        });
+        const jobDate = document.getElementById('c-jobDate').value.trim();
+        if (!jobDate) { showError('err-c-jobDate', 'Job Date is required.'); valid = false; }
         return valid;
     }
 
@@ -942,12 +730,12 @@
         const mseError   = document.getElementById('p-mseError').value.trim();
         if (!recordedAt) { showError('err-p-recordedAt', 'Recorded At is required.'); valid = false; }
         if (!mseError)   { showError('err-p-mseError', 'MSE Error is required.'); valid = false; }
-        else if (isNaN(Number(mseError)) || Number(mseError) < 0) { showError('err-p-mseError', 'MSE Error must be a positive number.'); valid = false; }
+        else if (isNaN(Number(mseError)) || Number(mseError) < 0) { showError('err-p-mseError', 'Must be a positive number.'); valid = false; }
         return valid;
     }
 
-    function submitCuttingForm()  { if (validateCuttingForm()) document.getElementById('cuttingUpdateForm').submit(); }
-    function submitPerfForm()     { if (validatePerfForm())    document.getElementById('perfUpdateForm').submit(); }
+    function submitCuttingForm() { if (validateCuttingForm()) document.getElementById('cuttingUpdateForm').submit(); }
+    function submitPerfForm()    { if (validatePerfForm())    document.getElementById('perfUpdateForm').submit(); }
 </script>
 </body>
 </html>
