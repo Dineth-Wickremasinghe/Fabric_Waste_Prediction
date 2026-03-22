@@ -1,6 +1,5 @@
 package org.example.fabric_waste_prediction.Controller;
 
-import jakarta.servlet.http.HttpSession;
 import org.example.fabric_waste_prediction.Entity.CuttingJob;
 import org.example.fabric_waste_prediction.Entity.ModelPerformance;
 import org.example.fabric_waste_prediction.Service.HistoricalDataService;
@@ -18,11 +17,8 @@ public class HistoricalDataController {
     private HistoricalDataService historicalDataService;
 
     @GetMapping
-    public String historicalDashboard(HttpSession session, Model model,
+    public String historicalDashboard(Model model,
                                       @RequestParam(defaultValue = "cutting") String tab) {
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/user/login";
-        }
         model.addAttribute("cuttingJobs", historicalDataService.getAllCuttingJobs());
         model.addAttribute("modelPerformances", historicalDataService.getAllModelPerformance());
         model.addAttribute("activeTab", tab);
@@ -32,7 +28,6 @@ public class HistoricalDataController {
     @PostMapping("/cutting/update/{id}")
     public String updateCuttingJob(@PathVariable Long id,
                                    @ModelAttribute CuttingJob cuttingJob,
-                                   HttpSession session,
                                    RedirectAttributes redirectAttributes) {
         if (session.getAttribute("loggedInUser") == null) return "redirect:/user/login";
         String result = historicalDataService.updateCuttingJob(id, cuttingJob);
@@ -46,7 +41,6 @@ public class HistoricalDataController {
 
     @PostMapping("/cutting/delete/{id}")
     public String deleteCuttingJob(@PathVariable Long id,
-                                   HttpSession session,
                                    RedirectAttributes redirectAttributes) {
         if (session.getAttribute("loggedInUser") == null) return "redirect:/user/login";
         historicalDataService.deleteCuttingJob(id);
@@ -57,7 +51,6 @@ public class HistoricalDataController {
     @PostMapping("/performance/update/{id}")
     public String updateModelPerformance(@PathVariable Long id,
                                          @ModelAttribute ModelPerformance modelPerformance,
-                                         HttpSession session,
                                          RedirectAttributes redirectAttributes) {
         if (session.getAttribute("loggedInUser") == null) return "redirect:/user/login";
         String result = historicalDataService.updateModelPerformance(id, modelPerformance);
@@ -71,7 +64,6 @@ public class HistoricalDataController {
 
     @PostMapping("/performance/delete/{id}")
     public String deleteModelPerformance(@PathVariable Long id,
-                                         HttpSession session,
                                          RedirectAttributes redirectAttributes) {
         if (session.getAttribute("loggedInUser") == null) return "redirect:/user/login";
         historicalDataService.deleteModelPerformance(id);
