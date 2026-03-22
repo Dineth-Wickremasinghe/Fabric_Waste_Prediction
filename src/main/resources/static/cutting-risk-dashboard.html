@@ -145,12 +145,15 @@
 
         <input type="number" id="cuttingOverlapMm"
                placeholder="Cutting Overlap (mm)" min="0" max="50">
+        <span class="field-error-msg" id="err-overlap"></span>
 
         <input type="number" id="markerEfficiency"
                placeholder="Marker Efficiency % (e.g. 85)" min="0" max="100">
+        <span class="field-error-msg" id="err-efficiency"></span>
 
         <input type="number" id="actualWaste"
                placeholder="Actual Waste % (fill after cutting)" min="0" max="100">
+        <span class="field-error-msg" id="err-actualwaste"></span>
 
         <select id="cuttingMethodSelect">
             <option value="" disabled selected>Select Cutting Method</option>

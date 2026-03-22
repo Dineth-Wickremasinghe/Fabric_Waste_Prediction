@@ -3,7 +3,7 @@ package org.example.fabric_waste_prediction.Service;
 
 import org.example.fabric_waste_prediction.Entity.*;
 import org.example.fabric_waste_prediction.Repository.CuttingJobRepository;
-import org.example.fabric_waste_prediction.Repository.CuttingRiskRecordRepository; // ← ADD
+import org.example.fabric_waste_prediction.Repository.CuttingRiskRecordRepository;
 import org.example.fabric_waste_prediction.Repository.DailyWastageRepository;
 import org.example.fabric_waste_prediction.Repository.MaterialAccuracyRepository;
 import org.example.fabric_waste_prediction.Repository.PredictionRepository;
@@ -28,6 +28,7 @@ public class WasteService {
 
     @Autowired
     private CuttingRiskRecordRepository cuttingRiskRecordRepository;
+
     // ─── Trend Chart ──────────────────────────────────────────────────────────
     public double[] getTrendData() {
         List<Prediction> records = predictionRepository
@@ -201,6 +202,7 @@ public class WasteService {
         if (style.equalsIgnoreCase("shorts")) return 0.8;
         return 1.5;
     }
+
     public WasteResponse calculateWaste(WasteRequest req) {
         // ── Input Validation ──
         List<String> errors = new ArrayList<>();
@@ -208,17 +210,17 @@ public class WasteService {
         if (req.getFabricWidth() <= 0)
             errors.add("Fabric width must be greater than 0");
         else if (req.getFabricWidth() > 500)
-            errors.add("Fabric width cannot exceed 500 cm");
+            errors.add("Fabric width must be between 1 and 500 cm");
 
         if (req.getLayers() <= 0)
             errors.add("Number of layers must be at least 1");
         else if (req.getLayers() > 200)
-            errors.add("Number of layers cannot exceed 200");
+            errors.add("Number of layers must be between 1 and 200");
 
         if (req.getOrderQty() <= 0)
             errors.add("Order quantity must be greater than 0");
         else if (req.getOrderQty() > 100000)
-            errors.add("Order quantity cannot exceed 100,000");
+            errors.add("Order quantity must be between 1 and 100,000");
 
         if (req.getFabricType() == null || req.getFabricType().trim().isEmpty())
             errors.add("Fabric type is required");
@@ -229,7 +231,7 @@ public class WasteService {
         if (!errors.isEmpty())
             throw new IllegalArgumentException(String.join(", ", errors));
 
-        // ── Existing Formula (unchanged) ──
+        // ── Formula ──
         double baseWaste = (req.getLayers() * 0.5)
                 + (req.getOrderQty() / 1000.0)
                 + (10.0 / req.getFabricWidth());
@@ -252,6 +254,7 @@ public class WasteService {
 
         return new WasteResponse(predicted, riskLevel, message);
     }
+
     // ─── Shift Chart ──────────────────────────────────────────
     public String[] getShiftLabels() {
         List<Object[]> results = cuttingRiskRecordRepository.getAvgWasteByShift();
@@ -334,43 +337,57 @@ public class WasteService {
     public Map<String, Object> getSummaryKPIs() {
         Map<String, Object> summary = new HashMap<>();
 
-        // Avg waste from prediction
-        Double avg = predictionRepository.getAvgWaste();
-        summary.put("avgWaste", avg != null
-                ? Math.round(avg * 100.0) / 100.0 : 0);
+        try {
+            Double avg = predictionRepository.getAvgWaste();
+            summary.put("avgWaste", avg != null
+                    ? Math.round(avg * 100.0) / 100.0 : 0);
+        } catch (Exception e) {
+            summary.put("avgWaste", 0);
+        }
 
-        // High risk days from prediction
-        List<Prediction> records = predictionRepository
-                .findAllByOrderByCreatedAtDesc();
-        long highRiskDays = records.stream()
-                .filter(r -> r.getPredictionResult() != null
-                        && r.getPredictionResult() > 10)
-                .count();
-        summary.put("highRiskDays", highRiskDays);
+        try {
+            List<Prediction> records = predictionRepository
+                    .findAllByOrderByCreatedAtDesc();
+            long highRiskDays = records.stream()
+                    .filter(r -> r.getPredictionResult() != null
+                            && r.getPredictionResult() > 10)
+                    .count();
+            summary.put("highRiskDays", highRiskDays);
+        } catch (Exception e) {
+            summary.put("highRiskDays", 0);
+        }
 
-        // Best fabric (lowest avg waste) from prediction
-        List<Object[]> fabricData = predictionRepository.getAvgWasteByFabric();
-        String bestFabric = fabricData.stream()
-                .min(Comparator.comparingDouble(
-                        row -> ((Number) row[1]).doubleValue()))
-                .map(row -> row[0].toString())
-                .orElse("N/A");
-        summary.put("bestFabric", bestFabric);
+        try {
+            List<Object[]> fabricData = predictionRepository.getAvgWasteByFabric();
+            String bestFabric = fabricData.stream()
+                    .filter(row -> row[0] != null && row[1] != null)
+                    .min(Comparator.comparingDouble(
+                            row -> ((Number) row[1]).doubleValue()))
+                    .map(row -> row[0].toString())
+                    .orElse("N/A");
+            summary.put("bestFabric", bestFabric);
+        } catch (Exception e) {
+            summary.put("bestFabric", "N/A");
+        }
 
-        // Worst shift from cutting_risk_records
-        List<Object[]> shiftData = cuttingRiskRecordRepository.getAvgWasteByShift();
-        String worstShift = shiftData.stream()
-                .max(Comparator.comparingDouble(
-                        row -> ((Number) row[1]).doubleValue()))
-                .map(row -> row[0].toString())
-                .orElse("N/A");
-        summary.put("worstShift", worstShift);
+        try {
+            List<Object[]> shiftData = cuttingRiskRecordRepository.getAvgWasteByShift();
+            String worstShift = shiftData.stream()
+                    .filter(row -> row[0] != null && row[1] != null)
+                    .max(Comparator.comparingDouble(
+                            row -> ((Number) row[1]).doubleValue()))
+                    .map(row -> row[0].toString())
+                    .orElse("N/A");
+            summary.put("worstShift", worstShift);
+        } catch (Exception e) {
+            summary.put("worstShift", "N/A");
+        }
 
         return summary;
     }
+
     // ─── Get predictions for dropdown ─────────────────────
     public List<Map<String, Object>> getPredictionsForDropdown() {
-        // Query from Prediction table where data actually exists
         List<Prediction> records = predictionRepository.findAllByOrderByCreatedAtDesc();
         List<Map<String, Object>> list = new ArrayList<>();
         for (Prediction r : records) {
@@ -389,16 +406,65 @@ public class WasteService {
 
     // ─── Save cutting risk record ──────────────────────────
     public Map<String, Object> saveCuttingRiskRecord(CuttingRiskRequest req) {
+
+        // ── Input Validation ──
+        List<String> errors = new ArrayList<>();
+
+        // Prediction selection
+        if (req.getPredictionId() == null || req.getPredictionId().trim().isEmpty())
+            errors.add("Prediction must be selected");
+
+        // Layers
+        if (req.getNoOfLayers() == null || req.getNoOfLayers() <= 0)
+            errors.add("Number of layers must be at least 1");
+        else if (req.getNoOfLayers() > 200)
+            errors.add("Number of layers must be between 1 and 200");
+
+        // Fabric GSM
+        if (req.getFabricGsm() != null && req.getFabricGsm() < 50)
+            errors.add("Fabric GSM must be between 50 and 500");
+        else if (req.getFabricGsm() != null && req.getFabricGsm() > 500)
+            errors.add("Fabric GSM must be between 50 and 500");
+
+        // Cutting Overlap
+        if (req.getCuttingOverlapMm() != null && req.getCuttingOverlapMm() < 0)
+            errors.add("Cutting overlap cannot be negative");
+        else if (req.getCuttingOverlapMm() != null && req.getCuttingOverlapMm() > 50)
+            errors.add("Cutting overlap must be between 0 and 50 mm");
+
+        // Marker Efficiency
+        if (req.getMarkerEfficiencyPct() != null && req.getMarkerEfficiencyPct() < 0)
+            errors.add("Marker efficiency cannot be negative");
+        else if (req.getMarkerEfficiencyPct() != null && req.getMarkerEfficiencyPct() > 100)
+            errors.add("Marker efficiency must be between 0 and 100%");
+
+        // Cutting Method
+        if (req.getCuttingMethod() == null || req.getCuttingMethod().trim().isEmpty())
+            errors.add("Cutting method is required");
+
+        // Shift
+        if (req.getShift() == null || req.getShift().trim().isEmpty())
+            errors.add("Shift is required");
+
+        // Actual Waste
+        if (req.getActualWastagePct() != null && req.getActualWastagePct() < 0)
+            errors.add("Actual waste cannot be negative");
+        else if (req.getActualWastagePct() != null && req.getActualWastagePct() > 100)
+            errors.add("Actual waste must be between 0 and 100%");
+
+        if (!errors.isEmpty())
+            throw new IllegalArgumentException(String.join(", ", errors));
+
+        // ── Save Record ──
         Map<String, Object> response = new HashMap<>();
 
-        // ✅ Look up in prediction table, not daily_wastage
         Prediction prediction = predictionRepository
                 .findById(Long.parseLong(req.getPredictionId()))
                 .orElseThrow(() ->
                         new IllegalArgumentException("Prediction not found"));
 
         CuttingRiskRecord record = new CuttingRiskRecord();
-        record.setPrediction(prediction);           // ✅ now accepts Prediction
+        record.setPrediction(prediction);
         record.setNoOfLayers(req.getNoOfLayers());
         record.setFabricGsm(req.getFabricGsm());
         record.setCuttingMethod(
