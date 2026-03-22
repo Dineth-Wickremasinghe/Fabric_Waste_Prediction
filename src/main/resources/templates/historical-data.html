@@ -113,15 +113,11 @@
     <div th:if="${errorMsg}"   class="alert alert-error"   th:text="${errorMsg}"></div>
 
     <div class="tab-nav">
-        <button class="tab-btn active" id="tab-cutting-btn" onclick="switchTab('cutting')">
+        <button class="tab-btn active" id="tab-cutting-btn">
             <span class="tab-icon">&#9986;</span>Production Cutting Records
-        </button>
-        <button class="tab-btn" id="tab-performance-btn" onclick="switchTab('performance')">
-            <span class="tab-icon">&#128200;</span>Prediction Model Analytics
         </button>
     </div>
 
-    <!-- Production Cutting Records Tab -->
     <div class="tab-content active" id="tab-cutting">
         <div class="card">
             <div class="card-header">
@@ -214,7 +210,6 @@
             <div class="no-data" th:if="${cuttingJobs == null or cuttingJobs.isEmpty()}">No production cutting records found.</div>
         </div>
 
-        <!-- Cutting Charts -->
         <div class="charts-grid" th:if="${cuttingJobs != null and !cuttingJobs.isEmpty()}">
             <div class="chart-card full-width">
                 <div class="chart-title">Actual vs Predicted Fabric Wastage</div>
@@ -228,76 +223,12 @@
             </div>
         </div>
     </div>
-
-    <!-- Prediction Model Analytics Tab -->
-    <div class="tab-content" id="tab-performance">
-        <div class="card">
-            <div class="card-header">
-                <h2>Prediction Model Analytics</h2>
-                <div class="card-header-right">
-                    <span class="record-count" id="perf-count" th:text="${modelPerformances.size()} + ' Records Found'"></span>
-                    <button class="btn-open-filter" id="p-filter-btn" onclick="openFilterPopup('performance')">
-                        <span>&#128269; Search</span>
-                        <span class="filter-dot"></span>
-                    </button>
-                </div>
-            </div>
-            <div class="filter-active-strip" id="p-filter-strip">
-                <span id="p-strip-text"></span>
-                <button class="btn-strip-reset" onclick="resetFilter('performance')">&#10006; Clear Filters</button>
-            </div>
-            <table th:if="${modelPerformances != null and !modelPerformances.isEmpty()}">
-                <thead>
-                <tr><th>ID</th><th>Recorded At</th><th>MSE Error</th><th>Health Status</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="perf-tbody">
-                <tr th:each="p : ${modelPerformances}"
-                    th:data-recordedat="${#temporals.format(p.recordedAt, 'yyyy-MM-dd')}"
-                    th:data-healthstatus="${p.healthStatus}"
-                    th:data-mseerror="${p.mseError}">
-                    <td th:text="${p.id}"></td>
-                    <td th:text="${#temporals.format(p.recordedAt, 'yyyy-MM-dd HH:mm')}"></td>
-                    <td th:text="${p.mseError}"></td>
-                    <td>
-                            <span th:class="${p.healthStatus == 'Healthy'} ? 'badge badge-healthy' : (${p.healthStatus == 'Warning'} ? 'badge badge-warning' : 'badge badge-critical')"
-                                  th:text="${p.healthStatus}"></span>
-                    </td>
-                    <td>
-                        <div class="actions-cell">
-                            <button class="btn-update"
-                                    th:data-id="${p.id}"
-                                    th:data-recordedat="${#temporals.format(p.recordedAt, 'yyyy-MM-dd') + 'T' + #temporals.format(p.recordedAt, 'HH:mm')}"
-                                    th:data-mseerror="${p.mseError}"
-                                    th:data-healthstatus="${p.healthStatus}"
-                                    onclick="openPerfUpdateModal(this)">Update
-                            </button>
-                            <form th:action="@{'/user/historical/performance/delete/' + ${p.id}}" method="post" style="margin:0"
-                                  onsubmit="return confirm('Are you sure you want to delete this record?')">
-                                <button type="submit" class="btn-delete">Delete</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="no-filter-results" id="p-no-results">&#9888; No records match the selected filters.</div>
-            <div class="no-data" th:if="${modelPerformances == null or modelPerformances.isEmpty()}">No model performance records found.</div>
-        </div>
-        <div class="charts-grid" th:if="${modelPerformances != null and !modelPerformances.isEmpty()}">
-            <div class="chart-card full-width">
-                <div class="chart-title">Model MSE Error Over Time</div>
-                <div class="chart-subtitle">Green = healthy, orange = warning, red = critical</div>
-                <div class="chart-container-tall"><canvas id="mseLineChart"></canvas></div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <div class="logout-section">
     <a href="/user/logout" class="btn-logout">Logout</a>
 </div>
 
-<!-- Cutting Filter Popup -->
 <div class="filter-overlay" id="cutting-filter-overlay">
     <div class="filter-popup">
         <div class="filter-popup-header">
@@ -337,8 +268,16 @@
                 <div class="filter-section-title">&#128269; Search by Field</div>
                 <div class="filter-grid">
                     <div class="fgroup"><label>Fabric Type</label><input type="text" id="c-filter-fabric" placeholder="e.g. Cotton" /></div>
-                    <div class="fgroup"><label>Cutting Method</label><input type="text" id="c-filter-method" placeholder="e.g. Manual" /></div>
-                    <div class="fgroup"><label>Shift</label>
+                    <div class="fgroup">
+                        <label>Cutting Method</label>
+                        <select id="c-filter-method">
+                            <option value="">All Methods</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Auto">Auto</option>
+                        </select>
+                    </div>
+                    <div class="fgroup">
+                        <label>Shift</label>
                         <select id="c-filter-shift">
                             <option value="">All Shifts</option>
                             <option value="DAY">Day</option>
@@ -356,68 +295,6 @@
     </div>
 </div>
 
-<!-- Performance Filter Popup -->
-<div class="filter-overlay" id="performance-filter-overlay">
-    <div class="filter-popup">
-        <div class="filter-popup-header">
-            <h3>&#128269; Search Model Analytics Records</h3>
-            <button class="filter-popup-close" onclick="closeFilterPopup('performance')">&#x2715;</button>
-        </div>
-        <div class="filter-popup-body">
-            <div class="filter-section">
-                <div class="filter-section-title">&#128197; Date Filters</div>
-                <div class="filter-grid">
-                    <div class="fgroup"><label>Single Date</label><input type="date" id="p-single-date" /></div>
-                    <div class="fgroup"></div>
-                    <div class="fgroup"><label>From Date</label><input type="date" id="p-from-date" /></div>
-                    <div class="fgroup"><label>To Date</label><input type="date" id="p-to-date" /></div>
-                    <div class="fgroup">
-                        <label>Month</label>
-                        <select id="p-month">
-                            <option value="">All Months</option>
-                            <option value="01">January</option><option value="02">February</option>
-                            <option value="03">March</option><option value="04">April</option>
-                            <option value="05">May</option><option value="06">June</option>
-                            <option value="07">July</option><option value="08">August</option>
-                            <option value="09">September</option><option value="10">October</option>
-                            <option value="11">November</option><option value="12">December</option>
-                        </select>
-                    </div>
-                    <div class="fgroup">
-                        <label>Year</label>
-                        <select id="p-year">
-                            <option value="">All Years</option>
-                            <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="filter-section">
-                <div class="filter-section-title">&#128269; Search by Field</div>
-                <div class="filter-grid">
-                    <div class="fgroup full">
-                        <label>Health Status</label>
-                        <select id="p-filter-health">
-                            <option value="">All Statuses</option>
-                            <option value="Healthy">Healthy</option>
-                            <option value="Warning">Warning</option>
-                            <option value="Critical">Critical</option>
-                        </select>
-                    </div>
-                    <div class="fgroup"><label>MSE Min</label><input type="number" id="p-filter-mse-min" step="0.0001" placeholder="e.g. 0.01" /></div>
-                    <div class="fgroup"><label>MSE Max</label><input type="number" id="p-filter-mse-max" step="0.0001" placeholder="e.g. 0.05" /></div>
-                </div>
-            </div>
-        </div>
-        <div class="filter-popup-footer">
-            <button class="btn-filter-cancel" onclick="closeFilterPopup('performance')">Cancel</button>
-            <button class="btn-filter-reset"  onclick="resetFilter('performance')">&#10006; Clear All</button>
-            <button class="btn-filter-apply"  onclick="applyFilter('performance')">&#128269; Apply</button>
-        </div>
-    </div>
-</div>
-
-<!-- Update Cutting Modal -->
 <div class="modal-overlay" id="cuttingModal">
     <div class="modal">
         <div class="modal-header">
@@ -427,15 +304,44 @@
         <form id="cuttingUpdateForm" method="post" novalidate>
             <div class="modal-body">
                 <div class="form-row">
-                    <div class="form-group"><label>Fabric Type</label><input type="text" id="c-fabricType" name="fabricType" /><span class="field-error" id="err-c-fabricType"></span></div>
-                    <div class="form-group"><label>Fabric Pattern</label><input type="text" id="c-fabricPattern" name="fabricPattern" /></div>
-                    <div class="form-group"><label>Cutting Method</label><input type="text" id="c-cuttingMethod" name="cuttingMethod" /></div>
+                    <div class="form-group">
+                        <label>Fabric Type</label>
+                        <input type="text" id="c-fabricType" name="fabricType" required />
+                        <span class="field-error" id="err-c-fabricType"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Fabric Pattern</label>
+                        <input type="text" id="c-fabricPattern" name="fabricPattern" />
+                    </div>
+                    <div class="form-group">
+                        <label>Cutting Method</label>
+                        <select id="c-cuttingMethod" name="cuttingMethod">
+                            <option value="Manual">Manual</option>
+                            <option value="Auto">Auto</option>
+                        </select>
+                    </div>
                     <div class="form-group"><label>Marker Loss %</label><input type="number" step="0.01" id="c-markerLossPct" name="markerLossPct" /></div>
                     <div class="form-group"><label>Pattern Complexity</label><input type="number" step="0.01" id="c-patternComplexity" name="patternComplexity" /></div>
                     <div class="form-group"><label>Operator Experience</label><input type="number" step="0.01" id="c-operatorExperience" name="operatorExperience" /></div>
-                    <div class="form-group"><label>Predicted Waste %</label><input type="number" step="0.01" id="c-predictedWastePct" name="predictedWastePct" /></div>
-                    <div class="form-group"><label>No. of Layers</label><input type="number" id="c-noOfLayers" name="noOfLayers" /><span class="field-error" id="err-c-noOfLayers"></span></div>
-                    <div class="form-group"><label>Fabric GSM</label><input type="number" id="c-fabricGsm" name="fabricGsm" /></div>
+
+                    <div class="form-group">
+                        <label>Predicted Waste %</label>
+                        <input type="number" step="0.01" id="c-predictedWastePct" name="predictedWastePct" />
+                        <span class="field-error" id="err-c-predictedWastePct"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>No. of Layers</label>
+                        <input type="number" id="c-noOfLayers" name="noOfLayers" required />
+                        <span class="field-error" id="err-c-noOfLayers"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Fabric GSM</label>
+                        <input type="number" id="c-fabricGsm" name="fabricGsm" />
+                        <span class="field-error" id="err-c-fabricGsm"></span>
+                    </div>
+
                     <div class="form-group">
                         <label>Shift</label>
                         <select id="c-shift" name="shift">
@@ -443,10 +349,31 @@
                             <option value="NIGHT">Night</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Cutting Overlap (mm)</label><input type="number" id="c-cuttingOverlapMm" name="cuttingOverlapMm" /></div>
-                    <div class="form-group"><label>Marker Efficiency %</label><input type="number" step="0.01" id="c-markerEfficiencyPct" name="markerEfficiencyPct" /><span class="field-error" id="err-c-markerEfficiencyPct"></span></div>
-                    <div class="form-group"><label>Actual Wastage %</label><input type="number" step="0.01" id="c-actualWastagePct" name="actualWastagePct" /><span class="field-error" id="err-c-actualWastagePct"></span></div>
-                    <div class="form-group"><label>Job Date</label><input type="date" id="c-jobDate" name="jobDate" /><span class="field-error" id="err-c-jobDate"></span></div>
+
+                    <div class="form-group">
+                        <label>Cutting Overlap (mm)</label>
+                        <input type="number" id="c-cuttingOverlapMm" name="cuttingOverlapMm" />
+                        <span class="field-error" id="err-c-cuttingOverlapMm"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Marker Efficiency %</label>
+                        <input type="number" step="0.01" id="c-markerEfficiencyPct" name="markerEfficiencyPct" />
+                        <span class="field-error" id="err-c-markerEfficiencyPct"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Actual Wastage %</label>
+                        <input type="number" step="0.01" id="c-actualWastagePct" name="actualWastagePct" />
+                        <span class="field-error" id="err-c-actualWastagePct"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Job Date</label>
+                        <input type="date" id="c-jobDate" name="jobDate" required />
+                        <span class="field-error" id="err-c-jobDate"></span>
+                    </div>
+
                     <div class="form-group full"><label>Notes</label><input type="text" id="c-notes" name="notes" /></div>
                 </div>
             </div>
@@ -458,139 +385,89 @@
     </div>
 </div>
 
-<!-- Update Performance Modal -->
-<div class="modal-overlay" id="perfModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h3>Update Model Analytics Record</h3>
-            <button class="modal-close" onclick="closePerfModal()">&#x2715;</button>
-        </div>
-        <form id="perfUpdateForm" method="post" novalidate>
-            <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group full"><label>Recorded At</label><input type="datetime-local" id="p-recordedAt" name="recordedAt" /><span class="field-error" id="err-p-recordedAt"></span></div>
-                    <div class="form-group"><label>MSE Error</label><input type="number" step="0.0001" id="p-mseError" name="mseError" /><span class="field-error" id="err-p-mseError"></span></div>
-                    <div class="form-group">
-                        <label>Health Status</label>
-                        <select id="p-healthStatus" name="healthStatus">
-                            <option value="Healthy">Healthy</option>
-                            <option value="Warning">Warning</option>
-                            <option value="Critical">Critical</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-back-modal" onclick="closePerfModal()">&#8592; Back</button>
-                <button type="button" class="btn-submit" onclick="submitPerfForm()">Save Changes</button>
-            </div>
-        </form>
-    </div>
-</div>
+</body>
 
 <script th:inline="javascript">
     const chartLabels    = /*[[${cuttingJobs.![fabricType]}]]*/ [];
     const actualWaste    = /*[[${cuttingJobs.![actualWastagePct]}]]*/ [];
     const predictedWaste = /*[[${cuttingJobs.![predictedWastePct]}]]*/ [];
     const markerEff      = /*[[${cuttingJobs.![markerEfficiencyPct]}]]*/ [];
-    const perfLabels     = /*[[${modelPerformances.![#temporals.format(recordedAt,'yyyy-MM')]}]]*/ [];
-    const mseErrors      = /*[[${modelPerformances.![mseError]}]]*/ [];
 </script>
 
 <script>
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('tab-' + tab).classList.add('active');
-        document.getElementById('tab-' + tab + '-btn').classList.add('active');
-    }
-
     window.addEventListener('DOMContentLoaded', function() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('tab') === 'performance') switchTab('performance');
         buildCharts();
     });
 
     function openFilterPopup(type)  { document.getElementById(type + '-filter-overlay').classList.add('active'); }
     function closeFilterPopup(type) { document.getElementById(type + '-filter-overlay').classList.remove('active'); }
+
     document.addEventListener('click', function(e) {
-        ['cutting','performance'].forEach(type => {
-            const overlay = document.getElementById(type + '-filter-overlay');
-            if (e.target === overlay) closeFilterPopup(type);
-        });
+        const overlay = document.getElementById('cutting-filter-overlay');
+        if (e.target === overlay) closeFilterPopup('cutting');
     });
 
     function applyFilter(type) {
-        const isCutting = type === 'cutting';
-        const prefix    = isCutting ? 'c' : 'p';
-        const tbodyId   = isCutting ? 'cutting-tbody' : 'perf-tbody';
-        const countId   = isCutting ? 'cutting-count' : 'perf-count';
+        const prefix    = 'c';
+        const tbodyId   = 'cutting-tbody';
+        const countId   = 'cutting-count';
 
         const singleDate = document.getElementById(prefix + '-single-date').value;
         const fromDate   = document.getElementById(prefix + '-from-date').value;
         const toDate     = document.getElementById(prefix + '-to-date').value;
         const month      = document.getElementById(prefix + '-month').value;
         const year       = document.getElementById(prefix + '-year').value;
-        const fabric     = isCutting ? document.getElementById('c-filter-fabric').value.trim().toLowerCase() : '';
-        const method     = isCutting ? document.getElementById('c-filter-method').value.trim().toLowerCase() : '';
-        const shift      = isCutting ? document.getElementById('c-filter-shift').value : '';
-        const health     = !isCutting ? document.getElementById('p-filter-health').value : '';
-        const mseMin     = !isCutting ? parseFloat(document.getElementById('p-filter-mse-min').value) : NaN;
-        const mseMax     = !isCutting ? parseFloat(document.getElementById('p-filter-mse-max').value) : NaN;
+
+        const fabricFilter = document.getElementById('c-filter-fabric').value.trim().toLowerCase();
+        const methodFilter = document.getElementById('c-filter-method').value.trim().toLowerCase();
+        const shiftFilter  = document.getElementById('c-filter-shift').value.trim().toLowerCase();
 
         const rows = document.querySelectorAll('#' + tbodyId + ' tr');
         let visibleCount = 0;
 
         rows.forEach(row => {
-            const rawDate   = isCutting ? row.getAttribute('data-jobdate') : row.getAttribute('data-recordedat');
-            const rowYear   = rawDate ? rawDate.substring(0,4) : '';
-            const rowMonth  = rawDate ? rawDate.substring(5,7) : '';
-            const rowDate   = rawDate ? new Date(rawDate) : null;
-            const rowFabric = (row.getAttribute('data-fabrictype') || '').toLowerCase();
-            const rowMethod = (row.getAttribute('data-method') || '').toLowerCase();
-            const rowShift  = row.getAttribute('data-shift') || '';
-            const rowHealth = row.getAttribute('data-healthstatus') || '';
-            const rowMse    = parseFloat(row.getAttribute('data-mseerror') || '0');
+            const rawDate    = row.getAttribute('data-jobdate');
+            const rowFabric  = (row.getAttribute('data-fabrictype') || '').trim().toLowerCase();
+            const rowMethod  = (row.getAttribute('data-method') || '').trim().toLowerCase();
+            const rowShift   = (row.getAttribute('data-shift') || '').trim().toLowerCase();
 
             let show = true;
 
-            if (singleDate) { if (rawDate !== singleDate) show = false; }
-            else if (fromDate || toDate) {
+            if (singleDate) {
+                if (rawDate !== singleDate) show = false;
+            } else if (fromDate || toDate) {
+                const rowDateObj = rawDate ? new Date(rawDate) : null;
                 const from = fromDate ? new Date(fromDate) : null;
                 const to   = toDate   ? new Date(toDate)   : null;
-                if (from && rowDate && rowDate < from) show = false;
-                if (to   && rowDate && rowDate > to)   show = false;
+                if (from && rowDateObj && rowDateObj < from) show = false;
+                if (to   && rowDateObj && rowDateObj > to)   show = false;
             } else if (month || year) {
-                if (month && rowMonth !== month) show = false;
-                if (year  && rowYear  !== year)  show = false;
+                const rYear   = rawDate ? rawDate.substring(0,4) : '';
+                const rMonth  = rawDate ? rawDate.substring(5,7) : '';
+                if (month && rMonth !== month) show = false;
+                if (year  && rYear  !== year)  show = false;
             }
 
-            if (isCutting) {
-                if (fabric && !rowFabric.includes(fabric))  show = false;
-                if (method && !rowMethod.includes(method))  show = false;
-                if (shift  && rowShift !== shift)            show = false;
+            if (fabricFilter && !rowFabric.includes(fabricFilter)) show = false;
+            if (methodFilter && rowMethod !== methodFilter) show = false;
+            if (shiftFilter  && rowShift !== shiftFilter)   show = false;
+
+            if (show) {
+                row.style.display = '';
+                visibleCount++;
             } else {
-                if (health           && rowHealth !== health) show = false;
-                if (!isNaN(mseMin)   && rowMse < mseMin)      show = false;
-                if (!isNaN(mseMax)   && rowMse > mseMax)      show = false;
+                row.style.display = 'none';
             }
-
-            if (show) { row.classList.remove('hidden-row'); visibleCount++; }
-            else        row.classList.add('hidden-row');
         });
 
         document.getElementById(countId).textContent = visibleCount + ' Records Found';
         document.getElementById(prefix + '-no-results').style.display = visibleCount === 0 ? 'block' : 'none';
 
         const activeFilters = [];
-        if (singleDate)              activeFilters.push('Date: ' + singleDate);
-        else if (fromDate || toDate) activeFilters.push('Range: ' + (fromDate||'...') + ' → ' + (toDate||'...'));
-        else if (month || year)      activeFilters.push((month ? monthName(month) : '') + ' ' + (year||''));
-        if (fabric)  activeFilters.push('Fabric: ' + fabric);
-        if (method)  activeFilters.push('Method: ' + method);
-        if (shift)   activeFilters.push('Shift: '  + shift);
-        if (health)  activeFilters.push('Health: ' + health);
-        if (!isNaN(mseMin)||!isNaN(mseMax)) activeFilters.push('MSE: ' + (!isNaN(mseMin)?mseMin:'0') + ' – ' + (!isNaN(mseMax)?mseMax:'∞'));
+        if (singleDate) activeFilters.push('Date: ' + singleDate);
+        if (fabricFilter) activeFilters.push('Fabric: ' + fabricFilter);
+        if (methodFilter) activeFilters.push('Method: ' + methodFilter);
+        if (shiftFilter)  activeFilters.push('Shift: '  + shiftFilter);
 
         const strip     = document.getElementById(prefix + '-filter-strip');
         const stripTxt  = document.getElementById(prefix + '-strip-text');
@@ -598,42 +475,36 @@
 
         if (activeFilters.length > 0) {
             stripTxt.textContent = 'Active Filters: ' + activeFilters.join('  |  ');
-            strip.classList.add('visible');
+            strip.style.display = 'flex';
             filterBtn.classList.add('active-filter');
         } else {
-            strip.classList.remove('visible');
+            strip.style.display = 'none';
             filterBtn.classList.remove('active-filter');
         }
-        closeFilterPopup(type);
+        closeFilterPopup('cutting');
     }
 
     function resetFilter(type) {
-        const isCutting = type === 'cutting';
-        const prefix    = isCutting ? 'c' : 'p';
-        const tbodyId   = isCutting ? 'cutting-tbody' : 'perf-tbody';
-        const countId   = isCutting ? 'cutting-count' : 'perf-count';
+        const prefix    = 'c';
+        const tbodyId   = 'cutting-tbody';
+        const countId   = 'cutting-count';
 
         ['single-date','from-date','to-date','month','year'].forEach(f => {
             const el = document.getElementById(prefix + '-' + f);
             if (el) el.value = '';
         });
 
-        if (isCutting) {
-            document.getElementById('c-filter-fabric').value = '';
-            document.getElementById('c-filter-method').value = '';
-            document.getElementById('c-filter-shift').value  = '';
-        } else {
-            document.getElementById('p-filter-health').value  = '';
-            document.getElementById('p-filter-mse-min').value = '';
-            document.getElementById('p-filter-mse-max').value = '';
-        }
+        document.getElementById('c-filter-fabric').value = '';
+        document.getElementById('c-filter-method').value = '';
+        document.getElementById('c-filter-shift').value  = '';
 
-        document.querySelectorAll('#' + tbodyId + ' tr').forEach(r => r.classList.remove('hidden-row'));
-        document.getElementById(countId).textContent = document.querySelectorAll('#' + tbodyId + ' tr').length + ' Records Found';
+        const rows = document.querySelectorAll('#' + tbodyId + ' tr');
+        rows.forEach(r => r.style.display = '');
+        document.getElementById(countId).textContent = rows.length + ' Records Found';
         document.getElementById(prefix + '-no-results').style.display = 'none';
-        document.getElementById(prefix + '-filter-strip').classList.remove('visible');
+        document.getElementById(prefix + '-filter-strip').style.display = 'none';
         document.getElementById(prefix + '-filter-btn').classList.remove('active-filter');
-        closeFilterPopup(type);
+        closeFilterPopup('cutting');
     }
 
     function monthName(m) {
@@ -643,7 +514,7 @@
 
     function buildCharts() {
         const wasteCtx = document.getElementById('wasteLineChart');
-        if (wasteCtx && chartLabels.length > 0) {
+        if (wasteCtx && typeof chartLabels !== 'undefined' && chartLabels.length > 0) {
             new Chart(wasteCtx, {
                 type: 'line',
                 data: { labels: chartLabels, datasets: [
@@ -651,32 +522,20 @@
                         { label: 'Predicted Wastage (%)', data: predictedWaste, borderColor: '#1976d2', backgroundColor: 'rgba(25,118,210,0.06)', borderWidth: 2.5, borderDash: [6,3], pointBackgroundColor: '#1976d2', pointRadius: 5, pointHoverRadius: 7, tension: 0.35, fill: true }
                     ]},
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { position: 'top', labels: { font: { size: 12 }, padding: 16 } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + '%' } } },
-                    scales: { x: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 } } }, y: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 }, callback: v => v + '%' }, title: { display: true, text: 'Wastage (%)', font: { size: 12 } } } }
+                    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + '%' } } },
+                    scales: { y: { ticks: { callback: v => v + '%' } } }
                 }
             });
         }
 
         const markerCtx = document.getElementById('markerEffChart');
-        if (markerCtx && chartLabels.length > 0) {
+        if (markerCtx && typeof chartLabels !== 'undefined' && chartLabels.length > 0) {
             new Chart(markerCtx, {
                 type: 'bar',
                 data: { labels: chartLabels, datasets: [{ label: 'Marker Efficiency (%)', data: markerEff, backgroundColor: markerEff.map(v => v >= 85 ? 'rgba(46,204,113,0.75)' : v >= 78 ? 'rgba(243,156,18,0.75)' : 'rgba(231,76,60,0.75)'), borderColor: markerEff.map(v => v >= 85 ? '#27ae60' : v >= 78 ? '#e67e22' : '#c0392b'), borderWidth: 1.5, borderRadius: 4 }] },
                 options: { responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Efficiency: ' + ctx.parsed.y.toFixed(2) + '%' } } },
-                    scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { grid: { color: '#f0f0f0' }, min: 70, max: 100, ticks: { font: { size: 11 }, callback: v => v + '%' }, title: { display: true, text: 'Efficiency (%)', font: { size: 12 } } } }
-                }
-            });
-        }
-
-        const mseCtx = document.getElementById('mseLineChart');
-        if (mseCtx && perfLabels.length > 0) {
-            new Chart(mseCtx, {
-                type: 'line',
-                data: { labels: perfLabels, datasets: [{ label: 'MSE Error', data: mseErrors, borderColor: '#9c27b0', backgroundColor: 'rgba(156,39,176,0.08)', borderWidth: 2.5, pointBackgroundColor: mseErrors.map(v => v <= 0.025 ? '#27ae60' : v <= 0.04 ? '#f39c12' : '#e74c3c'), pointRadius: 6, pointHoverRadius: 8, tension: 0.35, fill: true }] },
-                options: { responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'MSE: ' + ctx.parsed.y.toFixed(4) } } },
-                    scales: { x: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 } } }, y: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 } }, title: { display: true, text: 'MSE Error', font: { size: 12 } } } }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { min: 70, max: 100, ticks: { callback: v => v + '%' } } }
                 }
             });
         }
@@ -701,41 +560,57 @@
         document.getElementById('cuttingUpdateForm').action   = '/user/historical/cutting/update/' + btn.getAttribute('data-id');
         document.getElementById('cuttingModal').classList.add('active');
     }
-    function closeCuttingModal() { document.getElementById('cuttingModal').classList.remove('active'); }
-    document.getElementById('cuttingModal').addEventListener('click', function(e) { if (e.target === this) closeCuttingModal(); });
 
-    function openPerfUpdateModal(btn) {
-        document.getElementById('p-recordedAt').value    = btn.getAttribute('data-recordedat');
-        document.getElementById('p-mseError').value      = btn.getAttribute('data-mseerror');
-        document.getElementById('p-healthStatus').value  = btn.getAttribute('data-healthstatus');
-        document.getElementById('perfUpdateForm').action = '/user/historical/performance/update/' + btn.getAttribute('data-id');
-        document.getElementById('perfModal').classList.add('active');
-    }
-    function closePerfModal() { document.getElementById('perfModal').classList.remove('active'); }
-    document.getElementById('perfModal').addEventListener('click', function(e) { if (e.target === this) closePerfModal(); });
+    function closeCuttingModal() { document.getElementById('cuttingModal').classList.remove('active'); }
+
+    document.getElementById('cuttingModal').addEventListener('click', function(e) {
+        if (e.target === this) closeCuttingModal();
+    });
 
     function showError(id, msg) { const el = document.getElementById(id); if (el) { el.textContent = msg; el.style.display = 'block'; } }
     function clearErrors(prefix) { document.querySelectorAll('.field-error').forEach(el => { if (el.id.startsWith('err-' + prefix)) { el.textContent = ''; el.style.display = 'none'; } }); }
 
     function validateCuttingForm() {
-        clearErrors('c'); let valid = true;
-        const jobDate = document.getElementById('c-jobDate').value.trim();
-        if (!jobDate) { showError('err-c-jobDate', 'Job Date is required.'); valid = false; }
-        return valid;
-    }
+        clearErrors('c');
+        let valid = true;
 
-    function validatePerfForm() {
-        clearErrors('p'); let valid = true;
-        const recordedAt = document.getElementById('p-recordedAt').value.trim();
-        const mseError   = document.getElementById('p-mseError').value.trim();
-        if (!recordedAt) { showError('err-p-recordedAt', 'Recorded At is required.'); valid = false; }
-        if (!mseError)   { showError('err-p-mseError', 'MSE Error is required.'); valid = false; }
-        else if (isNaN(Number(mseError)) || Number(mseError) < 0) { showError('err-p-mseError', 'Must be a positive number.'); valid = false; }
+        const fabricType = document.getElementById('c-fabricType').value.trim();
+        const noOfLayers = document.getElementById('c-noOfLayers').value;
+        const jobDate = document.getElementById('c-jobDate').value.trim();
+        const actualWaste = document.getElementById('c-actualWastagePct').value;
+        const predWaste = document.getElementById('c-predictedWastePct').value;
+        const markEff = document.getElementById('c-markerEfficiencyPct').value;
+        const gsm = document.getElementById('c-fabricGsm').value;
+        const overlap = document.getElementById('c-cuttingOverlapMm').value;
+
+        // Required
+        if (!fabricType) { showError('err-c-fabricType', 'Required.'); valid = false; }
+        if (!jobDate) { showError('err-c-jobDate', 'Required.'); valid = false; }
+        if (!noOfLayers) { showError('err-c-noOfLayers', 'Required.'); valid = false; }
+
+        // Percentages (0-100)
+        [ {id: 'c-actualWastagePct', val: actualWaste, lbl: 'Actual Waste'},
+            {id: 'c-predictedWastePct', val: predWaste, lbl: 'Predicted Waste'},
+            {id: 'c-markerEfficiencyPct', val: markEff, lbl: 'Efficiency'}
+        ].forEach(f => {
+            if (f.val !== "" && (parseFloat(f.val) < 0 || parseFloat(f.val) > 100)) {
+                showError('err-' + f.id, f.lbl + ' must be 0-100%.'); valid = false;
+            }
+        });
+
+        // Positive Whole Number (Layers)
+        if (noOfLayers !== "" && (parseFloat(noOfLayers) <= 0 || !Number.isInteger(Number(noOfLayers)))) {
+            showError('err-c-noOfLayers', 'Must be a positive whole number.'); valid = false;
+        }
+
+        // Positive Numbers (GSM & Overlap)
+        if (gsm !== "" && parseFloat(gsm) <= 0) { showError('err-c-fabricGsm', 'Must be positive.'); valid = false; }
+        if (overlap !== "" && parseFloat(overlap) <= 0) { showError('err-c-cuttingOverlapMm', 'Must be positive.'); valid = false; }
+
         return valid;
     }
 
     function submitCuttingForm() { if (validateCuttingForm()) document.getElementById('cuttingUpdateForm').submit(); }
-    function submitPerfForm()    { if (validatePerfForm())    document.getElementById('perfUpdateForm').submit(); }
 </script>
 </body>
 </html>

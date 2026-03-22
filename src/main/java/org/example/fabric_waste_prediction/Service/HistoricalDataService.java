@@ -1,12 +1,8 @@
 package org.example.fabric_waste_prediction.Service;
 
 import org.example.fabric_waste_prediction.Entity.CuttingJob;
-import org.example.fabric_waste_prediction.Entity.CuttingRiskRecord;
-import org.example.fabric_waste_prediction.Entity.ModelPerformance;
-import org.example.fabric_waste_prediction.Entity.Prediction;
 import org.example.fabric_waste_prediction.Repository.CuttingJobRepository;
 import org.example.fabric_waste_prediction.Repository.CuttingRiskRecordRepository;
-import org.example.fabric_waste_prediction.Repository.ModelPerformanceRepository;
 import org.example.fabric_waste_prediction.Repository.PredictionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,9 +21,6 @@ public class HistoricalDataService {
 
     @Autowired
     private PredictionRepository predictionRepository;
-
-    @Autowired
-    private ModelPerformanceRepository modelPerformanceRepository;
 
     // ── Get all cutting jobs ──────────────────────────────────────────────────
     public List<CuttingJob> getAllCuttingJobs() {
@@ -110,25 +103,4 @@ public class HistoricalDataService {
         });
     }
 
-    // ── Model Performance ─────────────────────────────────────────────────────
-    public List<ModelPerformance> getAllModelPerformance() {
-        return modelPerformanceRepository.findAll();
-    }
-
-    public String updateModelPerformance(Long id, ModelPerformance updated) {
-        Optional<ModelPerformance> existing = modelPerformanceRepository.findById(id);
-        if (existing.isEmpty()) return "Record not found!";
-
-        ModelPerformance record = existing.get();
-        record.setRecordedAt(updated.getRecordedAt());
-        record.setMseError(updated.getMseError());
-        record.setHealthStatus(updated.getHealthStatus());
-
-        modelPerformanceRepository.save(record);
-        return "success";
-    }
-
-    public void deleteModelPerformance(Long id) {
-        modelPerformanceRepository.deleteById(id);
-    }
 }
