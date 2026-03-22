@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-        import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Optional;
 
@@ -28,15 +28,21 @@ public class AdminController {
                              @RequestParam String password,
                              HttpSession session,
                              RedirectAttributes redirectAttributes) {
-        System.out.println("LOGIN ATTEMPT: " + username);
+        System.out.println("ADMIN LOGIN ATTEMPT: " + username);
+
+        // Ensure the third parameter is 'true' for Admin authentication
         Optional<user> admin = userService.authenticate(username, password, true);
+
         System.out.println("AUTH RESULT: " + admin.isPresent());
+
         if (admin.isPresent()) {
             session.setAttribute("adminUser", admin.get());
             session.setAttribute("adminLoggedIn", true);
             return "redirect:/admin/dashboard";
         }
-        redirectAttributes.addFlashAttribute("loginError", "Invalid username or password. Please try again.");
+
+        // Changed to "error" to match your HTML: th:if="${error}"
+        redirectAttributes.addFlashAttribute("error", "Invalid admin username or password.");
         return "redirect:/admin/login";
     }
 
