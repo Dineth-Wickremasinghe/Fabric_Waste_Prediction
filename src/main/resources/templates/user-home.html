@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Fabric Wastage Prediction System</title>
+    <title>Home - Fabric Wastage Prediction System</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -22,6 +23,10 @@
             --teal-lt:  #ecfeff;
             --rose:     #e11d48;
             --rose-lt:  #fff1f2;
+            --orange:   #ea580c;
+            --orange-lt:#fff7ed;
+            --red:      #dc2626;
+            --red-lt:   #fef2f2;
             --surface:  #f1f5f9;
             --border:   #e2e8f0;
             --text:     #1e293b;
@@ -71,9 +76,9 @@
 
         /* ── Page wrapper ───────────────────────────────── */
         .page {
-            max-width: 920px;
+            max-width: 960px;
             margin: 0 auto;
-            padding: 40px 24px 64px;
+            padding: 40px 24px 100px;
         }
 
         /* ── Welcome row ────────────────────────────────── */
@@ -112,6 +117,7 @@
         }
         .welcome-name span { color: var(--green); }
         .welcome-sub { font-size: 0.82rem; color: var(--muted); }
+
         .role-badge {
             display: inline-flex;
             align-items: center;
@@ -136,22 +142,6 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50%       { opacity: 0.35; }
-        }
-
-        /* ── Alert ──────────────────────────────────────── */
-        .alert-success {
-            background: var(--green-lt);
-            color: #065f46;
-            border: 1px solid var(--green-md);
-            padding: 11px 16px;
-            border-radius: 10px;
-            font-size: 0.83rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 24px;
-            animation: slideIn 0.3s ease both;
         }
 
         /* ── Section label ──────────────────────────────── */
@@ -188,6 +178,8 @@
             overflow: hidden;
             animation: fadeUp 0.4s ease both;
         }
+
+        /* staggered entry — up to 6 cards */
         .nav-card:nth-child(1) { animation-delay: 0.08s; }
         .nav-card:nth-child(2) { animation-delay: 0.13s; }
         .nav-card:nth-child(3) { animation-delay: 0.18s; }
@@ -200,6 +192,7 @@
             box-shadow: 0 8px 28px rgba(0,0,0,0.09);
         }
 
+        /* Sweep accent line on hover */
         .nav-card::after {
             content: '';
             position: absolute;
@@ -212,20 +205,22 @@
         }
         .nav-card:hover::after { transform: scaleX(1); }
 
-        .nav-card.green::after  { background: var(--green); }
-        .nav-card.blue::after   { background: var(--blue); }
-        .nav-card.amber::after  { background: var(--amber); }
-        .nav-card.purple::after { background: var(--purple); }
-        .nav-card.teal::after   { background: var(--teal); }
-        .nav-card.rose::after   { background: var(--rose); }
+        /* Per-colour accent + hover border */
+        .nav-card.green::after   { background: var(--green); }
+        .nav-card.blue::after    { background: var(--blue); }
+        .nav-card.orange::after  { background: var(--orange); }
+        .nav-card.purple::after  { background: var(--purple); }
+        .nav-card.teal::after    { background: var(--teal); }
+        .nav-card.red::after     { background: var(--red); }
 
-        .nav-card.green:hover  { border-color: #a7f3d0; }
-        .nav-card.blue:hover   { border-color: #bfdbfe; }
-        .nav-card.amber:hover  { border-color: #fcd34d; }
-        .nav-card.purple:hover { border-color: #ddd6fe; }
-        .nav-card.teal:hover   { border-color: #a5f3fc; }
-        .nav-card.rose:hover   { border-color: #fecdd3; }
+        .nav-card.green:hover    { border-color: #a7f3d0; }
+        .nav-card.blue:hover     { border-color: #bfdbfe; }
+        .nav-card.orange:hover   { border-color: #fed7aa; }
+        .nav-card.purple:hover   { border-color: #ddd6fe; }
+        .nav-card.teal:hover     { border-color: #a5f3fc; }
+        .nav-card.red:hover      { border-color: #fca5a5; }
 
+        /* Icon */
         .nav-icon {
             width: 44px; height: 44px;
             border-radius: 11px;
@@ -240,11 +235,12 @@
 
         .nav-icon.green  { background: var(--green-lt); }
         .nav-icon.blue   { background: var(--blue-lt); }
-        .nav-icon.amber  { background: var(--amber-lt); }
+        .nav-icon.orange { background: var(--orange-lt); }
         .nav-icon.purple { background: var(--purple-lt); }
         .nav-icon.teal   { background: var(--teal-lt); }
-        .nav-icon.rose   { background: var(--rose-lt); }
+        .nav-icon.red    { background: var(--red-lt); }
 
+        /* Card text */
         .nav-card-body { flex: 1; min-width: 0; }
         .nav-card-body h3 {
             font-size: 0.9rem;
@@ -259,6 +255,7 @@
             line-height: 1.5;
         }
 
+        /* Arrow */
         .nav-arrow {
             color: var(--border);
             font-size: 1.1rem;
@@ -272,7 +269,6 @@
         .logout-row {
             display: flex;
             justify-content: center;
-            padding-bottom: 80px; /* room so FAB never covers the button */
         }
         .btn-logout {
             display: inline-flex;
@@ -300,15 +296,13 @@
             position: fixed;
             bottom: 32px;
             right: 32px;
-            z-index: 9999;          /* well above everything */
+            z-index: 9999;
             display: flex;
             align-items: center;
             text-decoration: none;
         }
-
-        /* Tooltip label — needs position:relative so its ::after arrow is anchored */
         .chat-fab-label {
-            position: relative;     /* FIX: was missing, caused arrow to escape */
+            position: relative;
             background: var(--navy);
             color: #fff;
             font-size: 0.75rem;
@@ -338,7 +332,6 @@
             opacity: 1;
             transform: translateX(0);
         }
-
         .chat-fab-btn {
             width: 56px; height: 56px;
             border-radius: 50%;
@@ -349,7 +342,7 @@
             box-shadow: 0 4px 18px rgba(15,31,53,0.4), 0 1px 4px rgba(0,0,0,0.12);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             flex-shrink: 0;
-            position: relative;     /* needed for ::before ring + dot */
+            position: relative;
         }
         .chat-fab:hover .chat-fab-btn {
             transform: scale(1.1);
@@ -362,13 +355,12 @@
             border-radius: 50%;
             border: 2px solid rgba(15,31,53,0.25);
             animation: fabRing 2.6s ease-out infinite;
-            pointer-events: none;   /* FIX: prevents ring from blocking clicks */
+            pointer-events: none;
         }
         @keyframes fabRing {
             0%   { transform: scale(1);    opacity: 0.8; }
             100% { transform: scale(1.55); opacity: 0; }
         }
-
         .chat-fab-dot {
             position: absolute;
             top: 4px; right: 4px;
@@ -384,13 +376,9 @@
             from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-6px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
 
         /* ── Responsive ─────────────────────────────────── */
-        @media (max-width: 620px) {
+        @media (max-width: 640px) {
             .nav-grid { grid-template-columns: 1fr; }
             .topbar { padding: 0 20px; }
             .topbar-meta { display: none; }
@@ -409,21 +397,13 @@
             <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
             <path d="M13 13l6 6"/>
         </svg>
-        Fabric AI Monitoring
+        Fabric AI
     </div>
     <div class="topbar-meta">Wastage Prediction System</div>
 </header>
 
 <!-- ── Page ──────────────────────────────────────────────── -->
 <div class="page">
-
-    <!-- Success alert -->
-    <div th:if="${success}" class="alert-success">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-        <span th:text="${success}"></span>
-    </div>
 
     <!-- Welcome row -->
     <div class="welcome-row">
@@ -440,11 +420,14 @@
         </div>
     </div>
 
-    <!-- Module cards -->
+    <!-- Module cards — visibility controlled by Spring Security roles -->
     <div class="section-label">Available Modules</div>
     <div class="nav-grid">
 
-        <a href="/user/historical" class="nav-card green">
+        <!-- Historical Data — Business Analyst + Managing Director -->
+        <a href="/user/historical"
+           sec:authorize="hasAnyRole('BUSINESS_ANALYST', 'MANAGING_DIRECTOR')"
+           class="nav-card green">
             <div class="nav-icon green">&#128202;</div>
             <div class="nav-card-body">
                 <h3>Historical Data</h3>
@@ -453,17 +436,11 @@
             <div class="nav-arrow">&#x2192;</div>
         </a>
 
-        <a href="/cutting-risk-dashboard.html" class="nav-card blue">
-            <div class="nav-icon blue">&#9986;</div>
-            <div class="nav-card-body">
-                <h3>Cutting Risk Analysis</h3>
-                <p>View fabric waste trends and risk distribution charts</p>
-            </div>
-            <div class="nav-arrow">&#x2192;</div>
-        </a>
-
-        <a href="/report" class="nav-card amber">
-            <div class="nav-icon amber">&#128196;</div>
+        <!-- Report Generation — Business Analyst + Managing Director -->
+        <a href="/report"
+           sec:authorize="hasAnyRole('BUSINESS_ANALYST', 'MANAGING_DIRECTOR')"
+           class="nav-card orange">
+            <div class="nav-icon orange">&#128196;</div>
             <div class="nav-card-body">
                 <h3>Report Generation</h3>
                 <p>Generate and download waste prediction reports</p>
@@ -471,7 +448,10 @@
             <div class="nav-arrow">&#x2192;</div>
         </a>
 
-        <a href="/sustainability-dashboard" class="nav-card purple">
+        <!-- Sustainability Dashboard — Sustainability Officer + Managing Director -->
+        <a href="/sustainability/dashboard"
+           sec:authorize="hasAnyRole('SUSTAINABILITY_OFFICER', 'MANAGING_DIRECTOR')"
+           class="nav-card purple">
             <div class="nav-icon purple">&#127807;</div>
             <div class="nav-card-body">
                 <h3>Sustainability Dashboard</h3>
@@ -480,20 +460,38 @@
             <div class="nav-arrow">&#x2192;</div>
         </a>
 
-        <a href="/dashboard" class="nav-card teal">
-            <div class="nav-icon teal">&#129302;</div>
+        <!-- Model Monitoring — Technical Officer + Managing Director -->
+        <a href="/monitoring/show"
+           sec:authorize="hasAnyRole('TECHNICAL_OFFICER', 'MANAGING_DIRECTOR')"
+           class="nav-card teal">
+            <div class="nav-icon teal">&#128300;</div>
             <div class="nav-card-body">
-                <h3>Waste Prediction</h3>
-                <p>Run the AI model to predict fabric waste for new cutting inputs</p>
+                <h3>Model Performance Monitoring</h3>
+                <p>View R&#178;, MAE and detailed model performance metrics</p>
             </div>
             <div class="nav-arrow">&#x2192;</div>
         </a>
 
-        <a href="/monitoring/show" class="nav-card rose">
-            <div class="nav-icon rose">&#128200;</div>
+        <!-- Cutting Parameter Input — Cutting Manager + Managing Director -->
+        <a href="/dashboard"
+           sec:authorize="hasAnyRole('CUTTING_MANAGER', 'MANAGING_DIRECTOR')"
+           class="nav-card blue">
+            <div class="nav-icon blue">&#9986;</div>
             <div class="nav-card-body">
-                <h3>Model Monitoring</h3>
-                <p>Track model accuracy, R&#178; score, MAE and retrain when needed</p>
+                <h3>Cutting Parameter Input</h3>
+                <p>Enter and validate fabric and cutting parameters</p>
+            </div>
+            <div class="nav-arrow">&#x2192;</div>
+        </a>
+
+        <!-- Cutting Risk Analysis — Cutting Manager + Managing Director -->
+        <a href="/cutting-risk-dashboard.html"
+           sec:authorize="hasAnyRole('CUTTING_MANAGER', 'MANAGING_DIRECTOR')"
+           class="nav-card red">
+            <div class="nav-icon red">&#128200;</div>
+            <div class="nav-card-body">
+                <h3>Cutting Risk Analysis</h3>
+                <p>View fabric waste trends and risk distribution charts</p>
             </div>
             <div class="nav-arrow">&#x2192;</div>
         </a>

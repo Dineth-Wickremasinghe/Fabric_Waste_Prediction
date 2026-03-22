@@ -3,294 +3,908 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sustainability Dashboard - Fabric Waste Prediction</title>
+    <title>EcoCut - Complete Sustainability Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/sustainability.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, #1e3c2c 0%, #2e7d32 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-brand i {
+            margin-right: 8px;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            border: none;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .section-icon.green {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            color: #2e7d32;
+        }
+
+        .section-icon.blue {
+            background: linear-gradient(135deg, #e3f2fd, #bbdef5);
+            color: #1976d2;
+        }
+
+        .section-icon.orange {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            color: #f57c00;
+        }
+
+        .section-icon.purple {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            color: #7b1fa2;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .section-subtitle {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* Form Styling */
+        .form-label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #334155;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-control, .form-select {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+        }
+
+        /* Range Slider */
+        .form-range {
+            height: 6px;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            background: #2e7d32;
+            width: 18px;
+            height: 18px;
+        }
+
+        .range-value {
+            font-weight: 600;
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* Radio Buttons */
+        .btn-option {
+            border-radius: 30px !important;
+            padding: 8px 16px !important;
+            font-size: 0.85rem !important;
+            font-weight: 500 !important;
+            transition: all 0.2s;
+        }
+
+        .btn-option:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-check:checked + .btn-outline-success {
+            background: linear-gradient(135deg, #2e7d32, #43a047);
+            border-color: #2e7d32;
+            color: white;
+        }
+
+        .btn-check:checked + .btn-outline-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+        }
+
+        .btn-check:checked + .btn-outline-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-check:checked + .btn-outline-info {
+            background: #0dcaf0;
+            border-color: #0dcaf0;
+            color: #000;
+        }
+
+        .btn-check:checked + .btn-outline-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+
+        .btn-check:checked + .btn-outline-dark {
+            background: #212529;
+            border-color: #212529;
+            color: white;
+        }
+
+        /* Score Card */
+        .score-card {
+            background: linear-gradient(135deg, #1e3c2c, #2e7d32);
+            border-radius: 20px;
+            padding: 1.5rem;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .score-number {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .rating-badge {
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s;
+            border: 1px solid #e9ecef;
+        }
+
+        .metric-card:hover {
+            border-color: #2e7d32;
+            transform: translateY(-3px);
+        }
+
+        .metric-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 0;
+        }
+
+        /* Question Cards */
+        .question-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+            border: 1px solid #e9ecef;
+        }
+
+        .question-card:hover {
+            background: white;
+            border-color: #2e7d32;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .question-number {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #2e7d32, #43a047);
+            color: white;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .question-title {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Prediction Form Card */
+        .prediction-card {
+            background: linear-gradient(135deg, #fef9e6, #fff4e0);
+            border: 1px solid #ffe0b2;
+        }
+
+        /* Report Card */
+        .report-card {
+            background: linear-gradient(135deg, #e8f0fe, #d9e6ff);
+            border: 1px solid #bbdef5;
+        }
+
+        /* Tip Box */
+        .tip-box {
+            background: #fff8e7;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+
+        /* Buttons */
+        .btn-calculate {
+            background: linear-gradient(135deg, #2e7d32, #43a047);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 40px;
+            transition: all 0.3s;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(46,125,50,0.3);
+        }
+
+        .btn-predict {
+            background: linear-gradient(135deg, #f57c00, #ff9800);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 40px;
+            transition: all 0.3s;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245,124,0,0.3);
+        }
+
+        .btn-report {
+            background: linear-gradient(135deg, #6f42c1, #8b5cf6);
+            border: none;
+            padding: 10px 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border-radius: 30px;
+            transition: all 0.3s;
+        }
+
+        .btn-report:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(111,66,193,0.3);
+        }
+
+        .btn-report i {
+            margin-right: 6px;
+        }
+
+        /* Date Range Picker */
+        .date-range-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .score-number {
+                font-size: 2.5rem;
+            }
+            .metric-value {
+                font-size: 1.2rem;
+            }
+            .question-card {
+                padding: 1rem;
+            }
+            .btn-report {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animated {
+            animation: fadeInUp 0.5s ease-out;
+        }
+    </style>
 </head>
 <body>
-<div class="container-fluid">
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-recycle"></i>
-                EcoCut - Sustainability Dashboard
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#"><i class="bi bi-house-door"></i> Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="downloadReport('pdf')">
-                            <i class="bi bi-file-pdf"></i> PDF Report
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="downloadReport('excel')">
-                            <i class="bi bi-file-excel"></i> Excel Report
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <div class="row">
-        <!-- Left Column - Prediction Form -->
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-calculator"></i> Calculate Environmental Impact</h5>
+<!-- Navigation -->
+<nav class="navbar navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-recycle"></i> EcoCut
+        </a>
+        <div class="d-flex gap-2">
+            <a href="/sustainability/dashboard" class="btn btn-outline-light btn-sm active">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="text-center mb-4 animated">
+        <h1 class="display-5 fw-bold" style="color: #1e3c2c;">🌿 Complete Sustainability Dashboard</h1>
+        <p class="text-muted">Calculate environmental impact + Get sustainability score & recommendations</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Forms -->
+        <div class="col-lg-5">
+            <!-- PREDICTION FORM (Original) -->
+            <div class="card prediction-card mb-4">
+                <div class="card-header bg-transparent">
+                    <div class="section-header mb-0">
+                        <div class="section-icon orange">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <div>
+                            <h5 class="section-title">📊 Fabric Prediction</h5>
+                            <p class="section-subtitle">Calculate your environmental impact</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <form th:action="@{/sustainability/predict}" method="post" th:object="${predictionInput}">
-                        <div class="mb-3">
-                            <label class="form-label">Fabric Type</label>
-                            <select class="form-select" th:field="*{fabricType}" required>
-                                <option value="">Select Fabric</option>
-                                <option th:each="type : ${fabricTypes}" th:value="${type}" th:text="${type}"></option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Fabric Pattern</label>
-                            <select class="form-select" th:field="*{fabricPattern}" required>
-                                <option value="">Select Pattern</option>
-                                <option th:each="pattern : ${fabricPatterns}" th:value="${pattern}" th:text="${pattern}"></option>
-                            </select>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Fabric Type</label>
+                                <select class="form-select" th:field="*{fabricType}" required>
+                                    <option value="">Select</option>
+                                    <option th:each="type : ${fabricTypes}" th:value="${type}" th:text="${type}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fabric Pattern</label>
+                                <select class="form-select" th:field="*{fabricPattern}" required>
+                                    <option value="">Select</option>
+                                    <option th:each="pattern : ${fabricPatterns}" th:value="${pattern}" th:text="${pattern}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">GSM</label>
                                 <input type="number" class="form-control" th:field="*{fabricGSM}" required min="50" max="500" placeholder="150">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Width (inches)</label>
                                 <input type="number" class="form-control" th:field="*{fabricWidth}" required min="30" max="120" placeholder="60">
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Number of Layers</label>
                                 <input type="number" class="form-control" th:field="*{numberOfLayers}" required min="1" max="100" placeholder="20">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Order Quantity (m)</label>
                                 <input type="number" class="form-control" th:field="*{orderQuantity}" required min="10" step="0.1" placeholder="100">
                             </div>
                         </div>
+                        <button type="submit" class="btn btn-predict w-100 mt-4">
+                            <i class="bi bi-calculator-fill me-2"></i> Calculate Impact
+                        </button>
+                    </form>
+                </div>
+            </div>
 
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-calculator"></i> Calculate Impact
+            <!-- SUSTAINABILITY FORM (6 Questions) -->
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <div class="section-header mb-0">
+                        <div class="section-icon green">
+                            <i class="bi bi-sliders2"></i>
+                        </div>
+                        <div>
+                            <h5 class="section-title">🌱 Sustainability Check</h5>
+                            <p class="section-subtitle">Answer 6 questions for your sustainability score</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Messages -->
+                    <div th:if="${success}" class="alert alert-success rounded-4 mb-3">
+                        <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger rounded-4 mb-3">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
+                    </div>
+
+                    <form th:action="@{/sustainability/calculate-simple}" th:object="${sustainabilityInput}" method="post" id="sustainabilityForm">
+
+                        <!-- Question 1: Recycling Rate -->
+                        <div class="question-card">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="question-number">1</span>
+                                <span class="question-title">♻️ Fabric Waste Recycling</span>
+                            </div>
+                            <div class="mt-2">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-muted small">0%</span>
+                                    <span class="fw-bold text-success range-value" id="recyclingValue">50%</span>
+                                    <span class="text-muted small">100%</span>
+                                </div>
+                                <input type="range" class="form-range" th:field="*{recyclingRate}" min="0" max="100" step="5" oninput="updatePreview()">
+                                <small class="text-muted">Percentage of fabric waste recycled</small>
+                            </div>
+                        </div>
+
+                        <!-- Question 2: Waste Disposal -->
+                        <div class="question-card">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="question-number">2</span>
+                                <span class="question-title">🗑️ Non-Recycled Waste</span>
+                            </div>
+                            <div class="row g-2 mt-1">
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" th:field="*{wasteDisposal}" value="RECYCLE" id="recycle" onchange="updatePreview()">
+                                    <label class="btn btn-outline-success w-100 btn-option" for="recycle">
+                                        <i class="bi bi-arrow-repeat"></i> Recycle
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" th:field="*{wasteDisposal}" value="INCINERATE" id="incinerate" onchange="updatePreview()">
+                                    <label class="btn btn-outline-warning w-100 btn-option" for="incinerate">
+                                        <i class="bi bi-fire"></i> Incinerate
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" th:field="*{wasteDisposal}" value="LANDFILL" id="landfill" onchange="updatePreview()">
+                                    <label class="btn btn-outline-danger w-100 btn-option" for="landfill">
+                                        <i class="bi bi-trash"></i> Landfill
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Question 3: Energy Source -->
+                        <div class="question-card">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="question-number">3</span>
+                                <span class="question-title">⚡ Energy Source</span>
+                            </div>
+                            <div class="row g-2 mt-1">
+                                <div class="col-3">
+                                    <input type="radio" class="btn-check" th:field="*{energySource}" value="SOLAR" id="solar" onchange="updatePreview()">
+                                    <label class="btn btn-outline-warning w-100 btn-option" for="solar">☀️ Solar</label>
+                                </div>
+                                <div class="col-3">
+                                    <input type="radio" class="btn-check" th:field="*{energySource}" value="WIND" id="wind" onchange="updatePreview()">
+                                    <label class="btn btn-outline-info w-100 btn-option" for="wind">💨 Wind</label>
+                                </div>
+                                <div class="col-3">
+                                    <input type="radio" class="btn-check" th:field="*{energySource}" value="MIXED" id="mixed" onchange="updatePreview()">
+                                    <label class="btn btn-outline-secondary w-100 btn-option" for="mixed">🔄 Mixed</label>
+                                </div>
+                                <div class="col-3">
+                                    <input type="radio" class="btn-check" th:field="*{energySource}" value="GRID" id="grid" onchange="updatePreview()">
+                                    <label class="btn btn-outline-dark w-100 btn-option" for="grid">🏭 Grid</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Question 4: Renewable Percentage -->
+                        <div class="question-card">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="question-number">4</span>
+                                <span class="question-title">🌱 Renewable Energy</span>
+                            </div>
+                            <div class="mt-2">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-muted small">0%</span>
+                                    <span class="fw-bold text-success range-value" id="renewableValue">30%</span>
+                                    <span class="text-muted small">100%</span>
+                                </div>
+                                <input type="range" class="form-range" th:field="*{renewablePercentage}" min="0" max="100" step="5" oninput="updatePreview()">
+                                <small class="text-muted">Percentage of energy from renewable sources</small>
+                            </div>
+                        </div>
+
+                        <!-- Question 5: Certification -->
+                        <div class="question-card">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="question-number">5</span>
+                                <span class="question-title">🏆 Eco-Certification</span>
+                            </div>
+                            <div class="row g-2 mt-1">
+                                <div class="col-3">
+                                    <input type="radio" class="btn-check" th:field="*{certification}" value="NONE" id="none" onchange="updatePreview()">
+                                    <label class="btn btn-outline-secondary w-100 btn-option" for="none">None</label>
+                                </div>
+                                <div class="col-3">
+                                    <input type="radio" class="btn-check" th:field="*{certification}" value="OEKO_TEX" id="oeko" onchange="updatePreview()">
+                                    <label class="btn btn-outline-info w-100 btn-option" for="oeko">OEKO-TEX</label>
+                                </div>
+                                <div class="col-3">
+                                    <input type="radio" class="btn-check" th:field="*{certification}" value="GOTS" id="gots" onchange="updatePreview()">
+                                    <label class="btn btn-outline-warning w-100 btn-option" for="gots">GOTS</label>
+                                </div>
+                                <div class="col-3">
+                                    <input type="radio" class="btn-check" th:field="*{certification}" value="BLUESIGN" id="bluesign" onchange="updatePreview()">
+                                    <label class="btn btn-outline-success w-100 btn-option" for="bluesign">BLUESIGN</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Question 6: Compliance -->
+                        <div class="question-card">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="question-number">6</span>
+                                <span class="question-title">📋 Regulatory Compliance</span>
+                            </div>
+                            <div class="row g-2 mt-1">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" th:field="*{followsLaws}" th:value="true" id="lawsYes" onchange="updatePreview()">
+                                    <label class="btn btn-outline-success w-100 btn-option" for="lawsYes">
+                                        <i class="bi bi-check-circle"></i> Yes, comply
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" th:field="*{followsLaws}" th:value="false" id="lawsNo" onchange="updatePreview()">
+                                    <label class="btn btn-outline-danger w-100 btn-option" for="lawsNo">
+                                        <i class="bi bi-x-circle"></i> Not yet
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mt-2">Water discharge, air emissions, waste disposal regulations</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-calculate w-100 mt-3">
+                            <i class="bi bi-calculator-fill me-2"></i> Calculate Sustainability Score
                         </button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column - Dashboard Metrics -->
-        <div class="col-lg-8">
-            <!-- Flash Messages -->
-            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
-                <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
-                <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <!-- Right Column: Dashboard Metrics -->
+        <div class="col-lg-7">
+            <!-- Live Score Preview -->
+            <div class="card mb-4" id="previewCard">
+                <div class="card-body p-4">
+                    <div id="livePreview">
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-sliders2 fs-1"></i>
+                            <p class="mt-3">Adjust the sliders to see your sustainability score</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Updated Sustainability Score Card with kg units -->
-            <div class="card shadow mb-4 bg-gradient-primary">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-4 text-center">
-                            <h2 class="display-4 fw-bold text-success mb-0"
-                                th:text="${#numbers.formatDecimal(summary.overallSustainabilityScore, 1, 1)} + '%'">85%</h2>
-                            <p class="text-muted mb-0">Overall Sustainability Score</p>
+            <!-- Prediction Impact Results -->
+            <div th:if="${impact}" class="card mb-4 border-success">
+                <div class="card-header bg-transparent">
+                    <div class="section-header mb-0">
+                        <div class="section-icon orange">
+                            <i class="bi bi-graph-up-arrow"></i>
                         </div>
-                        <div class="col-md-8">
-                            <div class="row">
-                                <div class="col-sm-6 mb-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <i class="bi bi-droplet fs-2 text-primary"></i>
-                                        </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h6 class="mb-0">Water Saved</h6>
-                                            <h4 class="mb-0" th:text="${#numbers.formatDecimal(summary.totalWaterSaved, 1, 0)} + 'L'">45,200L</h4>
-                                            <small class="text-muted">liters</small>
-                                        </div>
-                                    </div>
+                        <div>
+                            <h5 class="section-title">📈 Latest Prediction Impact</h5>
+                            <p class="section-subtitle">Based on your fabric prediction</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: #e8f5e9; color: #2e7d32;">
+                                    <i class="bi bi-cloud"></i>
                                 </div>
-                                <div class="col-sm-6 mb-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <i class="bi bi-cloud fs-2 text-secondary"></i>
-                                        </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h6 class="mb-0">CO₂ Avoided</h6>
-                                            <h4 class="mb-0" th:text="${#numbers.formatDecimal(summary.totalCarbonAvoided, 1, 0)} + ' kg'">12,400 kg</h4>
-                                            <small class="text-muted">kilograms</small>
-                                        </div>
-                                    </div>
+                                <p class="metric-value" th:text="${#numbers.formatDecimal(impact.co2SavedKg, 1, 0)} + ' kg'">125 kg</p>
+                                <p class="metric-label">CO₂ Saved</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: #e3f2fd; color: #1976d2;">
+                                    <i class="bi bi-droplet"></i>
                                 </div>
-                                <div class="col-sm-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <i class="bi bi-trash3 fs-2 text-danger"></i>
-                                        </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h6 class="mb-0">Landfill Avoided</h6>
-                                            <h4 class="mb-0" th:text="${#numbers.formatDecimal(summary.totalWasteReduced, 1, 0)} + ' kg'">2,800 kg</h4>
-                                            <small class="text-muted">kilograms</small>
-                                        </div>
-                                    </div>
+                                <p class="metric-value" th:text="${#numbers.formatDecimal(impact.waterSavedL, 1, 0)} + ' L'">7,530 L</p>
+                                <p class="metric-label">Water Saved</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: #fff3e0; color: #f57c00;">
+                                    <i class="bi bi-trash3"></i>
                                 </div>
-                                <div class="col-sm-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <i class="bi bi-cash-stack fs-2 text-success"></i>
-                                        </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h6 class="mb-0">Cost Saved</h6>
-                                            <h4 class="mb-0" th:text="'Rs. ' + ${#numbers.formatDecimal(summary.totalCostSaved, 1, 0)}">Rs. 12,500</h4>
-                                            <small class="text-muted">Sri Lankan Rupees</small>
-                                        </div>
-                                    </div>
+                                <p class="metric-value" th:text="${#numbers.formatDecimal(impact.fabricSavedKg, 1, 1)} + ' kg'">50.2 kg</p>
+                                <p class="metric-label">Fabric Saved</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: #fce4ec; color: #c2185b;">
+                                    <i class="bi bi-cash-stack"></i>
                                 </div>
+                                <p class="metric-value" th:text="'Rs. ' + ${#numbers.formatDecimal(impact.costSavedLkr, 1, 0)}">Rs. 37,500</p>
+                                <p class="metric-label">Cost Saved</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <p><strong>Risk Level:</strong>
+                            <span class="badge" th:classappend="${impact.riskLevel == 'HIGH' ? 'bg-danger' : (impact.riskLevel == 'MEDIUM' ? 'bg-warning' : 'bg-success')}"
+                                  th:text="${impact.riskLevel}">LOW</span>
+                        </p>
+                        <p><strong>Recommendations:</strong> <span th:text="${impact.recommendations}"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Impact Metrics -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="section-header mb-3">
+                        <div class="section-icon blue">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div>
+                            <h5 class="section-title">Key Impact Metrics</h5>
+                            <p class="section-subtitle">Overall performance (last 30 days)</p>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: #e8f5e9; color: #2e7d32;">
+                                    <i class="bi bi-cloud"></i>
+                                </div>
+                                <p class="metric-value" th:text="${summary.totalCarbonAvoided != null ? #numbers.formatDecimal(summary.totalCarbonAvoided, 1, 0) + ' kg' : '12,400 kg'}">12,400 kg</p>
+                                <p class="metric-label">CO₂ Avoided</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: #e3f2fd; color: #1976d2;">
+                                    <i class="bi bi-droplet"></i>
+                                </div>
+                                <p class="metric-value" th:text="${summary.totalWaterSaved != null ? #numbers.formatDecimal(summary.totalWaterSaved, 1, 0) + ' L' : '45,200 L'}">45,200 L</p>
+                                <p class="metric-label">Water Saved</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: #fff3e0; color: #f57c00;">
+                                    <i class="bi bi-trash3"></i>
+                                </div>
+                                <p class="metric-value" th:text="${summary.totalWasteReduced != null ? #numbers.formatDecimal(summary.totalWasteReduced, 1, 0) + ' kg' : '2,800 kg'}">2,800 kg</p>
+                                <p class="metric-label">Landfill Avoided</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: #fce4ec; color: #c2185b;">
+                                    <i class="bi bi-cash-stack"></i>
+                                </div>
+                                <p class="metric-value" th:text="${summary.totalCostSaved != null ? 'Rs. ' + #numbers.formatDecimal(summary.totalCostSaved, 1, 0) : 'Rs. 12,500'}">Rs. 12,500</p>
+                                <p class="metric-label">Cost Saved</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Impact Chart -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Environmental Impact Trends</h5>
+            <!-- REPORT GENERATION SECTION (Moved after Key Impact Metrics) -->
+            <div class="card report-card mb-4">
+                <div class="card-header bg-transparent">
+                    <div class="section-header mb-0">
+                        <div class="section-icon purple">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div>
+                            <h5 class="section-title">📄 Generate Reports</h5>
+                            <p class="section-subtitle">Export your sustainability data</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="impactChart" height="100"></canvas>
-                    <div class="mt-2 small text-muted">
-                        <span class="me-3"><span class="badge bg-success">●</span> CO2 Savings (kg)</span>
-                        <span><span class="badge bg-primary">●</span> Water Saved (10L)</span>
+                    <div class="date-range-card">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="reportStartDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="reportEndDate">
+                            </div>
+                        </div>
+                        <div class="row g-2 mt-3">
+                            <div class="col-md-6">
+                                <button class="btn btn-report w-100" onclick="generateReport('pdf')">
+                                    <i class="bi bi-file-pdf-fill"></i> Export as PDF
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-report w-100" onclick="generateReport('excel')">
+                                    <i class="bi bi-file-excel-fill"></i> Export as Excel
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row g-2 mt-2">
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('7days')">
+                                    <i class="bi bi-calendar-week"></i> Last 7 Days
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('30days')">
+                                    <i class="bi bi-calendar-month"></i> Last 30 Days
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('year')">
+                                    <i class="bi bi-calendar-year"></i> Last Year
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Updated Recent Impact Metrics with Cost Saved included -->
-            <div th:if="${impact}" class="card shadow mb-4 border-success">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Latest Prediction Impact</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="metric-box p-3 bg-light rounded">
-                                <small class="text-muted">CO2 Saved</small>
-                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.co2SavedKg, 1, 0)} + ' kg'">125 kg</h5>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="metric-box p-3 bg-light rounded">
-                                <small class="text-muted">Water Saved</small>
-                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.waterSavedL, 1, 0)} + ' L'">7,530 L</h5>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="metric-box p-3 bg-light rounded">
-                                <small class="text-muted">Fabric Saved</small>
-                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.fabricSavedKg, 1, 1)} + ' kg'">50.2 kg</h5>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="metric-box p-3 bg-light rounded">
-                                <small class="text-muted">Energy Saved</small>
-                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.energySavedKwh, 1, 0)} + ' kWh'">2,259 kWh</h5>
-                            </div>
+            <!-- Fabric Breakdown & High Risk -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-success"></i> Fabric Waste Breakdown</h6>
+                            <canvas id="fabricChart" height="180"></canvas>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="metric-box p-3 bg-light rounded">
-                                <small class="text-muted">Cost Saved</small>
-                                <h5 class="mb-0" th:text="'Rs. ' + ${#numbers.formatDecimal(impact.costSavedLkr, 1, 0)}">Rs. 37,500</h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2 text-warning"></i> High Risk Fabrics</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                    <tr>
+                                        <th>Fabric</th>
+                                        <th>Wastage</th>
+                                        <th>Risk</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="fabric : ${highRiskFabrics}" th:classappend="${fabric.riskLevel == 'HIGH' ? 'table-danger' : 'table-warning'}">
+                                        <td th:text="${fabric.fabricType}">Cotton</td>
+                                        <td th:text="${#numbers.formatDecimal(fabric.avgWastagePct, 1, 1)} + '%'">15.2%</td>
+                                        <td><span class="badge" th:classappend="${fabric.riskLevel == 'HIGH' ? 'bg-danger' : 'bg-warning'}" th:text="${fabric.riskLevel}">HIGH</span></td>
+                                    </tr>
+                                    <tr th:if="${highRiskFabrics == null or highRiskFabrics.isEmpty()}">
+                                        <td colspan="3" class="text-center text-muted">No high risk fabrics</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="metric-box p-3 bg-light rounded">
-                                <small class="text-muted">Landfill Avoided</small>
-                                <h5 class="mb-0" th:text="${#numbers.formatDecimal(impact.landfillAvoidedKg, 1, 1)} + ' kg'">15.8 kg</h5>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Risk Level:</strong>
-                                <span class="badge" th:classappend="${impact.riskLevel == 'HIGH' ? 'bg-danger' :
-                                        (impact.riskLevel == 'MEDIUM' ? 'bg-warning' : 'bg-success')}"
-                                      th:text="${impact.riskLevel}">LOW</span>
-                            </p>
-                            <p><strong>Recommendations:</strong> <span th:text="${impact.recommendations}"></span></p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Fabric Breakdown Section -->
-    <div class="row mt-3">
-        <div class="col-md-6">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Fabric Breakdown by Wastage</h5>
-                </div>
+            <!-- Environmental Impact Trend -->
+            <div class="card mt-4">
                 <div class="card-body">
-                    <canvas id="fabricChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> High Risk Fabrics</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th>Fabric Type</th>
-                                <th>Wastage %</th>
-                                <th>Risk Level</th>
-                                <th>Optimization</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="fabric : ${highRiskFabrics}" th:classappend="${fabric.riskLevel == 'HIGH' ? 'table-danger' : 'table-warning'}">
-                                <td th:text="${fabric.fabricType}">Cotton</td>
-                                <td th:text="${#numbers.formatDecimal(fabric.avgWastagePct, 1, 1)} + '%'">15.2%</td>
-                                <td>
-                                    <span class="badge" th:classappend="${fabric.riskLevel == 'HIGH' ? 'bg-danger' : 'bg-warning'}"
-                                          th:text="${fabric.riskLevel}">HIGH</span>
-                                </td>
-                                <td>
-                                    <span th:if="${fabric.optimizationNeeded}" class="badge bg-danger">Needed</span>
-                                    <span th:unless="${fabric.optimizationNeeded}" class="badge bg-success">Good</span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                    <h6 class="fw-bold mb-3"><i class="bi bi-graph-up me-2 text-success"></i> Environmental Impact Trend</h6>
+                    <canvas id="impactChart" height="120"></canvas>
+                    <div class="mt-2 text-center small text-muted">
+                        <span class="me-3"><span class="badge bg-success" style="width: 10px; height: 10px; padding: 0; display: inline-block; border-radius: 50%;"></span> CO₂ Savings (kg)</span>
+                        <span><span class="badge bg-primary" style="width: 10px; height: 10px; padding: 0; display: inline-block; border-radius: 50%;"></span> Water Saved (10L)</span>
                     </div>
                 </div>
             </div>
@@ -298,93 +912,168 @@
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script th:src="@{/js/dashboard.js}"></script>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    function downloadReport(format) {
-        const startDate = prompt("Enter start date (YYYY-MM-DD) or leave empty for last 30 days:",
-            new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0]);
-        const endDate = prompt("Enter end date (YYYY-MM-DD) or leave empty for today:",
-            new Date().toISOString().split('T')[0]);
+<script>
+    // Report Generation Functions
+    function generateReport(format) {
+        const startDate = document.getElementById('reportStartDate').value;
+        const endDate = document.getElementById('reportEndDate').value;
 
-        if (startDate && endDate) {
-            window.location.href = '/sustainability/report/' + format +
-                '?startDate=' + startDate + '&endDate=' + endDate;
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates');
+            return;
         }
+
+        window.location.href = '/sustainability/report/' + format + '?startDate=' + startDate + '&endDate=' + endDate;
     }
 
+    function setQuickRange(range) {
+        const today = new Date();
+        const endDate = today.toISOString().split('T')[0];
+        let startDate = new Date();
+
+        switch(range) {
+            case '7days':
+                startDate.setDate(today.getDate() - 7);
+                break;
+            case '30days':
+                startDate.setDate(today.getDate() - 30);
+                break;
+            case 'year':
+                startDate.setFullYear(today.getFullYear() - 1);
+                break;
+        }
+
+        document.getElementById('reportStartDate').value = startDate.toISOString().split('T')[0];
+        document.getElementById('reportEndDate').value = endDate;
+    }
+
+    // Live Preview Function
+    function updatePreview() {
+        const recycling = parseFloat(document.querySelector('[name="recyclingRate"]')?.value) || 0;
+        const renewable = parseFloat(document.querySelector('[name="renewablePercentage"]')?.value) || 0;
+        const wasteDisposal = document.querySelector('[name="wasteDisposal"]:checked')?.value || 'RECYCLE';
+        const certification = document.querySelector('[name="certification"]:checked')?.value || 'NONE';
+        const followsLaws = document.querySelector('[name="followsLaws"]:checked')?.value === 'true';
+
+        document.getElementById('recyclingValue').innerText = recycling + '%';
+        document.getElementById('renewableValue').innerText = renewable + '%';
+
+        let score = 0;
+        score += (recycling / 100) * 35;
+        score += (renewable / 100) * 35;
+        if (followsLaws) score += 20;
+        if (certification === 'OEKO_TEX') score += 5;
+        if (certification === 'GOTS') score += 8;
+        if (certification === 'BLUESIGN') score += 10;
+        if (wasteDisposal === 'RECYCLE') score += 10;
+        if (wasteDisposal === 'INCINERATE') score += 5;
+
+        score = Math.min(100, Math.round(score));
+
+        let rating = '', bgColor = '', emoji = '', message = '';
+        if (score >= 80) { rating = 'PLATINUM'; bgColor = '#e5e4e2'; emoji = '🏆'; message = 'Excellent! You\'re a sustainability leader!'; }
+        else if (score >= 70) { rating = 'GOLD'; bgColor = '#ffd700'; emoji = '⭐'; message = 'Great work! Keep up the good practices!'; }
+        else if (score >= 60) { rating = 'SILVER'; bgColor = '#c0c0c0'; emoji = '👍'; message = 'Good progress! A few improvements will get you higher!'; }
+        else if (score >= 50) { rating = 'BRONZE'; bgColor = '#cd7f32'; emoji = '📈'; message = 'Fair score. Focus on recycling and renewable energy!'; }
+        else { rating = 'NEEDS IMPROVEMENT'; bgColor = '#ff5252'; emoji = '⚠️'; message = 'Start with recycling more fabric waste and using clean energy!'; }
+
+        let tips = [];
+        if (recycling < 50) tips.push('♻️ Recycle more fabric waste - aim for 50%+');
+        if (renewable < 30) tips.push('⚡ Use more clean energy - aim for 30%+');
+        if (!followsLaws) tips.push('📋 Follow environmental laws');
+        if (certification === 'NONE') tips.push('🏆 Get eco-certification (GOTS, OEKO-TEX, or BLUESIGN)');
+        if (wasteDisposal === 'LANDFILL') tips.push('🗑️ Switch from landfill to recycling or incineration');
+
+        const tipHtml = tips.length > 0 ?
+            `<div class="tip-box mt-3"><i class="bi bi-lightbulb me-2"></i><strong>Tips to improve:</strong><br>${tips.map(t => `• ${t}`).join('<br>')}</div>` :
+            `<div class="tip-box mt-3" style="background:#e8f5e9; border-left-color:#4caf50;"><i class="bi bi-star-fill me-2"></i><strong>Perfect! You're doing everything right! 🎉</strong></div>`;
+
+        document.getElementById('livePreview').innerHTML = `
+            <div class="score-card">
+                <div class="score-number">${score}%</div>
+                <div class="rating-badge" style="background: ${bgColor}; color: ${score < 50 ? 'white' : '#333'}">${emoji} ${rating} ${emoji}</div>
+                <p class="mt-2 mb-0">${message}</p>
+            </div>
+            <div class="row text-center mt-4">
+                <div class="col-4"><small class="text-muted">Fabric Recycling</small><h5 class="text-success mt-1">${recycling}%</h5></div>
+                <div class="col-4"><small class="text-muted">Clean Energy</small><h5 class="text-success mt-1">${renewable}%</h5></div>
+                <div class="col-4"><small class="text-muted">Disposal</small><h5 class="text-success mt-1">${wasteDisposal === 'RECYCLE' ? '♻️ Recycle' : wasteDisposal === 'INCINERATE' ? '🔥 Incinerate' : '🗑️ Landfill'}</h5></div>
+            </div>
+            ${tipHtml}
+        `;
+    }
+
+    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        // Get fabric breakdown data
+        // Set default dates for report (last 30 days)
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        document.getElementById('reportStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+        document.getElementById('reportEndDate').value = today.toISOString().split('T')[0];
+
+        const recyclingInput = document.querySelector('[name="recyclingRate"]');
+        const renewableInput = document.querySelector('[name="renewablePercentage"]');
+        if (recyclingInput && !recyclingInput.value) recyclingInput.value = 50;
+        if (renewableInput && !renewableInput.value) renewableInput.value = 30;
+
+        const defaultWaste = document.getElementById('recycle');
+        const defaultEnergy = document.getElementById('mixed');
+        const defaultCert = document.getElementById('none');
+        const defaultLawsYes = document.getElementById('lawsYes');
+
+        if (defaultWaste) defaultWaste.checked = true;
+        if (defaultEnergy) defaultEnergy.checked = true;
+        if (defaultCert) defaultCert.checked = true;
+        if (defaultLawsYes) defaultLawsYes.checked = true;
+
+        updatePreview();
+
+        // Fabric Breakdown Chart
         fetch('/sustainability/api/fabric-breakdown')
             .then(response => response.json())
             .then(data => {
                 const fabricCtx = document.getElementById('fabricChart').getContext('2d');
                 new Chart(fabricCtx, {
-                    type: 'pie',
+                    type: 'doughnut',
                     data: {
                         labels: data.map(f => f.fabricType),
                         datasets: [{
                             data: data.map(f => f.wastagePercentage),
                             backgroundColor: data.map(f => f.colorCode || '#28a745'),
-                            borderWidth: 1
+                            borderWidth: 0
                         }]
                     },
                     options: {
                         responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
+                        maintainAspectRatio: true,
+                        plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } },
+                        cutout: '60%'
                     }
                 });
             });
 
+        // Impact Trend Chart
         const impactCtx = document.getElementById('impactChart').getContext('2d');
         new Chart(impactCtx, {
             type: 'line',
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                 datasets: [
-                    {
-                        label: 'CO2 Savings (kg)',
-                        data: [1200, 1350, 1100, 1600, 1450, 1700],
-                        borderColor: '#28a745',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Water Saved (10L)',
-                        data: [850, 920, 780, 1100, 980, 1250],
-                        borderColor: '#0d6efd',
-                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                        tension: 0.4
-                    }
+                    { label: 'CO2 Savings (kg)', data: [1200, 1350, 1100, 1600, 1450, 1700], borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,0.05)', tension: 0.4, fill: true },
+                    { label: 'Water Saved (10L)', data: [850, 920, 780, 1100, 980, 1250], borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.05)', tension: 0.4, fill: true }
                 ]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Amount'
-                        }
-                    }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
     });
-    /*]]>*/
+
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('change', updatePreview);
+        input.addEventListener('input', updatePreview);
+    });
 </script>
 </body>
 </html>
