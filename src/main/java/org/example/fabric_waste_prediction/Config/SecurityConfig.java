@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.io.IOException;
@@ -61,6 +62,27 @@ public class SecurityConfig {
         };
     }
 
+    // ── Custom Failure Handler ────────────────────────────────────────────────
+    // ✅ Redirects admin login failures back to /admin/login
+    // ✅ Redirects user login failures back to /user/login
+    @Bean
+    public AuthenticationFailureHandler customFailureHandler() {
+        return new AuthenticationFailureHandler() {
+            @Override
+            public void onAuthenticationFailure(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                org.springframework.security.core.AuthenticationException exception)
+                    throws IOException {
+                String referer = request.getHeader("Referer");
+                if (referer != null && referer.contains("/admin/login")) {
+                    response.sendRedirect("/admin/login?error=true");
+                } else {
+                    response.sendRedirect("/user/login?error=true");
+                }
+            }
+        };
+    }
+
     // ── Security Filter Chain ─────────────────────────────────────────────────
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -88,13 +110,11 @@ public class SecurityConfig {
                         .requestMatchers("/cutting-risk-dashboard.html").hasAnyRole("CUTTING_MANAGER", "MANAGING_DIRECTOR")
                         .anyRequest().authenticated()
                 )
-                // ── Single formLogin handles BOTH admin and user ──────────────────
-                // customSuccessHandler redirects to correct page based on role
                 .formLogin(form -> form
                         .loginPage("/user/login")
                         .loginProcessingUrl("/user/login")
                         .successHandler(customSuccessHandler())
-                        .failureUrl("/user/login?error=true")
+                        .failureHandler(customFailureHandler()) // ✅ replaced failureUrl with custom handler
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .permitAll()

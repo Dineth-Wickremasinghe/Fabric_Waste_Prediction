@@ -320,28 +320,36 @@
                             <option value="Auto">Auto</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Marker Loss %</label><input type="number" step="0.01" id="c-markerLossPct" name="markerLossPct" /></div>
-                    <div class="form-group"><label>Pattern Complexity</label><input type="number" step="0.01" id="c-patternComplexity" name="patternComplexity" /></div>
-                    <div class="form-group"><label>Operator Experience</label><input type="number" step="0.01" id="c-operatorExperience" name="operatorExperience" /></div>
-
+                    <div class="form-group">
+                        <label>Marker Loss %</label>
+                        <input type="number" step="0.01" id="c-markerLossPct" name="markerLossPct" />
+                        <span class="field-error" id="err-c-markerLossPct"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Pattern Complexity</label>
+                        <input type="number" step="0.01" id="c-patternComplexity" name="patternComplexity" />
+                        <span class="field-error" id="err-c-patternComplexity"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Operator Experience</label>
+                        <input type="number" step="0.01" id="c-operatorExperience" name="operatorExperience" />
+                        <span class="field-error" id="err-c-operatorExperience"></span>
+                    </div>
                     <div class="form-group">
                         <label>Predicted Waste %</label>
                         <input type="number" step="0.01" id="c-predictedWastePct" name="predictedWastePct" />
                         <span class="field-error" id="err-c-predictedWastePct"></span>
                     </div>
-
                     <div class="form-group">
                         <label>No. of Layers</label>
                         <input type="number" id="c-noOfLayers" name="noOfLayers" required />
                         <span class="field-error" id="err-c-noOfLayers"></span>
                     </div>
-
                     <div class="form-group">
                         <label>Fabric GSM</label>
                         <input type="number" id="c-fabricGsm" name="fabricGsm" />
                         <span class="field-error" id="err-c-fabricGsm"></span>
                     </div>
-
                     <div class="form-group">
                         <label>Shift</label>
                         <select id="c-shift" name="shift">
@@ -349,32 +357,30 @@
                             <option value="NIGHT">Night</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label>Cutting Overlap (mm)</label>
                         <input type="number" id="c-cuttingOverlapMm" name="cuttingOverlapMm" />
                         <span class="field-error" id="err-c-cuttingOverlapMm"></span>
                     </div>
-
                     <div class="form-group">
                         <label>Marker Efficiency %</label>
                         <input type="number" step="0.01" id="c-markerEfficiencyPct" name="markerEfficiencyPct" />
                         <span class="field-error" id="err-c-markerEfficiencyPct"></span>
                     </div>
-
                     <div class="form-group">
                         <label>Actual Wastage %</label>
                         <input type="number" step="0.01" id="c-actualWastagePct" name="actualWastagePct" />
                         <span class="field-error" id="err-c-actualWastagePct"></span>
                     </div>
-
                     <div class="form-group">
                         <label>Job Date</label>
                         <input type="date" id="c-jobDate" name="jobDate" required />
                         <span class="field-error" id="err-c-jobDate"></span>
                     </div>
-
-                    <div class="form-group full"><label>Notes</label><input type="text" id="c-notes" name="notes" /></div>
+                    <div class="form-group full">
+                        <label>Notes</label>
+                        <input type="text" id="c-notes" name="notes" />
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -464,7 +470,7 @@
         document.getElementById(prefix + '-no-results').style.display = visibleCount === 0 ? 'block' : 'none';
 
         const activeFilters = [];
-        if (singleDate) activeFilters.push('Date: ' + singleDate);
+        if (singleDate)   activeFilters.push('Date: ' + singleDate);
         if (fabricFilter) activeFilters.push('Fabric: ' + fabricFilter);
         if (methodFilter) activeFilters.push('Method: ' + methodFilter);
         if (shiftFilter)  activeFilters.push('Shift: '  + shiftFilter);
@@ -507,11 +513,6 @@
         closeFilterPopup('cutting');
     }
 
-    function monthName(m) {
-        const n = {'01':'January','02':'February','03':'March','04':'April','05':'May','06':'June','07':'July','08':'August','09':'September','10':'October','11':'November','12':'December'};
-        return n[m] || '';
-    }
-
     function buildCharts() {
         const wasteCtx = document.getElementById('wasteLineChart');
         if (wasteCtx && typeof chartLabels !== 'undefined' && chartLabels.length > 0) {
@@ -542,75 +543,131 @@
     }
 
     function openCuttingUpdateModal(btn) {
-        document.getElementById('c-fabricType').value         = btn.getAttribute('data-fabrictype') || '';
-        document.getElementById('c-fabricPattern').value      = btn.getAttribute('data-fabricpattern') || '';
-        document.getElementById('c-cuttingMethod').value      = btn.getAttribute('data-cuttingmethod') || '';
-        document.getElementById('c-markerLossPct').value      = btn.getAttribute('data-markerloss') || '';
-        document.getElementById('c-patternComplexity').value  = btn.getAttribute('data-patterncomplexity') || '';
-        document.getElementById('c-operatorExperience').value = btn.getAttribute('data-operatorexperience') || '';
-        document.getElementById('c-predictedWastePct').value  = btn.getAttribute('data-predictedwaste') || '';
-        document.getElementById('c-noOfLayers').value         = btn.getAttribute('data-nooflayers') || '';
-        document.getElementById('c-fabricGsm').value          = btn.getAttribute('data-fabricgsm') || '';
-        document.getElementById('c-shift').value              = btn.getAttribute('data-shift') || '';
-        document.getElementById('c-cuttingOverlapMm').value   = btn.getAttribute('data-overlapmm') || '';
+        document.getElementById('c-fabricType').value          = btn.getAttribute('data-fabrictype') || '';
+        document.getElementById('c-fabricPattern').value       = btn.getAttribute('data-fabricpattern') || '';
+        document.getElementById('c-cuttingMethod').value       = btn.getAttribute('data-cuttingmethod') || '';
+        document.getElementById('c-markerLossPct').value       = btn.getAttribute('data-markerloss') || '';
+        document.getElementById('c-patternComplexity').value   = btn.getAttribute('data-patterncomplexity') || '';
+        document.getElementById('c-operatorExperience').value  = btn.getAttribute('data-operatorexperience') || '';
+        document.getElementById('c-predictedWastePct').value   = btn.getAttribute('data-predictedwaste') || '';
+        document.getElementById('c-noOfLayers').value          = btn.getAttribute('data-nooflayers') || '';
+        document.getElementById('c-fabricGsm').value           = btn.getAttribute('data-fabricgsm') || '';
+        document.getElementById('c-shift').value               = btn.getAttribute('data-shift') || '';
+        document.getElementById('c-cuttingOverlapMm').value    = btn.getAttribute('data-overlapmm') || '';
         document.getElementById('c-markerEfficiencyPct').value = btn.getAttribute('data-markereff') || '';
-        document.getElementById('c-actualWastagePct').value   = btn.getAttribute('data-actualwaste') || '';
-        document.getElementById('c-jobDate').value            = btn.getAttribute('data-jobdate') || '';
-        document.getElementById('c-notes').value              = btn.getAttribute('data-notes') || '';
-        document.getElementById('cuttingUpdateForm').action   = '/user/historical/cutting/update/' + btn.getAttribute('data-id');
+        document.getElementById('c-actualWastagePct').value    = btn.getAttribute('data-actualwaste') || '';
+        document.getElementById('c-jobDate').value             = btn.getAttribute('data-jobdate') || '';
+        document.getElementById('c-notes').value               = btn.getAttribute('data-notes') || '';
+        document.getElementById('cuttingUpdateForm').action    = '/user/historical/cutting/update/' + btn.getAttribute('data-id');
         document.getElementById('cuttingModal').classList.add('active');
     }
 
-    function closeCuttingModal() { document.getElementById('cuttingModal').classList.remove('active'); }
+    function closeCuttingModal() {
+        document.getElementById('cuttingModal').classList.remove('active');
+    }
 
     document.getElementById('cuttingModal').addEventListener('click', function(e) {
         if (e.target === this) closeCuttingModal();
     });
 
-    function showError(id, msg) { const el = document.getElementById(id); if (el) { el.textContent = msg; el.style.display = 'block'; } }
-    function clearErrors(prefix) { document.querySelectorAll('.field-error').forEach(el => { if (el.id.startsWith('err-' + prefix)) { el.textContent = ''; el.style.display = 'none'; } }); }
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = msg; el.style.display = 'block'; }
+    }
+
+    function clearErrors(prefix) {
+        document.querySelectorAll('.field-error').forEach(el => {
+            if (el.id.startsWith('err-' + prefix)) { el.textContent = ''; el.style.display = 'none'; }
+        });
+    }
 
     function validateCuttingForm() {
         clearErrors('c');
         let valid = true;
 
-        const fabricType = document.getElementById('c-fabricType').value.trim();
-        const noOfLayers = document.getElementById('c-noOfLayers').value;
-        const jobDate = document.getElementById('c-jobDate').value.trim();
-        const actualWaste = document.getElementById('c-actualWastagePct').value;
-        const predWaste = document.getElementById('c-predictedWastePct').value;
-        const markEff = document.getElementById('c-markerEfficiencyPct').value;
-        const gsm = document.getElementById('c-fabricGsm').value;
-        const overlap = document.getElementById('c-cuttingOverlapMm').value;
+        const fabricType         = document.getElementById('c-fabricType').value.trim();
+        const noOfLayers         = document.getElementById('c-noOfLayers').value;
+        const jobDate            = document.getElementById('c-jobDate').value.trim();
+        const actualWaste        = document.getElementById('c-actualWastagePct').value;
+        const predWaste          = document.getElementById('c-predictedWastePct').value;
+        const markEff            = document.getElementById('c-markerEfficiencyPct').value;
+        const gsm                = document.getElementById('c-fabricGsm').value;
+        const overlap            = document.getElementById('c-cuttingOverlapMm').value;
+        const markerLoss         = document.getElementById('c-markerLossPct').value;
+        const patternComplexity  = document.getElementById('c-patternComplexity').value;
+        const operatorExperience = document.getElementById('c-operatorExperience').value;
 
-        // Required
+        // ── Required Fields ───────────────────────────────────────────────────
         if (!fabricType) { showError('err-c-fabricType', 'Required.'); valid = false; }
-        if (!jobDate) { showError('err-c-jobDate', 'Required.'); valid = false; }
+        if (!jobDate)    { showError('err-c-jobDate', 'Required.'); valid = false; }
         if (!noOfLayers) { showError('err-c-noOfLayers', 'Required.'); valid = false; }
 
-        // Percentages (0-100)
-        [ {id: 'c-actualWastagePct', val: actualWaste, lbl: 'Actual Waste'},
-            {id: 'c-predictedWastePct', val: predWaste, lbl: 'Predicted Waste'},
-            {id: 'c-markerEfficiencyPct', val: markEff, lbl: 'Efficiency'}
+        // ── Job Date: must not be a future date ───────────────────────────────
+        if (jobDate) {
+            const selected = new Date(jobDate);
+            const today    = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (selected > today) {
+                showError('err-c-jobDate', 'Job date cannot be a future date.');
+                valid = false;
+            }
+        }
+
+        // ── Percentage Fields (0-100) ─────────────────────────────────────────
+        [
+            { id: 'c-actualWastagePct',    val: actualWaste, lbl: 'Actual Waste' },
+            { id: 'c-predictedWastePct',   val: predWaste,   lbl: 'Predicted Waste' },
+            { id: 'c-markerEfficiencyPct', val: markEff,     lbl: 'Marker Efficiency' },
+            { id: 'c-markerLossPct',       val: markerLoss,  lbl: 'Marker Loss' }
         ].forEach(f => {
-            if (f.val !== "" && (parseFloat(f.val) < 0 || parseFloat(f.val) > 100)) {
-                showError('err-' + f.id, f.lbl + ' must be 0-100%.'); valid = false;
+            if (f.val !== '' && (parseFloat(f.val) < 0 || parseFloat(f.val) > 100)) {
+                showError('err-' + f.id, f.lbl + ' must be between 0 and 100%.');
+                valid = false;
             }
         });
 
-        // Positive Whole Number (Layers)
-        if (noOfLayers !== "" && (parseFloat(noOfLayers) <= 0 || !Number.isInteger(Number(noOfLayers)))) {
-            showError('err-c-noOfLayers', 'Must be a positive whole number.'); valid = false;
+        // ── No. of Layers: positive whole number + max 500 ───────────────────
+        if (noOfLayers !== '') {
+            const layers = Number(noOfLayers);
+            if (!Number.isInteger(layers) || layers <= 0) {
+                showError('err-c-noOfLayers', 'Must be a positive whole number.');
+                valid = false;
+            } else if (layers > 500) {
+                showError('err-c-noOfLayers', 'Cannot exceed 500 layers.');
+                valid = false;
+            }
         }
 
-        // Positive Numbers (GSM & Overlap)
-        if (gsm !== "" && parseFloat(gsm) <= 0) { showError('err-c-fabricGsm', 'Must be positive.'); valid = false; }
-        if (overlap !== "" && parseFloat(overlap) <= 0) { showError('err-c-cuttingOverlapMm', 'Must be positive.'); valid = false; }
+        // ── Fabric GSM: positive number ───────────────────────────────────────
+        if (gsm !== '' && parseFloat(gsm) <= 0) {
+            showError('err-c-fabricGsm', 'Must be a positive number.');
+            valid = false;
+        }
+
+        // ── Cutting Overlap: positive number ──────────────────────────────────
+        if (overlap !== '' && parseFloat(overlap) <= 0) {
+            showError('err-c-cuttingOverlapMm', 'Must be a positive number.');
+            valid = false;
+        }
+
+        // ── Pattern Complexity: positive if filled ────────────────────────────
+        if (patternComplexity !== '' && parseFloat(patternComplexity) <= 0) {
+            showError('err-c-patternComplexity', 'Must be a positive number.');
+            valid = false;
+        }
+
+        // ── Operator Experience: positive if filled ───────────────────────────
+        if (operatorExperience !== '' && parseFloat(operatorExperience) <= 0) {
+            showError('err-c-operatorExperience', 'Must be a positive number.');
+            valid = false;
+        }
 
         return valid;
     }
 
-    function submitCuttingForm() { if (validateCuttingForm()) document.getElementById('cuttingUpdateForm').submit(); }
+    function submitCuttingForm() {
+        if (validateCuttingForm()) document.getElementById('cuttingUpdateForm').submit();
+    }
 </script>
 </body>
 </html>

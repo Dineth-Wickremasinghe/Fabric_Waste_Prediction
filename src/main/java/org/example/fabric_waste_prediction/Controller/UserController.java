@@ -1,3 +1,4 @@
+
 package org.example.fabric_waste_prediction.Controller;
 
 import org.example.fabric_waste_prediction.Entity.user;
