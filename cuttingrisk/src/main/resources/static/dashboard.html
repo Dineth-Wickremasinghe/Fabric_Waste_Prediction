@@ -120,7 +120,9 @@
             Step 1 — Select Prediction Record
         </label>
         <select id="predictionSelect" style="margin-top:6px">
-            <option value="" disabled selected>Loading predictions...</option>
+            <option value="" disabled selected>
+                Loading predictions...
+            </option>
         </select>
         <span class="field-error-msg" id="err-prediction"></span>
 
@@ -136,24 +138,34 @@
         </label>
 
         <input type="number" id="noOfLayers"
-               placeholder="Number of Layers" min="1" max="200">
+               placeholder="Number of Layers"
+               min="1" max="200">
         <span class="field-error-msg" id="err-layers"></span>
 
         <input type="number" id="fabricGsm"
-               placeholder="Fabric GSM (e.g. 180)" min="50" max="500">
+               placeholder="Fabric GSM (e.g. 180)"
+               min="50" max="500">
         <span class="field-error-msg" id="err-gsm"></span>
 
         <input type="number" id="cuttingOverlapMm"
-               placeholder="Cutting Overlap (mm)" min="0" max="50">
+               placeholder="Cutting Overlap (mm)"
+               min="0" max="50">
+        <span class="field-error-msg" id="err-overlap"></span>
 
         <input type="number" id="markerEfficiency"
-               placeholder="Marker Efficiency % (e.g. 85)" min="0" max="100">
+               placeholder="Marker Efficiency % (e.g. 85)"
+               min="0" max="100">
+        <span class="field-error-msg" id="err-marker"></span>
 
         <input type="number" id="actualWaste"
-               placeholder="Actual Waste % (fill after cutting)" min="0" max="100">
+               placeholder="Actual Waste % (fill after cutting)"
+               min="0" max="100">
+        <span class="field-error-msg" id="err-actualWaste"></span>
 
         <select id="cuttingMethodSelect">
-            <option value="" disabled selected>Select Cutting Method</option>
+            <option value="" disabled selected>
+                Select Cutting Method
+            </option>
             <option value="Manual">Manual</option>
             <option value="Auto">Auto</option>
         </select>
@@ -172,18 +184,24 @@
                   style="width:100%; padding:12px; border-radius:12px;
                          border:1.5px solid #cfd8dc; margin:8px 0;
                          font-size:15px; font-family:'Segoe UI',sans-serif;
-                         resize:vertical; display:block; box-sizing:border-box;">
+                         resize:vertical; display:block;
+                         box-sizing:border-box;">
         </textarea>
 
         <div class="btn-row">
-            <button onclick="saveCuttingRisk()">💾 Save Risk Record</button>
-            <button class="reset-btn" onclick="resetRiskForm()">Reset</button>
+            <button onclick="saveCuttingRisk()">
+                💾 Save Risk Record
+            </button>
+            <button class="reset-btn" onclick="resetRiskForm()">
+                Reset
+            </button>
         </div>
 
         <div id="riskSaveSuccess"
              style="display:none; margin-top:15px; padding:14px;
-                    background:#d1fae5; color:#065f46; border-radius:12px;
-                    text-align:center; font-weight:600; font-size:15px;">
+                    background:#d1fae5; color:#065f46;
+                    border-radius:12px; text-align:center;
+                    font-weight:600; font-size:15px;">
             ✅ Cutting Risk Record Saved Successfully!
         </div>
     </div>

@@ -360,7 +360,7 @@ async function loadHistory() {
                             <td>${item.predicted}</td>
                             <td>${item.actual}</td>
                             <td>
-                                <span class="badge 
+                                <span class="badge
                                     badge-${item.risk.toLowerCase()}">
                                     ${item.risk}
                                 </span>
@@ -401,7 +401,7 @@ async function loadPredictionsDropdown() {
                     item.risk === 'Medium' ? '🟡' : '🔴';
             select.innerHTML +=
                 `<option value="${item.id}">
-                    ${riskEmoji} ${item.date} 
+                    ${riskEmoji} ${item.date}
                     — ${item.predicted}% (${item.risk})
                 </option>`;
         });
@@ -416,9 +416,9 @@ async function loadPredictionsDropdown() {
                 info.innerHTML = `
                     <strong>Selected Prediction:</strong><br>
                     📅 Date: ${selected.date}<br>
-                    📊 Predicted Waste: 
+                    📊 Predicted Waste:
                         <strong>${selected.predicted}%</strong><br>
-                    ⚠️ Risk Level: 
+                    ⚠️ Risk Level:
                         <strong>${selected.risk}</strong>
                 `;
             }
@@ -430,7 +430,7 @@ async function loadPredictionsDropdown() {
 }
 
 // ══════════════════════════════════════════
-// SAVE CUTTING RISK RECORD
+// SAVE CUTTING RISK WITH FULL VALIDATION
 // ══════════════════════════════════════════
 async function saveCuttingRisk() {
     const predictionId     = document.getElementById('predictionSelect').value;
@@ -443,38 +443,92 @@ async function saveCuttingRisk() {
     const shift            = document.getElementById('shiftSelect').value;
     const notes            = document.getElementById('notes').value;
 
+    clearFieldErrors();
+
     let hasError = false;
 
+    // ── Prediction selection ──
     if (!predictionId) {
-        document.getElementById('err-prediction').innerText =
-            '⚠ Please select a prediction';
+        showSpanError('err-prediction', 'predictionSelect',
+            '⚠ Please select a prediction record');
         hasError = true;
-    } else {
-        document.getElementById('err-prediction').innerText = '';
     }
 
-    if (!noOfLayers || noOfLayers <= 0) {
-        document.getElementById('err-layers').innerText =
-            '⚠ Please enter number of layers';
+    // ── Layers ──
+    if (!noOfLayers || isNaN(noOfLayers) || noOfLayers <= 0) {
+        showSpanError('err-layers', 'noOfLayers',
+            '⚠ Layers must be at least 1');
         hasError = true;
-    } else {
-        document.getElementById('err-layers').innerText = '';
+    } else if (noOfLayers > 200) {
+        showSpanError('err-layers', 'noOfLayers',
+            '⚠ Layers must be between 1 and 200');
+        hasError = true;
     }
 
+    // ── Fabric GSM ──
+    if (!isNaN(fabricGsm) && fabricGsm > 0) {
+        if (fabricGsm < 50) {
+            showSpanError('err-gsm', 'fabricGsm',
+                '⚠ Fabric GSM must be between 50 and 500');
+            hasError = true;
+        } else if (fabricGsm > 500) {
+            showSpanError('err-gsm', 'fabricGsm',
+                '⚠ Fabric GSM must be between 50 and 500');
+            hasError = true;
+        }
+    }
+
+    // ── Cutting Overlap ──
+    if (!isNaN(cuttingOverlapMm)) {
+        if (cuttingOverlapMm < 0) {
+            showSpanError('err-overlap', 'cuttingOverlapMm',
+                '⚠ Cutting overlap cannot be negative');
+            hasError = true;
+        } else if (cuttingOverlapMm > 50) {
+            showSpanError('err-overlap', 'cuttingOverlapMm',
+                '⚠ Cutting overlap must be between 0 and 50 mm');
+            hasError = true;
+        }
+    }
+
+    // ── Marker Efficiency ──
+    if (!isNaN(markerEfficiency)) {
+        if (markerEfficiency < 0) {
+            showSpanError('err-marker', 'markerEfficiency',
+                '⚠ Marker efficiency cannot be negative');
+            hasError = true;
+        } else if (markerEfficiency > 100) {
+            showSpanError('err-marker', 'markerEfficiency',
+                '⚠ Marker efficiency must be between 0 and 100%');
+            hasError = true;
+        }
+    }
+
+    // ── Actual Waste ──
+    if (!isNaN(actualWaste)) {
+        if (actualWaste < 0) {
+            showSpanError('err-actualWaste', 'actualWaste',
+                '⚠ Actual waste cannot be negative');
+            hasError = true;
+        } else if (actualWaste > 100) {
+            showSpanError('err-actualWaste', 'actualWaste',
+                '⚠ Actual waste must be between 0 and 100%');
+            hasError = true;
+        }
+    }
+
+    // ── Cutting Method ──
     if (!cuttingMethod) {
-        document.getElementById('err-method').innerText =
-            '⚠ Please select cutting method';
+        showSpanError('err-method', 'cuttingMethodSelect',
+            '⚠ Please select a cutting method');
         hasError = true;
-    } else {
-        document.getElementById('err-method').innerText = '';
     }
 
+    // ── Shift ──
     if (!shift) {
-        document.getElementById('err-shift').innerText =
-            '⚠ Please select shift';
+        showSpanError('err-shift', 'shiftSelect',
+            '⚠ Please select a shift');
         hasError = true;
-    } else {
-        document.getElementById('err-shift').innerText = '';
     }
 
     if (hasError) return;
@@ -496,7 +550,11 @@ async function saveCuttingRisk() {
             })
         });
 
-        const data = await res.json();
+        if (!res.ok) {
+            const errData = await res.json();
+            showGlobalError(errData.error || 'Failed to save!');
+            return;
+        }
 
         const success = document.getElementById('riskSaveSuccess');
         success.style.display = 'block';
@@ -510,6 +568,50 @@ async function saveCuttingRisk() {
         console.error('Save risk record error:', err);
         showGlobalError('Failed to save risk record!');
     }
+}
+
+// ══════════════════════════════════════════
+// SHOW ERROR IN SPAN BELOW FIELD
+// ══════════════════════════════════════════
+function showSpanError(spanId, fieldId, message) {
+    const span = document.getElementById(spanId);
+    if (span) {
+        span.innerText         = message;
+        span.style.color       = '#e53935';
+        span.style.fontSize    = '12px';
+        span.style.fontWeight  = '600';
+        span.style.display     = 'block';
+        span.style.marginTop   = '2px';
+    }
+    const field = document.getElementById(fieldId);
+    if (field) {
+        field.style.borderColor     = '#e53935';
+        field.style.backgroundColor = '#fff5f5';
+        field.style.boxShadow       = '0 0 6px rgba(229,57,53,0.3)';
+    }
+}
+
+// ══════════════════════════════════════════
+// CLEAR ALL FIELD ERRORS
+// ══════════════════════════════════════════
+function clearFieldErrors() {
+    const spanIds = [
+        'err-fabricWidth', 'err-layers2', 'err-orderQty',
+        'err-fabricType',  'err-style',   'err-prediction',
+        'err-layers',      'err-gsm',     'err-method',
+        'err-shift',       'err-actualWaste',
+        'err-overlap',     'err-marker'
+    ];
+    spanIds.forEach(id => {
+        const span = document.getElementById(id);
+        if (span) span.innerText = '';
+    });
+
+    document.querySelectorAll('input, select').forEach(el => {
+        el.style.borderColor     = '';
+        el.style.backgroundColor = '';
+        el.style.boxShadow       = '';
+    });
 }
 
 // ══════════════════════════════════════════
@@ -527,10 +629,7 @@ function resetRiskForm() {
     document.getElementById('notes').value                       = '';
     document.getElementById('riskSaveSuccess').style.display     = 'none';
     document.getElementById('selectedPredictionInfo').style.display = 'none';
-    document.getElementById('err-prediction').innerText          = '';
-    document.getElementById('err-layers').innerText              = '';
-    document.getElementById('err-method').innerText              = '';
-    document.getElementById('err-shift').innerText               = '';
+    clearFieldErrors();
 }
 
 // ══════════════════════════════════════════
@@ -539,7 +638,7 @@ function resetRiskForm() {
 function showGlobalError(message) {
     const errDiv = document.getElementById('globalError');
     if (!errDiv) return;
-    errDiv.innerText = '❌ ' + message;
+    errDiv.innerText     = '❌ ' + message;
     errDiv.style.display = 'block';
     setTimeout(() => errDiv.style.display = 'none', 5000);
 }
