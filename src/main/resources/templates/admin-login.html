@@ -139,7 +139,7 @@
     <div th:if="${error}"   class="error-msg"   th:text="${error}"></div>
     <div th:if="${success}" class="success-msg" th:text="${success}"></div>
 
-    <form th:action="@{/admin/login}" method="post">
+    <form th:action="@{/user/login}" method="post">
         <div class="form-group">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" placeholder="Enter admin username" required />
