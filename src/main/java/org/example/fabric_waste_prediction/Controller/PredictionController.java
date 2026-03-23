@@ -3,6 +3,7 @@ package org.example.fabric_waste_prediction.Controller;
 import org.example.fabric_waste_prediction.DTO.PredictionRequest;
 import org.example.fabric_waste_prediction.DTO.PredictionResponse;
 import org.example.fabric_waste_prediction.Entity.Prediction;
+import org.example.fabric_waste_prediction.Exception.PredictionServiceUnavailableException;
 import org.example.fabric_waste_prediction.Service.PredictionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,8 +50,15 @@ public class PredictionController {
                 markerLossPct
         );
 
-        PredictionResponse response = predictionService.getPredictionAndSave(request);
-        redirectAttributes.addFlashAttribute("prediction", response.getPrediction());
+        try{
+            PredictionResponse response = predictionService.getPredictionAndSave(request);
+            redirectAttributes.addFlashAttribute("prediction", response.getPrediction());
+
+        }
+        catch (PredictionServiceUnavailableException e){
+            redirectAttributes.addFlashAttribute("serviceError", true);
+
+        }
 
 
         return "redirect:/dashboard";
