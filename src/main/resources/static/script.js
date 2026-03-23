@@ -434,47 +434,88 @@ async function loadPredictionsDropdown() {
 // ══════════════════════════════════════════
 async function saveCuttingRisk() {
     const predictionId     = document.getElementById('predictionSelect').value;
-    const noOfLayers       = parseInt(document.getElementById('noOfLayers').value);
-    const fabricGsm        = parseInt(document.getElementById('fabricGsm').value);
-    const cuttingOverlapMm = parseInt(document.getElementById('cuttingOverlapMm').value);
-    const markerEfficiency = parseFloat(document.getElementById('markerEfficiency').value);
-    const actualWaste      = parseFloat(document.getElementById('actualWaste').value);
+    const noOfLayersRaw    = document.getElementById('noOfLayers').value;
+    const fabricGsmRaw     = document.getElementById('fabricGsm').value;
+    const overlapRaw       = document.getElementById('cuttingOverlapMm').value;
+    const efficiencyRaw    = document.getElementById('markerEfficiency').value;
+    const actualWasteRaw   = document.getElementById('actualWaste').value;
     const cuttingMethod    = document.getElementById('cuttingMethodSelect').value;
     const shift            = document.getElementById('shiftSelect').value;
     const notes            = document.getElementById('notes').value;
 
+    const noOfLayers       = parseInt(noOfLayersRaw);
+    const fabricGsm        = fabricGsmRaw      !== '' ? parseInt(fabricGsmRaw)      : null;
+    const cuttingOverlapMm = overlapRaw        !== '' ? parseInt(overlapRaw)        : null;
+    const markerEfficiency = efficiencyRaw     !== '' ? parseFloat(efficiencyRaw)   : null;
+    const actualWaste      = actualWasteRaw    !== '' ? parseFloat(actualWasteRaw)  : null;
+
     let hasError = false;
 
+    // ── Prediction ──
     if (!predictionId) {
-        document.getElementById('err-prediction').innerText =
-            '⚠ Please select a prediction';
+        document.getElementById('err-prediction').innerText = '⚠ Please select a prediction';
         hasError = true;
     } else {
         document.getElementById('err-prediction').innerText = '';
     }
 
-    if (!noOfLayers || noOfLayers <= 0) {
-        document.getElementById('err-layers').innerText =
-            '⚠ Please enter number of layers';
+    // ── Layers ──
+    if (noOfLayersRaw === '' || isNaN(noOfLayers) || noOfLayers <= 0) {
+        document.getElementById('err-layers').innerText = '⚠ Number of layers must be at least 1';
+        hasError = true;
+    } else if (noOfLayers > 200) {
+        document.getElementById('err-layers').innerText = '⚠ Number of layers must be between 1 and 200';
         hasError = true;
     } else {
         document.getElementById('err-layers').innerText = '';
     }
 
+    // ── Fabric GSM (optional, but validated if entered) ──
+    if (fabricGsm !== null && (fabricGsm < 50 || fabricGsm > 500)) {
+        document.getElementById('err-gsm').innerText = '⚠ Fabric GSM must be between 50 and 500';
+        hasError = true;
+    } else {
+        document.getElementById('err-gsm').innerText = '';
+    }
+
+    // ── Cutting Overlap (optional, but validated if entered) ──
+    if (cuttingOverlapMm !== null && (cuttingOverlapMm < 0 || cuttingOverlapMm > 50)) {
+        document.getElementById('err-overlap').innerText = '⚠ Cutting overlap must be between 0 and 50 mm';
+        hasError = true;
+    } else {
+        document.getElementById('err-overlap').innerText = '';
+    }
+
+    // ── Marker Efficiency (optional, but validated if entered) ──
+    if (markerEfficiency !== null && (markerEfficiency < 0 || markerEfficiency > 100)) {
+        document.getElementById('err-efficiency').innerText = '⚠ Marker efficiency must be between 0 and 100%';
+        hasError = true;
+    } else {
+        document.getElementById('err-efficiency').innerText = '';
+    }
+
+    // ── Cutting Method ──
     if (!cuttingMethod) {
-        document.getElementById('err-method').innerText =
-            '⚠ Please select cutting method';
+        document.getElementById('err-method').innerText = '⚠ Please select cutting method';
         hasError = true;
     } else {
         document.getElementById('err-method').innerText = '';
     }
 
+    // ── Shift ──
     if (!shift) {
-        document.getElementById('err-shift').innerText =
-            '⚠ Please select shift';
+        document.getElementById('err-shift').innerText = '⚠ Please select shift';
         hasError = true;
     } else {
         document.getElementById('err-shift').innerText = '';
+    }
+
+    // ── Actual Waste (optional, but validated if entered) ──
+    if (actualWaste !== null && (actualWaste < 0 || actualWaste > 100)) {
+        document.getElementById('err-actualwaste').innerText = '⚠ Actual waste must be between 0 and 100%';
+        hasError = true;
+    } else {
+        document.getElementById('err-actualwaste').innerText = '';
     }
 
     if (hasError) return;
@@ -486,15 +527,21 @@ async function saveCuttingRisk() {
             body: JSON.stringify({
                 predictionId,
                 noOfLayers,
-                fabricGsm:           isNaN(fabricGsm) ? null : fabricGsm,
-                cuttingOverlapMm:    isNaN(cuttingOverlapMm) ? null : cuttingOverlapMm,
-                markerEfficiencyPct: isNaN(markerEfficiency) ? null : markerEfficiency,
-                actualWastagePct:    isNaN(actualWaste) ? null : actualWaste,
+                fabricGsm,
+                cuttingOverlapMm,
+                markerEfficiencyPct: markerEfficiency,
+                actualWastagePct:    actualWaste,
                 cuttingMethod,
                 shift,
                 notes
             })
         });
+
+        if (!res.ok) {
+            const errData = await res.json();
+            showGlobalError(errData.message || 'Failed to save record!');
+            return;
+        }
 
         const data = await res.json();
 
@@ -527,10 +574,16 @@ function resetRiskForm() {
     document.getElementById('notes').value                       = '';
     document.getElementById('riskSaveSuccess').style.display     = 'none';
     document.getElementById('selectedPredictionInfo').style.display = 'none';
-    document.getElementById('err-prediction').innerText          = '';
-    document.getElementById('err-layers').innerText              = '';
-    document.getElementById('err-method').innerText              = '';
-    document.getElementById('err-shift').innerText               = '';
+
+    // Clear all error messages
+    document.getElementById('err-prediction').innerText  = '';
+    document.getElementById('err-layers').innerText      = '';
+    document.getElementById('err-gsm').innerText         = '';
+    document.getElementById('err-overlap').innerText     = '';
+    document.getElementById('err-efficiency').innerText  = '';
+    document.getElementById('err-method').innerText      = '';
+    document.getElementById('err-shift').innerText       = '';
+    document.getElementById('err-actualwaste').innerText = '';
 }
 
 // ══════════════════════════════════════════
