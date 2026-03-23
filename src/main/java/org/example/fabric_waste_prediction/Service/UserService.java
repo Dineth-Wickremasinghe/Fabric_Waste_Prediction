@@ -27,7 +27,6 @@ public class UserService implements UserDetailsService {
         user u = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // Map role field to Spring Security role
         String springRole = mapToSpringRole(u);
 
         return org.springframework.security.core.userdetails.User
@@ -41,7 +40,6 @@ public class UserService implements UserDetailsService {
     private String mapToSpringRole(user u) {
         if (u.isAdmin()) return "ROLE_ADMIN";
 
-        // Map role field to Spring Security role
         return switch (u.getRole().toUpperCase().trim()) {
             case "CUTTING DEPARTMENT MANAGER",
                  "CUTTING_MANAGER"           -> "ROLE_CUTTING_MANAGER";
@@ -53,7 +51,7 @@ public class UserService implements UserDetailsService {
                  "BUSINESS_ANALYST"          -> "ROLE_BUSINESS_ANALYST";
             case "MANAGING DIRECTOR",
                  "MANAGING_DIRECTOR"         -> "ROLE_MANAGING_DIRECTOR";
-            default                          -> "ROLE_USER"; // fallback
+            default                          -> "ROLE_USER";
         };
     }
 
@@ -89,9 +87,16 @@ public class UserService implements UserDetailsService {
 
         user u = existing.get();
 
+        // ✅ Check username not taken by another user
         Optional<user> byUsername = userRepository.findByUsername(updatedUser.getUsername());
         if (byUsername.isPresent() && !byUsername.get().getId().equals(id)) {
             return "Username already taken!";
+        }
+
+        // ✅ Check email not taken by another user
+        Optional<user> byEmail = userRepository.findByEmail(updatedUser.getEmail());
+        if (byEmail.isPresent() && !byEmail.get().getId().equals(id)) {
+            return "Email already taken!";
         }
 
         u.setFullName(updatedUser.getFullName());
@@ -100,6 +105,7 @@ public class UserService implements UserDetailsService {
         u.setRole(updatedUser.getRole());
         u.setPhoneNumber(updatedUser.getPhoneNumber());
 
+        // ✅ Only update password if a new one was provided
         if (updatedUser.getPassword() != null && !updatedUser.getPassword().isBlank()) {
             u.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
@@ -108,9 +114,18 @@ public class UserService implements UserDetailsService {
         return "success";
     }
 
-    // ── Delete user ───────────────────────────────────────────────────────────
-    public void deleteUser(Long id) {
+    // ── Delete user — admin account cannot be deleted ─────────────────────────
+    public String deleteUser(Long id) {
+        Optional<user> existing = userRepository.findById(id);
+        if (existing.isEmpty()) return "User not found!";
+
+        // ✅ Prevent admin deletion
+        if (existing.get().isAdmin()) {
+            return "Admin account cannot be deleted!";
+        }
+
         userRepository.deleteById(id);
+        return "success";
     }
 
     // ── Legacy authenticate — kept for compatibility ───────────────────────────
