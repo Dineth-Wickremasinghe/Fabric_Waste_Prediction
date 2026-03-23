@@ -147,8 +147,9 @@
         <span class="user-badge">User Login</span>
     </div>
 
-    <div th:if="${error}"   class="error-msg"   th:text="${error}"></div>
-    <div th:if="${success}" class="success-msg" th:text="${success}"></div>
+    <!-- ✅ Fixed: using param.error and param.logout instead of ${error}/${success} -->
+    <div th:if="${param.error}"  class="error-msg">Invalid username or password.</div>
+    <div th:if="${param.logout}" class="success-msg">You have been logged out successfully.</div>
 
     <form th:action="@{/user/login}" method="post">
         <div class="form-group">

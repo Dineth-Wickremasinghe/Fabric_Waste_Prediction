@@ -1,12 +1,10 @@
 package org.example.fabric_waste_prediction.Service;
 
 import org.example.fabric_waste_prediction.Entity.CuttingJob;
-import org.example.fabric_waste_prediction.Entity.CuttingRiskRecord;
-import org.example.fabric_waste_prediction.Entity.ModelPerformance;
-import org.example.fabric_waste_prediction.Entity.Prediction;
+import org.example.fabric_waste_prediction.Entity.CuttingMethod;
+import org.example.fabric_waste_prediction.Entity.ShiftType;
 import org.example.fabric_waste_prediction.Repository.CuttingJobRepository;
 import org.example.fabric_waste_prediction.Repository.CuttingRiskRecordRepository;
-import org.example.fabric_waste_prediction.Repository.ModelPerformanceRepository;
 import org.example.fabric_waste_prediction.Repository.PredictionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,9 +24,6 @@ public class HistoricalDataService {
     @Autowired
     private PredictionRepository predictionRepository;
 
-    @Autowired
-    private ModelPerformanceRepository modelPerformanceRepository;
-
     // ── Get all cutting jobs ──────────────────────────────────────────────────
     public List<CuttingJob> getAllCuttingJobs() {
         return cuttingJobRepository.findAll();
@@ -41,7 +36,7 @@ public class HistoricalDataService {
 
         CuttingJob job = existing.get();
 
-        // Update cutting_jobs
+        // Update cutting_jobs table
         job.setFabricType(updated.getFabricType());
         job.setFabricPattern(updated.getFabricPattern());
         job.setCuttingMethod(updated.getCuttingMethod());
@@ -69,6 +64,7 @@ public class HistoricalDataService {
                 prediction.setPatternComplexity(updated.getPatternComplexity());
                 prediction.setOperatorExperience(updated.getOperatorExperience());
                 prediction.setPredictionResult(updated.getPredictedWastePct());
+                prediction.setActualResult(updated.getActualWastagePct()); // ✅ fixed
                 predictionRepository.save(prediction);
                 System.out.println("✅ prediction table synced!");
             });
@@ -84,6 +80,23 @@ public class HistoricalDataService {
                 record.setActualWastagePct(updated.getActualWastagePct());
                 record.setJobDate(updated.getJobDate());
                 record.setNotes(updated.getNotes());
+
+                // ✅ Convert String → Enum safely
+                if (updated.getShift() != null) {
+                    try {
+                        record.setShift(ShiftType.valueOf(updated.getShift().toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("⚠️ Invalid shift value: " + updated.getShift());
+                    }
+                }
+                if (updated.getCuttingMethod() != null) {
+                    try {
+                        record.setCuttingMethod(CuttingMethod.valueOf(updated.getCuttingMethod().toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("⚠️ Invalid cutting method value: " + updated.getCuttingMethod());
+                    }
+                }
+
                 cuttingRiskRecordRepository.save(record);
                 System.out.println("✅ cutting_risk_records table synced!");
             });
@@ -100,35 +113,14 @@ public class HistoricalDataService {
                 cuttingRiskRecordRepository.deleteById(job.getCuttingRiskRecordId());
                 System.out.println("✅ cutting_risk_records deleted!");
             }
-            // Delete from prediction
+            // Delete from prediction table
             if (job.getPredictionId() != null) {
                 predictionRepository.deleteById(job.getPredictionId());
                 System.out.println("✅ prediction deleted!");
             }
-            // Delete from cutting_jobs
+            // Delete from cutting_jobs last
             cuttingJobRepository.deleteById(id);
+            System.out.println("✅ cutting_jobs deleted!");
         });
-    }
-
-    // ── Model Performance ─────────────────────────────────────────────────────
-    public List<ModelPerformance> getAllModelPerformance() {
-        return modelPerformanceRepository.findAll();
-    }
-
-    public String updateModelPerformance(Long id, ModelPerformance updated) {
-        Optional<ModelPerformance> existing = modelPerformanceRepository.findById(id);
-        if (existing.isEmpty()) return "Record not found!";
-
-        ModelPerformance record = existing.get();
-        record.setRecordedAt(updated.getRecordedAt());
-        record.setMseError(updated.getMseError());
-        record.setHealthStatus(updated.getHealthStatus());
-
-        modelPerformanceRepository.save(record);
-        return "success";
-    }
-
-    public void deleteModelPerformance(Long id) {
-        modelPerformanceRepository.deleteById(id);
     }
 }

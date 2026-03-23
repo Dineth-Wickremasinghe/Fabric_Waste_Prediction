@@ -1,6 +1,7 @@
 package org.example.fabric_waste_prediction.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class CuttingJob {
     private UUID cuttingRiskRecordId;
 
     // ── From Prediction table ─────────────────────────────────────────────────
+    @NotBlank(message = "Fabric type is required")
     @Column(name = "fabric_type")
     private String fabricType;
 
@@ -45,6 +47,9 @@ public class CuttingJob {
     private Double predictedWastePct;
 
     // ── From CuttingRiskRecord table ──────────────────────────────────────────
+    @NotNull(message = "Number of layers is required")
+    @Min(value = 1, message = "Layers must be at least 1")
+    @Max(value = 500, message = "Layers cannot exceed 500")
     @Column(name = "no_of_layers")
     private Integer noOfLayers;
 
@@ -63,6 +68,8 @@ public class CuttingJob {
     @Column(name = "actual_wastage_pct")
     private Double actualWastagePct;
 
+    @NotNull(message = "Job date is required")
+    @PastOrPresent(message = "Job date cannot be a future date")
     @Column(name = "job_date")
     private LocalDate jobDate;
 
