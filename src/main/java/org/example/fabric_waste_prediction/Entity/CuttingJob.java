@@ -34,21 +34,15 @@ public class CuttingJob {
     @Column(name = "cutting_method")
     private String cuttingMethod;
 
-    @DecimalMin(value = "0.0", message = "Marker loss must be between 0 and 100")
-    @DecimalMax(value = "100.0", message = "Marker loss must be between 0 and 100")
     @Column(name = "marker_loss_pct")
     private Double markerLossPct;
 
-    @Positive(message = "Pattern complexity must be a positive number")
     @Column(name = "pattern_complexity")
     private Double patternComplexity;
 
-    @Positive(message = "Operator experience must be a positive number")
     @Column(name = "operator_experience")
     private Double operatorExperience;
 
-    @DecimalMin(value = "0.0", message = "Predicted waste must be between 0 and 100")
-    @DecimalMax(value = "100.0", message = "Predicted waste must be between 0 and 100")
     @Column(name = "predicted_waste_pct")
     private Double predictedWastePct;
 
@@ -59,24 +53,18 @@ public class CuttingJob {
     @Column(name = "no_of_layers")
     private Integer noOfLayers;
 
-    @Positive(message = "Fabric GSM must be a positive number")
     @Column(name = "fabric_gsm")
     private Integer fabricGsm;
 
     @Column(name = "shift")
     private String shift;
 
-    @Positive(message = "Cutting overlap must be a positive number")
     @Column(name = "cutting_overlap_mm")
     private Integer cuttingOverlapMm;
 
-    @DecimalMin(value = "0.0", message = "Marker efficiency must be between 0 and 100")
-    @DecimalMax(value = "100.0", message = "Marker efficiency must be between 0 and 100")
     @Column(name = "marker_efficiency_pct")
     private Double markerEfficiencyPct;
 
-    @DecimalMin(value = "0.0", message = "Actual wastage must be between 0 and 100")
-    @DecimalMax(value = "100.0", message = "Actual wastage must be between 0 and 100")
     @Column(name = "actual_wastage_pct")
     private Double actualWastagePct;
 
