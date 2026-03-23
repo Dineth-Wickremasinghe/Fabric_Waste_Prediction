@@ -3,27 +3,71 @@ package org.example.fabric_waste_prediction.Service;
 import org.example.fabric_waste_prediction.Entity.user;
 import org.example.fabric_waste_prediction.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // ── Spring Security — loads user and assigns role ─────────────────────────
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        user u = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        String springRole = mapToSpringRole(u);
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(u.getUsername())
+                .password(u.getPassword())
+                .authorities(springRole)
+                .build();
+    }
+
+    // ── Maps user role/admin flag to Spring Security role ─────────────────────
+    private String mapToSpringRole(user u) {
+        if (u.isAdmin()) return "ROLE_ADMIN";
+
+        return switch (u.getRole().toUpperCase().trim()) {
+            case "CUTTING DEPARTMENT MANAGER",
+                 "CUTTING_MANAGER"           -> "ROLE_CUTTING_MANAGER";
+            case "SUSTAINABILITY OFFICER",
+                 "SUSTAINABILITY_OFFICER"    -> "ROLE_SUSTAINABILITY_OFFICER";
+            case "TECHNICAL OFFICER",
+                 "TECHNICAL_OFFICER"         -> "ROLE_TECHNICAL_OFFICER";
+            case "BUSINESS ANALYST",
+                 "BUSINESS_ANALYST"          -> "ROLE_BUSINESS_ANALYST";
+            case "MANAGING DIRECTOR",
+                 "MANAGING_DIRECTOR"         -> "ROLE_MANAGING_DIRECTOR";
+            default                          -> "ROLE_USER";
+        };
+    }
+
+    // ── Get all non-admin users ───────────────────────────────────────────────
     public List<user> getAllUsers() {
         return userRepository.findAll().stream()
                 .filter(u -> !u.isAdmin())
                 .toList();
     }
 
+    // ── Get user by ID ────────────────────────────────────────────────────────
     public Optional<user> getUserById(Long id) {
         return userRepository.findById(id);
     }
 
+    // ── Create user — password BCrypt encoded ─────────────────────────────────
     public String createUser(user user) {
         if (userRepository.existsByUsername(user.getUsername())) {
             return "Username already exists!";
@@ -31,48 +75,67 @@ public class UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             return "Email already exists!";
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return "success";
     }
 
+    // ── Update user ───────────────────────────────────────────────────────────
     public String updateUser(Long id, user updatedUser) {
         Optional<user> existing = userRepository.findById(id);
         if (existing.isEmpty()) return "User not found!";
 
-        user user = existing.get();
+        user u = existing.get();
 
-        // Check username conflict with another user
+        // ✅ Check username not taken by another user
         Optional<user> byUsername = userRepository.findByUsername(updatedUser.getUsername());
         if (byUsername.isPresent() && !byUsername.get().getId().equals(id)) {
             return "Username already taken!";
         }
 
-        user.setFullName(updatedUser.getFullName());
-        user.setEmail(updatedUser.getEmail());
-        user.setUsername(updatedUser.getUsername());
-        user.setRole(updatedUser.getRole());
-        user.setPhoneNumber(updatedUser.getPhoneNumber());
-
-        // Only update password if a new one is provided
-        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isBlank()) {
-            user.setPassword(updatedUser.getPassword());
+        // ✅ Check email not taken by another user
+        Optional<user> byEmail = userRepository.findByEmail(updatedUser.getEmail());
+        if (byEmail.isPresent() && !byEmail.get().getId().equals(id)) {
+            return "Email already taken!";
         }
 
-        userRepository.save(user);
+        u.setFullName(updatedUser.getFullName());
+        u.setEmail(updatedUser.getEmail());
+        u.setUsername(updatedUser.getUsername());
+        u.setRole(updatedUser.getRole());
+        u.setPhoneNumber(updatedUser.getPhoneNumber());
+
+        // ✅ Only update password if a new one was provided
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isBlank()) {
+            u.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
+
+        userRepository.save(u);
         return "success";
     }
 
-    public void deleteUser(Long id) {
+    // ── Delete user — admin account cannot be deleted ─────────────────────────
+    public String deleteUser(Long id) {
+        Optional<user> existing = userRepository.findById(id);
+        if (existing.isEmpty()) return "User not found!";
+
+        // ✅ Prevent admin deletion
+        if (existing.get().isAdmin()) {
+            return "Admin account cannot be deleted!";
+        }
+
         userRepository.deleteById(id);
+        return "success";
     }
 
+    // ── Legacy authenticate — kept for compatibility ───────────────────────────
     public Optional<user> authenticate(String username, String password, boolean adminLogin) {
         Optional<user> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
-            user user = userOpt.get();
-            if (user.getPassword().equals(password)) {
-                if (adminLogin && user.isAdmin()) return userOpt;
-                if (!adminLogin && !user.isAdmin()) return userOpt;
+            user u = userOpt.get();
+            if (passwordEncoder.matches(password, u.getPassword())) {
+                if (adminLogin && u.isAdmin()) return userOpt;
+                if (!adminLogin && !u.isAdmin()) return userOpt;
             }
         }
         return Optional.empty();

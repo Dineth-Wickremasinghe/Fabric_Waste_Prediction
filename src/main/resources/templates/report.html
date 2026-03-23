@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Report Dashboard — Fabric Waste Prediction</title>
+    <title>Report Dashboard</title>
     <link rel="stylesheet" href="/css/report.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -16,22 +16,60 @@
         <div class="topbar-left">
             <div class="brand-inline">
                 <div class="brand-icon-sm">🧵</div>
-                <span class="brand-name">FabricAI Predictor</span>
+                <span class="brand-name">Fabric AI </span>
             </div>
             <div class="topbar-divider"></div>
             <span class="page-badge">Reports Module</span>
-            <h1>Fabric Waste Report Dashboard</h1>
+            <h1>Report Dashboard</h1>
         </div>
         <div class="topbar-right">
-            <div class="status-pill">
-                <div class="status-dot"></div>
-                Connected to DB
-            </div>
+            <div class="status-pill"><div class="status-dot"></div>Live Data</div>
             <span class="topbar-time" id="gen-time"></span>
         </div>
     </div>
 
     <div class="page-body">
+
+        <!-- ── DASHBOARD SUMMARY CARD ── -->
+        <div class="summary-banner">
+            <div class="summary-item">
+                <div class="summary-icon">📊</div>
+                <div class="summary-info">
+                    <div class="summary-value" th:text="${totalRecords}">0</div>
+                    <div class="summary-label">Total Cutting Jobs in DB</div>
+                </div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+                <div class="summary-icon">📋</div>
+                <div class="summary-info">
+                    <div class="summary-value" th:text="${reportCount}">0</div>
+                    <div class="summary-label">Total Reports Generated</div>
+                </div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+                <div class="summary-icon">🕐</div>
+                <div class="summary-info">
+                    <div class="summary-value" th:text="${todayCount}">0</div>
+                    <div class="summary-label">Reports Generated Today</div>
+                </div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item summary-item-wide">
+                <div class="summary-icon">🗒️</div>
+                <div class="summary-info">
+                    <div class="summary-value summary-value-sm" th:text="${lastReportName}">—</div>
+                    <div class="summary-label">Last Report · <span th:text="${lastReportTime}">—</span></div>
+                </div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+                <button class="btn-status-tracker" onclick="openStatusModal()">
+                    📁 Report Status Tracker
+                </button>
+            </div>
+        </div>
 
         <!-- FILTERS -->
         <div class="section-title">Report Filters</div>
@@ -39,87 +77,70 @@
             <div class="filter-top">
                 <div class="filter-icon">⚙️</div>
                 <h3>Filter & Generate Report</h3>
+                <div class="live-count-badge">
+                    <span id="live-count" th:text="${totalRecords}">0</span> records match
+                </div>
+            </div>
+            <div class="validation-box" id="validation-box" style="display:none;">
+                <span class="val-icon">⚠️</span>
+                <span id="validation-msg"></span>
             </div>
             <div class="filter-row">
                 <div class="filter-group">
                     <label>Year</label>
-                    <select id="filter-year">
+                    <select id="filter-year" onchange="updateLiveCount()">
                         <option value="all">All Years</option>
-                        <option value="2020" selected>2020</option>
-                        <option value="2021">2021</option>
-                        <option value="2022">2022</option>
+                        <option th:each="y : ${years}" th:value="${y}" th:text="${y}"></option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label>Month From</label>
-                    <select id="filter-month-from">
+                    <select id="filter-month-from" onchange="updateLiveCount()">
                         <option value="0">All</option>
-                        <option value="1">January</option>
-                        <option value="2">February</option>
-                        <option value="3">March</option>
-                        <option value="4">April</option>
-                        <option value="5">May</option>
-                        <option value="6">June</option>
-                        <option value="7">July</option>
-                        <option value="8">August</option>
-                        <option value="9">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
+                        <option value="1">January</option><option value="2">February</option>
+                        <option value="3">March</option><option value="4">April</option>
+                        <option value="5">May</option><option value="6">June</option>
+                        <option value="7">July</option><option value="8">August</option>
+                        <option value="9">September</option><option value="10">October</option>
+                        <option value="11">November</option><option value="12">December</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label>Month To</label>
-                    <select id="filter-month-to">
+                    <select id="filter-month-to" onchange="updateLiveCount()">
                         <option value="0">All</option>
-                        <option value="1">January</option>
-                        <option value="2">February</option>
-                        <option value="3">March</option>
-                        <option value="4">April</option>
-                        <option value="5" selected>May</option>
-                        <option value="6">June</option>
-                        <option value="7">July</option>
-                        <option value="8">August</option>
-                        <option value="9">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
+                        <option value="1">January</option><option value="2">February</option>
+                        <option value="3">March</option><option value="4">April</option>
+                        <option value="5">May</option><option value="6">June</option>
+                        <option value="7">July</option><option value="8">August</option>
+                        <option value="9">September</option><option value="10">October</option>
+                        <option value="11">November</option><option value="12">December</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label>Fabric Type</label>
-                    <select id="filter-fabric">
+                    <select id="filter-fabric" onchange="updateLiveCount()">
                         <option value="all">All Fabrics</option>
-                        <option value="Polyester">Polyester</option>
-                        <option value="Viscose">Viscose</option>
-                        <option value="Cotton">Cotton</option>
-                        <option value="Denim">Denim</option>
-                        <option value="Blended">Blended</option>
-                        <option value="Rayon">Rayon</option>
-                        <option value="Linen">Linen</option>
-                        <option value="Poplin">Poplin</option>
-                        <option value="Twill">Twill</option>
+                        <option th:each="f : ${fabricTypes}" th:value="${f}" th:text="${f}"></option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label>Shift</label>
-                    <select id="filter-shift">
+                    <select id="filter-shift" onchange="updateLiveCount()">
                         <option value="all">All Shifts</option>
-                        <option value="Day">Day Shift</option>
-                        <option value="Night">Night Shift</option>
+                        <option th:each="s : ${shifts}" th:value="${s}" th:text="${s}"></option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label>Cutting Method</label>
-                    <select id="filter-cutting">
+                    <select id="filter-cutting" onchange="updateLiveCount()">
                         <option value="all">All Methods</option>
-                        <option value="Manual">Manual</option>
-                        <option value="Auto">Auto</option>
+                        <option th:each="c : ${cuttingMethods}" th:value="${c}" th:text="${c}"></option>
                     </select>
                 </div>
                 <div class="filter-actions">
-                    <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
-                    <button class="btn-generate" onclick="generateReport()">▶ Generate Report</button>
+                    <button class="btn-reset"     onclick="resetFilters()">↺ Reset</button>
+                    <button class="btn-generate"  onclick="generateReport()">▶ Generate Report</button>
                 </div>
             </div>
         </div>
@@ -130,46 +151,52 @@
             <div class="kpi-card primary">
                 <div class="kpi-icon-wrap">📦</div>
                 <div class="kpi-label">Total Records</div>
-                <div class="kpi-value" id="kpi-total">51</div>
-                <div class="kpi-sub">entries in selection</div>
+                <div class="kpi-value" id="kpi-total" th:text="${totalRecords}">0</div>
+                <div class="kpi-sub">cutting jobs in selection</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-icon-wrap">📊</div>
                 <div class="kpi-label">Avg Actual Waste</div>
-                <div class="kpi-value" id="kpi-actual">8.17<span>%</span></div>
-                <div class="kpi-sub">historical average</div>
-                <div class="kpi-trend trend-up">↑ Above target</div>
+                <div class="kpi-value" id="kpi-actual">
+                    <span th:text="${kpis['avgActual']}">0</span><span>%</span>
+                </div>
+                <div class="kpi-sub">from cutting_jobs table</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-icon-wrap">🤖</div>
                 <div class="kpi-label">Avg Predicted Waste</div>
-                <div class="kpi-value" id="kpi-predicted">8.62<span>%</span></div>
-                <div class="kpi-sub">model output (demo)</div>
-                <div class="kpi-trend trend-up">↑ Model estimate</div>
+                <div class="kpi-value" id="kpi-predicted">
+                    <span th:text="${kpis['avgPredicted']}">0</span><span>%</span>
+                </div>
+                <div class="kpi-sub">ML model output</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-icon-wrap">⚠️</div>
                 <div class="kpi-label">Highest Wastage</div>
-                <div class="kpi-value" id="kpi-max">12.24<span>%</span></div>
-                <div class="kpi-sub">Cotton · Mar 2020</div>
+                <div class="kpi-value" id="kpi-max">
+                    <span th:text="${kpis['maxWaste']}">0</span><span>%</span>
+                </div>
+                <div class="kpi-sub">peak recorded waste</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-icon-wrap">✅</div>
                 <div class="kpi-label">Lowest Wastage</div>
-                <div class="kpi-value" id="kpi-min">3.65<span>%</span></div>
-                <div class="kpi-sub">Viscose · Jan 2020</div>
+                <div class="kpi-value" id="kpi-min">
+                    <span th:text="${kpis['minWaste']}">0</span><span>%</span>
+                </div>
+                <div class="kpi-sub">best recorded waste</div>
                 <div class="kpi-trend trend-down">↓ Best performer</div>
             </div>
         </div>
 
-        <!-- CHARTS ROW 1 -->
+        <!-- CHARTS -->
         <div class="section-title">Trend Analysis</div>
         <div class="charts-row">
             <div class="chart-card">
                 <div class="chart-header">
                     <div class="chart-title">
                         <h3>Actual vs Predicted Waste Trend</h3>
-                        <p>Monthly average · Jan – May 2020</p>
+                        <p>Monthly averages from database</p>
                     </div>
                     <div class="chart-legend">
                         <div class="legend-item"><div class="legend-dot" style="background:#2563eb;"></div> Actual</div>
@@ -180,35 +207,32 @@
             </div>
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">
-                        <h3>Waste by Fabric Type</h3>
-                        <p>Average % across all records</p>
-                    </div>
+                    <div class="chart-title"><h3>Waste by Fabric Type</h3><p>Average % per material</p></div>
                 </div>
                 <div class="chart-wrap"><canvas id="fabricChart"></canvas></div>
             </div>
         </div>
-
-        <!-- CHARTS ROW 2 -->
         <div class="charts-row-2">
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">
-                        <h3>Day vs Night Shift Comparison</h3>
-                        <p>Average wastage % per month by shift</p>
-                    </div>
+                    <div class="chart-title"><h3>Day vs Night Shift Comparison</h3><p>Average wastage % by shift</p></div>
                 </div>
                 <div class="chart-wrap"><canvas id="shiftChart"></canvas></div>
             </div>
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">
-                        <h3>Cutting Method Impact</h3>
-                        <p>Manual vs Auto — waste distribution</p>
-                    </div>
+                    <div class="chart-title"><h3>Cutting Method Impact</h3><p>Manual vs Auto — waste distribution</p></div>
                 </div>
                 <div class="chart-wrap"><canvas id="cuttingChart"></canvas></div>
             </div>
+        </div>
+
+        <!-- EXPORT BUTTONS -->
+        <div class="export-bar">
+            <span class="export-label">Export Current Report:</span>
+            <button class="btn-trends" onclick="downloadTrendsPDF()"> Download Trends Report(PDF)</button>
+            <button class="btn-csv"    onclick="downloadExcel()"> Download Generated Report - (Excel Sheet)</button>
+            <button class="btn-pdf"    onclick="downloadPDF()"> Download Generated Report (PDF)</button>
         </div>
 
         <!-- DETAILED RECORDS TABLE -->
@@ -216,251 +240,312 @@
         <div class="table-section">
             <div class="table-top">
                 <div class="table-top-left">
-                    <h3>Detailed Wastage Records</h3>
-                    <p>Showing <span id="row-count">51</span> records · dummy predicted values for demo</p>
-                </div>
-                <div class="table-btns">
-                    <button class="btn-csv" onclick="showToast('📋 CSV export coming in Phase 2')">⬇ Export CSV</button>
-                    <button class="btn-pdf" onclick="downloadPDF()">📄 Download PDF</button>
+                    <h3>Cutting Jobs — Wastage Records</h3>
+                    <p>Showing <span id="row-count" th:text="${totalRecords}">0</span> records from database</p>
                 </div>
             </div>
+            <div style="overflow-x:auto;">
             <table>
                 <thead>
                     <tr>
-                        <th>Year</th><th>Month</th><th>Fabric Type</th><th>Pattern</th>
-                        <th>GSM</th><th>Shift</th><th>Cutting</th>
-                        <th>Actual Waste %</th><th>Predicted %</th><th>Difference</th>
+                        <th>Job ID</th><th>Date</th><th>Fabric</th><th>Shift</th>
+                        <th>Cutting</th><th>Layers</th><th>Marker %</th>
+                        <th>Actual %</th><th>Predicted %</th><th>Difference</th>
                     </tr>
                 </thead>
-                <tbody id="report-tbody"></tbody>
+                <tbody id="report-tbody">
+                    <tr th:each="job : ${jobs}">
+                        <td th:text="${job['jobId']}">—</td>
+                        <td th:text="${job['jobDate']}">—</td>
+                        <td><strong th:text="${job['fabric']}">—</strong></td>
+                        <td><span th:class="'chip ' + (${job['shift']} == 'Day' ? 'chip-day' : 'chip-night')"
+                                  th:text="${job['shift']}">—</span></td>
+                        <td><span th:class="'chip ' + (${job['cutting']} == 'Auto' ? 'chip-auto' : 'chip-manual')"
+                                  th:text="${job['cutting']}">—</span></td>
+                        <td th:text="${job['layers']}">—</td>
+                        <td th:text="${job['marker']}">—</td>
+                        <td><span th:class="'badge ' + (${job['actual']} >= 10 ? 'badge-high' : (${job['actual']} >= 7.5 ? 'badge-mid' : 'badge-low'))"
+                                  th:text="${job['actual']} + '%'">—</span></td>
+                        <td style="font-weight:600;color:#1e4db7;" th:text="${job['predicted']} + '%'">—</td>
+                        <td th:with="diff=${job['predicted']} - ${job['actual']}"
+                            th:class="${diff > 0 ? 'diff-pos' : 'diff-neg'}"
+                            th:text="${(diff > 0 ? '+' : '') + #numbers.formatDecimal(diff,1,2) + '%'}">—</td>
+                    </tr>
+                </tbody>
             </table>
+            </div>
         </div>
 
-        <!-- ── SAVED REPORTS FROM DATABASE ── -->
+        <!-- SAVED REPORTS -->
         <div class="section-title">Saved Reports — Database</div>
-        <div class="table-section">
+        <div class="table-section" id="saved-reports-section">
             <div class="table-top">
                 <div class="table-top-left">
                     <h3>Generated Reports Log</h3>
                     <p>
                         <span th:if="${reportCount > 0}">
-                            <span th:text="${reportCount}">0</span> report(s) saved in PostgreSQL · <strong>reports</strong> table
+                            <span th:text="${reportCount}">0</span> report(s) in PostgreSQL · <strong>reports</strong> table
                         </span>
-                        <span th:if="${reportCount == 0}">
-                            No reports saved yet — click <strong>Generate Report</strong> above to save one
-                        </span>
+                        <span th:if="${reportCount == 0}">No reports saved yet — click Generate Report above</span>
                     </p>
                 </div>
                 <div class="table-btns">
-                    <span class="db-badge">🗄️ PostgreSQL · Fabric AI_V3</span>
+                    <span class="db-badge">🗄️ PostgreSQL · reports</span>
                 </div>
             </div>
-
-            <!-- Show table only if there are records -->
             <div th:if="${reportCount > 0}">
                 <table>
                     <thead>
-                        <tr>
-                            <th>ID (UUID)</th>
-                            <th>Report Name</th>
-                            <th>Generated At</th>
-                        </tr>
+                        <tr><th>Report Name</th><th>Filters Used</th><th>Records</th><th>Status</th><th>Generated At</th><th>Action</th></tr>
                     </thead>
-                    <tbody>
+                    <tbody id="saved-reports-tbody">
                         <tr th:each="report : ${reports}">
-                            <td class="uuid-cell" th:text="${report.id}">—</td>
                             <td><strong th:text="${report.reportName}">—</strong></td>
-                            <td th:text="${#temporals.format(report.generatedAt, 'dd MMM yyyy · HH:mm')}">—</td>
+                            <td style="font-size:11px;color:#64748b;" th:text="${report.filtersUsed}">—</td>
+                            <td th:text="${report.recordCount}">—</td>
+                            <td><span class="badge badge-low" th:text="${report.status}">—</span></td>
+                            <td th:text="${#temporals.format(report.generatedAt,'dd MMM yyyy · HH:mm')}">—</td>
+                            <td>
+                                <button class="btn-delete"
+                                        th:attr="data-id=${report.id}"
+                                        onclick="deleteReport(this.getAttribute('data-id'))">
+                                    🗑 Delete
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-
-            <!-- Empty state -->
             <div th:if="${reportCount == 0}" class="empty-state">
                 <div class="empty-icon">🗄️</div>
                 <p>No reports in database yet.</p>
                 <p>Click <strong>▶ Generate Report</strong> above — it will be saved here automatically.</p>
             </div>
-
         </div>
 
     </div><!-- /page-body -->
 </div><!-- /main-content -->
 
-<!-- TOAST -->
-<div class="toast" id="toast">
-    <span class="toast-icon">✓</span>
-    <span id="toast-msg">Done</span>
+<!-- ── REPORT STATUS TRACKER MODAL ── -->
+<div class="modal-overlay" id="statusModal" onclick="closeStatusModal(event)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title-wrap">
+                <span class="modal-icon">📁</span>
+                <div>
+                    <h2>Report Status Tracker</h2>
+                    <p>All generated reports with filter details and status</p>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeStatusModal()">✕</button>
+        </div>
+
+        <!-- Modal summary stats -->
+        <div class="modal-stats">
+            <div class="modal-stat">
+                <div class="modal-stat-value" id="modal-total">—</div>
+                <div class="modal-stat-label">Total Reports</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-value" id="modal-today">—</div>
+                <div class="modal-stat-label">Today</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-value" id="modal-generated">—</div>
+                <div class="modal-stat-label">Generated</div>
+            </div>
+        </div>
+
+        <!-- Modal table -->
+        <div class="modal-table-wrap">
+            <table class="modal-table">
+                <thead>
+                    <tr>
+                        <th>Report Name</th>
+                        <th>Filters Used</th>
+                        <th>Records</th>
+                        <th>Status</th>
+                        <th>Generated At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="modal-tbody">
+                    <tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-reset" onclick="closeStatusModal()">Close</button>
+        </div>
+    </div>
 </div>
 
+<!-- TOAST -->
+<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toast-msg">Done</span></div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+var dbJobs = [];
+try { dbJobs = /*[[${jobs}]]*/ []; } catch(e) { dbJobs = []; }
+/*]]>*/
+</script>
 <script>
-const MONTHS = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-const rawData = [
-    {year:2020,month:1,fabric:"Viscose",pattern:"Checked",gsm:150,shift:"Night",cutting:"Manual",actual:8.17},
-    {year:2020,month:1,fabric:"Polyester",pattern:"Checked",gsm:140,shift:"Night",cutting:"Manual",actual:7.48},
-    {year:2020,month:1,fabric:"Blended",pattern:"Checked",gsm:170,shift:"Night",cutting:"Auto",actual:7.82},
-    {year:2020,month:1,fabric:"Viscose",pattern:"Floral",gsm:180,shift:"Night",cutting:"Manual",actual:6.35},
-    {year:2020,month:1,fabric:"Rayon",pattern:"Striped",gsm:200,shift:"Day",cutting:"Manual",actual:11.54},
-    {year:2020,month:1,fabric:"Twill",pattern:"Floral",gsm:190,shift:"Day",cutting:"Manual",actual:8.05},
-    {year:2020,month:1,fabric:"Twill",pattern:"Printed",gsm:140,shift:"Night",cutting:"Auto",actual:4.04},
-    {year:2020,month:1,fabric:"Polyester",pattern:"Printed",gsm:200,shift:"Night",cutting:"Manual",actual:11.67},
-    {year:2020,month:1,fabric:"Blended",pattern:"Solid",gsm:160,shift:"Night",cutting:"Auto",actual:8.32},
-    {year:2020,month:1,fabric:"Blended",pattern:"Floral",gsm:150,shift:"Day",cutting:"Manual",actual:9.82},
-    {year:2020,month:1,fabric:"Polyester",pattern:"Striped",gsm:150,shift:"Day",cutting:"Auto",actual:6.72},
-    {year:2020,month:1,fabric:"Denim",pattern:"Striped",gsm:170,shift:"Day",cutting:"Auto",actual:8.95},
-    {year:2020,month:1,fabric:"Cotton",pattern:"Solid",gsm:150,shift:"Day",cutting:"Manual",actual:9.45},
-    {year:2020,month:1,fabric:"Linen",pattern:"Floral",gsm:180,shift:"Night",cutting:"Auto",actual:5.72},
-    {year:2020,month:1,fabric:"Viscose",pattern:"Printed",gsm:180,shift:"Day",cutting:"Auto",actual:3.65},
-    {year:2020,month:2,fabric:"Denim",pattern:"Solid",gsm:210,shift:"Day",cutting:"Auto",actual:5.18},
-    {year:2020,month:2,fabric:"Blended",pattern:"Floral",gsm:140,shift:"Night",cutting:"Manual",actual:10.28},
-    {year:2020,month:2,fabric:"Rayon",pattern:"Solid",gsm:210,shift:"Day",cutting:"Manual",actual:7.72},
-    {year:2020,month:2,fabric:"Viscose",pattern:"Floral",gsm:140,shift:"Night",cutting:"Auto",actual:6.05},
-    {year:2020,month:2,fabric:"Linen",pattern:"Checked",gsm:180,shift:"Night",cutting:"Auto",actual:10.47},
-    {year:2020,month:2,fabric:"Cotton",pattern:"Floral",gsm:170,shift:"Night",cutting:"Auto",actual:8.21},
-    {year:2020,month:2,fabric:"Poplin",pattern:"Striped",gsm:160,shift:"Day",cutting:"Manual",actual:8.64},
-    {year:2020,month:2,fabric:"Denim",pattern:"Solid",gsm:190,shift:"Night",cutting:"Auto",actual:5.50},
-    {year:2020,month:2,fabric:"Polyester",pattern:"Solid",gsm:170,shift:"Night",cutting:"Auto",actual:7.07},
-    {year:2020,month:2,fabric:"Polyester",pattern:"Printed",gsm:180,shift:"Day",cutting:"Manual",actual:8.53},
-    {year:2020,month:3,fabric:"Poplin",pattern:"Striped",gsm:170,shift:"Day",cutting:"Manual",actual:9.73},
-    {year:2020,month:3,fabric:"Polyester",pattern:"Floral",gsm:150,shift:"Day",cutting:"Auto",actual:5.14},
-    {year:2020,month:3,fabric:"Cotton",pattern:"Solid",gsm:160,shift:"Night",cutting:"Manual",actual:9.58},
-    {year:2020,month:3,fabric:"Rayon",pattern:"Floral",gsm:160,shift:"Day",cutting:"Auto",actual:6.74},
-    {year:2020,month:3,fabric:"Denim",pattern:"Floral",gsm:190,shift:"Day",cutting:"Auto",actual:7.82},
-    {year:2020,month:3,fabric:"Cotton",pattern:"Striped",gsm:170,shift:"Night",cutting:"Manual",actual:12.24},
-    {year:2020,month:3,fabric:"Poplin",pattern:"Printed",gsm:200,shift:"Day",cutting:"Auto",actual:3.74},
-    {year:2020,month:3,fabric:"Cotton",pattern:"Printed",gsm:150,shift:"Day",cutting:"Auto",actual:4.90},
-    {year:2020,month:3,fabric:"Linen",pattern:"Striped",gsm:160,shift:"Night",cutting:"Manual",actual:9.70},
-    {year:2020,month:3,fabric:"Denim",pattern:"Striped",gsm:150,shift:"Night",cutting:"Manual",actual:10.59},
-    {year:2020,month:4,fabric:"Poplin",pattern:"Checked",gsm:150,shift:"Night",cutting:"Manual",actual:9.07},
-    {year:2020,month:4,fabric:"Cotton",pattern:"Printed",gsm:170,shift:"Day",cutting:"Auto",actual:4.42},
-    {year:2020,month:4,fabric:"Denim",pattern:"Solid",gsm:150,shift:"Day",cutting:"Auto",actual:9.03},
-    {year:2020,month:4,fabric:"Blended",pattern:"Striped",gsm:160,shift:"Day",cutting:"Auto",actual:7.28},
-    {year:2020,month:4,fabric:"Denim",pattern:"Floral",gsm:170,shift:"Night",cutting:"Manual",actual:12.15},
-    {year:2020,month:4,fabric:"Linen",pattern:"Checked",gsm:170,shift:"Night",cutting:"Manual",actual:9.80},
-    {year:2020,month:4,fabric:"Polyester",pattern:"Striped",gsm:200,shift:"Night",cutting:"Manual",actual:7.27},
-    {year:2020,month:4,fabric:"Viscose",pattern:"Solid",gsm:150,shift:"Night",cutting:"Auto",actual:8.18},
-    {year:2020,month:4,fabric:"Rayon",pattern:"Striped",gsm:140,shift:"Night",cutting:"Auto",actual:7.72},
-    {year:2020,month:5,fabric:"Twill",pattern:"Floral",gsm:150,shift:"Night",cutting:"Manual",actual:8.10},
-    {year:2020,month:5,fabric:"Rayon",pattern:"Solid",gsm:200,shift:"Night",cutting:"Manual",actual:9.30},
-    {year:2020,month:5,fabric:"Viscose",pattern:"Floral",gsm:160,shift:"Day",cutting:"Manual",actual:7.70},
-    {year:2020,month:5,fabric:"Twill",pattern:"Floral",gsm:170,shift:"Night",cutting:"Auto",actual:9.75},
-    {year:2020,month:5,fabric:"Poplin",pattern:"Floral",gsm:180,shift:"Day",cutting:"Auto",actual:4.64},
-    {year:2020,month:5,fabric:"Blended",pattern:"Striped",gsm:180,shift:"Night",cutting:"Manual",actual:7.63},
-    {year:2020,month:5,fabric:"Denim",pattern:"Floral",gsm:170,shift:"Night",cutting:"Manual",actual:8.46},
-];
-
-const offsets = [0.73,0.62,0.45,0.88,0.61,0.94,0.55,0.72,0.41,0.85,0.38,0.66,0.79,0.52,0.43,
-                 0.67,0.55,0.91,0.48,0.63,0.72,0.58,0.34,0.47,0.83,0.69,0.44,0.77,0.52,0.39,
-                 0.85,0.41,0.62,0.73,0.56,0.68,0.39,0.51,0.82,0.94,0.47,0.58,0.61,0.37,0.79,
-                 0.53,0.41,0.88,0.44,0.67,0.72];
-const signs = [1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,
-               1,-1,1,-1,1,1,-1,1,-1,1,-1,1,-1,1,1,-1,1,-1,1,-1,1];
-
-const dataset = rawData.map((row,i) => ({
-    ...row,
-    predicted: +(row.actual + signs[i] * (offsets[i] || 0.5)).toFixed(2)
+const dataset = (Array.isArray(dbJobs) ? dbJobs : []).map(job => ({
+    jobId:     job.jobId     || '',
+    jobDate:   job.jobDate   || '',
+    year:      job.year      || 0,
+    month:     job.month     || 0,
+    monthName: job.monthName || '',
+    fabric:    job.fabric    || '',
+    shift:     job.shift     || '',
+    cutting:   job.cutting   || '',
+    layers:    job.layers    || 0,
+    marker:    job.marker    || 0,
+    actual:    job.actual    || 0,
+    predicted: job.predicted || 0,
 }));
+
+let currentFiltered = [...dataset];
 
 // CHARTS
 Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
 Chart.defaults.font.size = 11;
 Chart.defaults.color = '#94a3b8';
 Chart.defaults.borderColor = '#e2e8f0';
-
 const tooltipStyle = {
     backgroundColor:'#0f172a', borderColor:'#1e4db7', borderWidth:1,
     titleColor:'#f1f5f9', bodyColor:'#94a3b8', padding:10, cornerRadius:8
 };
 
-new Chart(document.getElementById('trendChart'), {
-    type:'line',
-    data:{
-        labels:['Jan','Feb','Mar','Apr','May'],
-        datasets:[
-            { label:'Actual Waste %', data:[8.21,7.83,8.44,8.07,8.61], borderColor:'#2563eb',
+function buildCharts(data) {
+    const MNAMES = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    const monthMap = {};
+    data.forEach(j => {
+        if (!j.month) return;
+        if (!monthMap[j.month]) monthMap[j.month] = {actual:[], predicted:[]};
+        monthMap[j.month].actual.push(j.actual);
+        monthMap[j.month].predicted.push(j.predicted);
+    });
+    const mKeys = Object.keys(monthMap).sort((a,b)=>a-b);
+    const trendLabels  = mKeys.map(m => MNAMES[m]);
+    const avgActuals   = mKeys.map(m => +(monthMap[m].actual.reduce((a,b)=>a+b,0)/monthMap[m].actual.length).toFixed(2));
+    const avgPredicted = mKeys.map(m => +(monthMap[m].predicted.reduce((a,b)=>a+b,0)/monthMap[m].predicted.length).toFixed(2));
+
+    if (window.tC) window.tC.destroy();
+    window.tC = new Chart(document.getElementById('trendChart'), {
+        type:'line',
+        data:{ labels:trendLabels, datasets:[
+            { label:'Actual %', data:avgActuals, borderColor:'#2563eb',
               backgroundColor:'rgba(37,99,235,0.08)', tension:0.4, fill:true,
               pointBackgroundColor:'#2563eb', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:5, borderWidth:2.5 },
-            { label:'Predicted Waste %', data:[8.79,8.26,8.91,8.55,9.05], borderColor:'#f59e0b',
+            { label:'Predicted %', data:avgPredicted, borderColor:'#f59e0b',
               backgroundColor:'rgba(245,158,11,0.06)', tension:0.4, fill:true,
               pointBackgroundColor:'#f59e0b', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:5,
               borderWidth:2.5, borderDash:[6,3] }
-        ]
-    },
-    options:{ responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{display:false}, tooltip:tooltipStyle },
-        scales:{ x:{grid:{color:'#f1f5f9'}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}, min:7, max:10} }
-    }
-});
-
-new Chart(document.getElementById('fabricChart'), {
-    type:'bar',
-    data:{
-        labels:['Polyester','Viscose','Cotton','Denim','Blended','Rayon','Linen','Poplin','Twill'],
-        datasets:[{ label:'Avg Waste %',
-            data:[8.14,6.97,8.12,9.05,8.57,8.40,8.92,7.20,7.89],
-            backgroundColor:['#2563eb','#3b82f6','#60a5fa','#1e4db7','#93c5fd','#2563eb','#3b82f6','#60a5fa','#1e4db7'],
-            borderRadius:5, borderWidth:0 }]
-    },
-    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
-        plugins:{ legend:{display:false}, tooltip:tooltipStyle },
-        scales:{ x:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}, min:0}, y:{grid:{display:false}} }
-    }
-});
-
-new Chart(document.getElementById('shiftChart'), {
-    type:'bar',
-    data:{
-        labels:['Jan','Feb','Mar','Apr','May'],
-        datasets:[
-            { label:'Day Shift',   data:[7.62,7.41,7.82,7.20,7.85], backgroundColor:'#3b82f6', borderRadius:4 },
-            { label:'Night Shift', data:[8.78,8.22,9.08,8.90,9.25], backgroundColor:'#1e4db7', borderRadius:4 }
-        ]
-    },
-    options:{ responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{display:true, position:'top', labels:{color:'#64748b', boxWidth:10, font:{size:11}}}, tooltip:tooltipStyle },
-        scales:{ x:{grid:{display:false}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}} }
-    }
-});
-
-new Chart(document.getElementById('cuttingChart'), {
-    type:'doughnut',
-    data:{
-        labels:['Manual Cutting','Auto Cutting'],
-        datasets:[{ data:[9.38,7.51], backgroundColor:['#2563eb','#93c5fd'], borderColor:'#fff', borderWidth:3 }]
-    },
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
-        plugins:{
-            legend:{display:true, position:'bottom', labels:{color:'#64748b', boxWidth:12, padding:16}},
-            tooltip:{...tooltipStyle, callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}%`}}
+        ]},
+        options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{display:false}, tooltip:tooltipStyle },
+            scales:{ x:{grid:{color:'#f1f5f9'}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}} }
         }
-    }
-});
+    });
+
+    const fabricMap = {};
+    data.forEach(j => { if (!j.fabric) return; if (!fabricMap[j.fabric]) fabricMap[j.fabric]=[]; fabricMap[j.fabric].push(j.actual); });
+    const fLabels = Object.keys(fabricMap);
+    const fAvgs   = fLabels.map(f => +(fabricMap[f].reduce((a,b)=>a+b,0)/fabricMap[f].length).toFixed(2));
+    const blues   = ['#2563eb','#3b82f6','#60a5fa','#1e4db7','#93c5fd','#2563eb','#3b82f6','#60a5fa','#1e4db7','#dbeafe'];
+
+    if (window.fC) window.fC.destroy();
+    window.fC = new Chart(document.getElementById('fabricChart'), {
+        type:'bar',
+        data:{ labels:fLabels, datasets:[{ label:'Avg Waste %', data:fAvgs,
+            backgroundColor:fLabels.map((_,i)=>blues[i%blues.length]), borderRadius:5, borderWidth:0 }]},
+        options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+            plugins:{ legend:{display:false}, tooltip:tooltipStyle },
+            scales:{ x:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}, min:0}, y:{grid:{display:false}} }
+        }
+    });
+
+    const shiftMap = {};
+    data.forEach(j => { if (!j.shift) return; if (!shiftMap[j.shift]) shiftMap[j.shift]=[]; shiftMap[j.shift].push(j.actual); });
+    const sLabels = Object.keys(shiftMap);
+    const sAvgs   = sLabels.map(s => +(shiftMap[s].reduce((a,b)=>a+b,0)/shiftMap[s].length).toFixed(2));
+
+    if (window.sC) window.sC.destroy();
+    window.sC = new Chart(document.getElementById('shiftChart'), {
+        type:'bar',
+        data:{ labels:sLabels, datasets:[{ label:'Avg Waste %', data:sAvgs,
+            backgroundColor:['#3b82f6','#1e4db7','#60a5fa'], borderRadius:4 }]},
+        options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{display:false}, tooltip:tooltipStyle },
+            scales:{ x:{grid:{display:false}}, y:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>v+'%'}} }
+        }
+    });
+
+    const cutMap = {};
+    data.forEach(j => { if (!j.cutting) return; if (!cutMap[j.cutting]) cutMap[j.cutting]=[]; cutMap[j.cutting].push(j.actual); });
+    const cLabels = Object.keys(cutMap);
+    const cAvgs   = cLabels.map(c => +(cutMap[c].reduce((a,b)=>a+b,0)/cutMap[c].length).toFixed(2));
+
+    if (window.cC) window.cC.destroy();
+    window.cC = new Chart(document.getElementById('cuttingChart'), {
+        type:'doughnut',
+        data:{ labels:cLabels, datasets:[{ data:cAvgs, backgroundColor:['#2563eb','#93c5fd','#1e4db7'], borderColor:'#fff', borderWidth:3 }]},
+        options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
+            plugins:{ legend:{display:true, position:'bottom', labels:{color:'#64748b', boxWidth:12, padding:16}},
+                tooltip:{...tooltipStyle, callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}%`}} }
+        }
+    });
+}
+
+buildCharts(dataset);
+
+// ── LIVE COUNT UPDATE ──
+function updateLiveCount() {
+    const year    = document.getElementById('filter-year').value;
+    const mFrom   = parseInt(document.getElementById('filter-month-from').value) || 0;
+    const mTo     = parseInt(document.getElementById('filter-month-to').value)   || 0;
+    const fabric  = document.getElementById('filter-fabric').value;
+    const shift   = document.getElementById('filter-shift').value;
+    const cutting = document.getElementById('filter-cutting').value;
+
+    const count = dataset.filter(row => {
+        if (year !== 'all' && row.year !== parseInt(year)) return false;
+        if (mFrom > 0 && row.month < mFrom) return false;
+        if (mTo   > 0 && row.month > mTo)   return false;
+        if (fabric  !== 'all' && row.fabric  !== fabric)  return false;
+        if (shift   !== 'all' && row.shift   !== shift)   return false;
+        if (cutting !== 'all' && row.cutting !== cutting) return false;
+        return true;
+    }).length;
+    document.getElementById('live-count').textContent = count;
+}
 
 // ── RENDER TABLE ──
 function renderTable(data) {
+    currentFiltered = data;
     document.getElementById('row-count').textContent = data.length;
     const tbody = document.getElementById('report-tbody');
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#94a3b8;">No records match the selected filters.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:30px;color:#94a3b8;">No records match the selected filters.</td></tr>';
         return;
     }
     tbody.innerHTML = data.map(row => {
-        const diff = (row.predicted - row.actual).toFixed(2);
-        const diffSign = diff > 0 ? '+' : '';
+        const diff      = (row.predicted - row.actual).toFixed(2);
+        const diffSign  = diff > 0 ? '+' : '';
         const diffClass = diff > 0 ? 'diff-pos' : 'diff-neg';
         const badgeClass = row.actual >= 10 ? 'badge-high' : row.actual >= 7.5 ? 'badge-mid' : 'badge-low';
-        const shiftChip = row.shift === 'Day' ? 'chip-day' : 'chip-night';
-        const cutChip   = row.cutting === 'Auto' ? 'chip-auto' : 'chip-manual';
+        const shiftChip  = (row.shift||'').toLowerCase().includes('day') ? 'chip-day' : 'chip-night';
+        const cutChip    = (row.cutting||'').toLowerCase() === 'auto' ? 'chip-auto' : 'chip-manual';
         return `<tr>
-            <td>${row.year}</td>
-            <td>${MONTHS[row.month]}</td>
-            <td><strong>${row.fabric}</strong></td>
-            <td>${row.pattern}</td>
-            <td>${row.gsm}</td>
-            <td><span class="chip ${shiftChip}">${row.shift}</span></td>
-            <td><span class="chip ${cutChip}">${row.cutting}</span></td>
+            <td>${row.jobId||'—'}</td>
+            <td>${row.jobDate||'—'}</td>
+            <td><strong>${row.fabric||'—'}</strong></td>
+            <td><span class="chip ${shiftChip}">${row.shift||'—'}</span></td>
+            <td><span class="chip ${cutChip}">${row.cutting||'—'}</span></td>
+            <td>${row.layers||'—'}</td>
+            <td>${row.marker||'—'}</td>
             <td><span class="badge ${badgeClass}">${row.actual}%</span></td>
             <td style="font-weight:600;color:#1e4db7;">${row.predicted}%</td>
             <td class="${diffClass}">${diffSign}${diff}%</td>
@@ -468,72 +553,382 @@ function renderTable(data) {
     }).join('');
 }
 
-renderTable(dataset);
+function updateKPIs(data) {
+    if (data.length === 0) {
+        ['kpi-total','kpi-actual','kpi-predicted','kpi-max','kpi-min'].forEach(id => {
+            document.getElementById(id).innerHTML = '0';
+        });
+        return;
+    }
+    const actuals = data.map(r => r.actual);
+    const preds   = data.map(r => r.predicted);
+    const avg = arr => (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2);
+    document.getElementById('kpi-total').textContent       = data.length;
+    document.getElementById('kpi-actual').innerHTML        = avg(actuals) + '<span>%</span>';
+    document.getElementById('kpi-predicted').innerHTML     = avg(preds)   + '<span>%</span>';
+    document.getElementById('kpi-max').innerHTML           = Math.max(...actuals).toFixed(2) + '<span>%</span>';
+    document.getElementById('kpi-min').innerHTML           = Math.min(...actuals).toFixed(2) + '<span>%</span>';
+}
 
-// ── GENERATE REPORT — filter + save to DB ──
+// ── INPUT VALIDATION ──
+function validateFilters(year, mFrom, mTo) {
+    const box = document.getElementById('validation-box');
+    const msg = document.getElementById('validation-msg');
+    if (mFrom > 0 && mTo > 0 && mFrom > mTo) {
+        msg.textContent = '"Month From" cannot be later than "Month To". Please correct the month range.';
+        box.style.display = 'flex'; return false;
+    }
+    if (year === 'all' && (mFrom > 0 || mTo > 0)) {
+        msg.textContent = 'You selected a month range but "All Years" is chosen. Please select a specific year for accurate monthly filtering.';
+        box.style.display = 'flex'; return false;
+    }
+    if (mFrom > 0 && mTo === 0) {
+        msg.textContent = 'Please also select a "Month To" value when "Month From" is set.';
+        box.style.display = 'flex'; return false;
+    }
+    box.style.display = 'none'; return true;
+}
+
+// ── GENERATE REPORT ──
 async function generateReport() {
     const year    = document.getElementById('filter-year').value;
     const mFrom   = parseInt(document.getElementById('filter-month-from').value) || 0;
-    const mTo     = parseInt(document.getElementById('filter-month-to').value) || 12;
+    const mTo     = parseInt(document.getElementById('filter-month-to').value)   || 0;
     const fabric  = document.getElementById('filter-fabric').value;
     const shift   = document.getElementById('filter-shift').value;
     const cutting = document.getElementById('filter-cutting').value;
 
-    const filtered = dataset.filter(row => {
-        if (year !== 'all' && row.year !== parseInt(year)) return false;
-        if (mFrom > 0 && row.month < mFrom) return false;
-        if (mTo > 0 && row.month > mTo) return false;
-        if (fabric !== 'all' && row.fabric !== fabric) return false;
-        if (shift  !== 'all' && row.shift  !== shift)  return false;
-        if (cutting !== 'all' && row.cutting !== cutting) return false;
-        return true;
-    });
+    if (!validateFilters(year, mFrom, mTo)) return;
 
-    renderTable(filtered);
-
-    if (filtered.length > 0) {
-        const actuals = filtered.map(r => r.actual);
-        const preds   = filtered.map(r => r.predicted);
-        const avg = arr => (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2);
-        document.getElementById('kpi-total').textContent   = filtered.length;
-        document.getElementById('kpi-actual').innerHTML    = avg(actuals) + '<span>%</span>';
-        document.getElementById('kpi-predicted').innerHTML = avg(preds)   + '<span>%</span>';
-        document.getElementById('kpi-max').innerHTML       = Math.max(...actuals).toFixed(2) + '<span>%</span>';
-        document.getElementById('kpi-min').innerHTML       = Math.min(...actuals).toFixed(2) + '<span>%</span>';
-    }
-
-    // ── Save to DB ──
-    const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const mFromLabel = mFrom > 0 ? monthNames[mFrom] : 'Jan';
-    const mToLabel   = mTo > 0 && mTo <= 12 ? monthNames[mTo] : 'May';
-    const fabricLabel  = fabric  !== 'all' ? fabric  : 'All Fabrics';
-    const shiftLabel   = shift   !== 'all' ? shift   : 'All Shifts';
-    const cuttingLabel = cutting !== 'all' ? cutting : 'All Methods';
-    const yearLabel    = year    !== 'all' ? year    : 'All Years';
-    const reportName   = `Waste Report — ${yearLabel} · ${mFromLabel}-${mToLabel} · ${fabricLabel} · ${shiftLabel} · ${cuttingLabel}`;
-
+    const params = new URLSearchParams({ year, monthFrom:mFrom, monthTo:mTo, fabric, shift, cutting });
     try {
-        const formData = new URLSearchParams();
-        formData.append('reportName', reportName);
-        const res = await fetch('/api/report/save', { method:'POST', body:formData });
+        const res  = await fetch('/api/report/filter?' + params);
         const json = await res.json();
-        if (json.success) {
+
+        renderTable(json.jobs);
+        updateKPIs(json.jobs);
+        buildCharts(json.jobs);
+
+        // Build filter description
+        const MNAMES = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const mFromLabel  = mFrom > 0 ? MNAMES[mFrom] : 'All';
+        const mToLabel    = mTo   > 0 ? MNAMES[mTo]   : 'All';
+        const fabricLabel = fabric  !== 'all' ? fabric  : 'All Fabrics';
+        const shiftLabel  = shift   !== 'all' ? shift   : 'All Shifts';
+        const cutLabel    = cutting !== 'all' ? cutting : 'All Methods';
+        const yearLabel   = year    !== 'all' ? year    : 'All Years';
+        const reportName  = `Waste Report — ${yearLabel} · ${mFromLabel}-${mToLabel} · ${fabricLabel} · ${shiftLabel} · ${cutLabel}`;
+        const filtersUsed = `Year:${yearLabel} | Months:${mFromLabel}-${mToLabel} | Fabric:${fabricLabel} | Shift:${shiftLabel} | Cutting:${cutLabel}`;
+
+        const formData = new URLSearchParams();
+        formData.append('reportName',  reportName);
+        formData.append('recordCount', json.count);
+        formData.append('filtersUsed', filtersUsed);
+        const saveRes  = await fetch('/api/report/save', { method:'POST', body:formData });
+        const saveJson = await saveRes.json();
+        if (saveJson.success) {
             showToast('✅ Report generated & saved to database!');
+            refreshSavedReports();
+            refreshSummaryBanner(reportName);
         }
     } catch(e) {
-        showToast('✅ Report generated! (DB save failed — check connection)');
+        console.error(e);
+        showToast('❌ Failed to load filtered data');
     }
 }
 
+// ── RESET ──
 function resetFilters() {
-    document.getElementById('filter-year').value       = '2020';
+    document.getElementById('filter-year').value       = 'all';
     document.getElementById('filter-month-from').value = '0';
-    document.getElementById('filter-month-to').value   = '5';
+    document.getElementById('filter-month-to').value   = '0';
     document.getElementById('filter-fabric').value     = 'all';
     document.getElementById('filter-shift').value      = 'all';
     document.getElementById('filter-cutting').value    = 'all';
+    document.getElementById('validation-box').style.display = 'none';
+    document.getElementById('live-count').textContent  = dataset.length;
     renderTable(dataset);
+    updateKPIs(dataset);
+    buildCharts(dataset);
     showToast('↺ Filters reset');
+}
+
+// ── DELETE REPORT ──
+async function deleteReport(id) {
+    if (!confirm('Delete this report from the database?')) return;
+    try {
+        const res  = await fetch('/api/report/' + id, { method:'DELETE' });
+        const json = await res.json();
+        if (json.success) {
+            showToast('🗑 Report deleted successfully');
+            setTimeout(() => location.reload(), 1000);
+        }
+    } catch(e) { showToast('❌ Delete failed'); }
+}
+
+// ── REPORT STATUS MODAL ──
+async function openStatusModal() {
+    document.getElementById('statusModal').style.display = 'flex';
+    try {
+        const res  = await fetch('/api/report/list');
+        const data = await res.json();
+
+        document.getElementById('modal-total').textContent     = data.length;
+        document.getElementById('modal-generated').textContent = data.filter(r => r.status === 'GENERATED').length;
+
+        const today = new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+        const todayCount = data.filter(r => r.generatedAt && r.generatedAt.startsWith(today.split(' ').reverse().join(' ').substring(0,2))).length;
+        document.getElementById('modal-today').textContent = data.filter(r => {
+            if (!r.generatedAt) return false;
+            const d = new Date();
+            const dateStr = `${String(d.getDate()).padStart(2,'0')} ${d.toLocaleString('en',{month:'short'})} ${d.getFullYear()}`;
+            return r.generatedAt.startsWith(dateStr);
+        }).length;
+
+        if (data.length === 0) {
+            document.getElementById('modal-tbody').innerHTML =
+                '<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">No reports generated yet.</td></tr>';
+            return;
+        }
+
+        document.getElementById('modal-tbody').innerHTML = data.map(r => `
+            <tr>
+                <td><strong>${r.reportName}</strong></td>
+                <td style="font-size:11px;color:#64748b;">${r.filtersUsed}</td>
+                <td>${r.recordCount}</td>
+                <td><span class="badge badge-low">${r.status}</span></td>
+                <td>${r.generatedAt}</td>
+                <td><button class="btn-delete" onclick="deleteReport('${r.id}')">🗑 Delete</button></td>
+            </tr>`).join('');
+    } catch(e) {
+        document.getElementById('modal-tbody').innerHTML =
+            '<tr><td colspan="6" style="text-align:center;padding:30px;color:#ef4444;">Failed to load reports.</td></tr>';
+    }
+}
+
+function closeStatusModal(e) {
+    if (!e || e.target === document.getElementById('statusModal')) {
+        document.getElementById('statusModal').style.display = 'none';
+    }
+}
+
+//show newly crated report in log(refresh generated reports log)
+async function refreshSavedReports() {
+    try {
+        const res  = await fetch('/api/report/list');
+        const data = await res.json();
+
+        // Update count text
+        const countSpan = document.querySelector('#saved-reports-section .table-top-left p');
+        if (countSpan) {
+            countSpan.innerHTML = data.length > 0
+                ? `<span>${data.length}</span> report(s) in PostgreSQL · <strong>reports</strong> table`
+                : 'No reports saved yet — click Generate Report above';
+        }
+
+        // Update table body
+        const tbody = document.getElementById('saved-reports-tbody');
+        if (!tbody) return;
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">No reports yet.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map(r => `
+            <tr>
+                <td><strong>${r.reportName}</strong></td>
+                <td style="font-size:11px;color:#64748b;">${r.filtersUsed}</td>
+                <td>${r.recordCount}</td>
+                <td><span class="badge badge-low">${r.status}</span></td>
+                <td>${r.generatedAt}</td>
+                <td><button class="btn-delete" onclick="deleteReport('${r.id}')">🗑 Delete</button></td>
+            </tr>`).join('');
+    } catch(e) {
+        console.error('Failed to refresh reports', e);
+    }
+}
+
+//Refresh summery banner
+async function refreshSummaryBanner(latestReportName) {
+    try {
+        const res  = await fetch('/api/report/list');
+        const data = await res.json();
+
+        // Total reports count
+        const totalEl = document.querySelector('.summary-item:nth-child(3) .summary-value');
+        if (totalEl) totalEl.textContent = data.length;
+
+        // Today count
+        const now = new Date();
+        const todayCount = data.filter(r => {
+            if (!r.generatedAt) return false;
+            const d = new Date();
+            const dateStr = `${String(d.getDate()).padStart(2,'0')} ${d.toLocaleString('en',{month:'short'})} ${d.getFullYear()}`;
+            return r.generatedAt.startsWith(dateStr);
+        }).length;
+        const todayEl = document.querySelector('.summary-item:nth-child(5) .summary-value');
+        if (todayEl) todayEl.textContent = todayCount;
+
+        // Last report name and time
+        const nameEl = document.querySelector('.summary-value-sm');
+        if (nameEl) nameEl.textContent = latestReportName;
+
+        const timeEl = document.querySelector('.summary-label span');
+        if (timeEl) {
+            const d = new Date();
+            timeEl.textContent = `${String(d.getDate()).padStart(2,'0')} ${d.toLocaleString('en',{month:'short'})} ${d.getFullYear()} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+    } catch(e) {
+        console.error('Failed to refresh banner', e);
+    }
+}
+
+// ── DOWNLOAD TRENDS PDF ──
+async function downloadTrendsPDF() {
+    const btn = document.querySelector('.btn-trends');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳ Generating...'; btn.disabled = true;
+
+    try {
+        const trendImg   = window.tC.toBase64Image();
+        const fabricImg  = window.fC.toBase64Image();
+        const shiftImg   = window.sC.toBase64Image();
+        const cuttingImg = window.cC.toBase64Image();
+
+        const formData = new URLSearchParams();
+        formData.append('year',         document.getElementById('filter-year').value);
+        formData.append('monthFrom',    document.getElementById('filter-month-from').options[document.getElementById('filter-month-from').selectedIndex].text);
+        formData.append('monthTo',      document.getElementById('filter-month-to').options[document.getElementById('filter-month-to').selectedIndex].text);
+        formData.append('fabric',       document.getElementById('filter-fabric').value);
+        formData.append('shift',        document.getElementById('filter-shift').value);
+        formData.append('cutting',      document.getElementById('filter-cutting').value);
+        formData.append('trendChart',   trendImg);
+        formData.append('fabricChart',  fabricImg);
+        formData.append('shiftChart',   shiftImg);
+        formData.append('cuttingChart', cuttingImg);
+        formData.append('recordCount',  currentFiltered.length);
+
+        const response = await fetch('/api/report/trends-pdf', {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body: formData
+        });
+
+        if (!response.ok) throw new Error('Trends PDF failed');
+
+        const blob = await response.blob();
+        const url  = window.URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = 'fabric_waste_trends_' + new Date().toISOString().slice(0,10) + '.pdf';
+        document.body.appendChild(a); a.click();
+        window.URL.revokeObjectURL(url); document.body.removeChild(a);
+        showToast('✅ Trends PDF downloaded!');
+    } catch(e) {
+        console.error(e); showToast('❌ Trends PDF generation failed');
+    } finally { btn.innerHTML = orig; btn.disabled = false; }
+}
+
+// ── DOWNLOAD DATA PDF ──
+async function downloadPDF() {
+    const btn = document.querySelector('.btn-pdf');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳ Generating...'; btn.disabled = true;
+    try {
+        const tableRows  = document.querySelectorAll('#report-tbody tr');
+        const reportData = [];
+        tableRows.forEach(row => {
+            if (row.cells.length >= 10) {
+                reportData.push({
+                    jobId:     row.cells[0].textContent.trim(),
+                    jobDate:   row.cells[1].textContent.trim(),
+                    fabric:    row.cells[2].textContent.trim(),
+                    shift:     row.cells[3].textContent.trim(),
+                    cutting:   row.cells[4].textContent.trim(),
+                    layers:    row.cells[5].textContent.trim(),
+                    marker:    row.cells[6].textContent.trim(),
+                    actual:    parseFloat(row.cells[7].textContent),
+                    predicted: parseFloat(row.cells[8].textContent),
+                    status:    row.cells[10] ? row.cells[10].textContent.trim() : ''
+                });
+            }
+        });
+        if (reportData.length === 0) { showToast('⚠️ No data to export'); return; }
+
+        const formData = new URLSearchParams();
+        formData.append('year',      document.getElementById('filter-year').value);
+        formData.append('monthFrom', document.getElementById('filter-month-from').options[document.getElementById('filter-month-from').selectedIndex].text);
+        formData.append('monthTo',   document.getElementById('filter-month-to').options[document.getElementById('filter-month-to').selectedIndex].text);
+        formData.append('fabric',    document.getElementById('filter-fabric').value);
+        formData.append('shift',     document.getElementById('filter-shift').value);
+        formData.append('cutting',   document.getElementById('filter-cutting').value);
+        formData.append('data',      JSON.stringify(reportData));
+
+        const response = await fetch('/api/report/pdf', {
+            method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:formData
+        });
+        if (!response.ok) throw new Error('PDF failed');
+
+        const blob = await response.blob();
+        const url  = window.URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = 'fabric_waste_report_' + new Date().toISOString().slice(0,10) + '.pdf';
+        document.body.appendChild(a); a.click();
+        window.URL.revokeObjectURL(url); document.body.removeChild(a);
+        showToast('✅ PDF downloaded successfully!');
+    } catch(e) { console.error(e); showToast('❌ PDF generation failed');
+    } finally { btn.innerHTML = orig; btn.disabled = false; }
+}
+
+// ── DOWNLOAD EXCEL ──
+async function downloadExcel() {
+    const btn = document.querySelector('.btn-csv');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳ Generating...'; btn.disabled = true;
+    try {
+        const tableRows  = document.querySelectorAll('#report-tbody tr');
+        const reportData = [];
+        tableRows.forEach(row => {
+            if (row.cells.length >= 10) {
+                reportData.push({
+                    jobId:     row.cells[0].textContent.trim(),
+                    jobDate:   row.cells[1].textContent.trim(),
+                    fabric:    row.cells[2].textContent.trim(),
+                    shift:     row.cells[3].textContent.trim(),
+                    cutting:   row.cells[4].textContent.trim(),
+                    layers:    row.cells[5].textContent.trim(),
+                    marker:    row.cells[6].textContent.trim(),
+                    actual:    parseFloat(row.cells[7].textContent),
+                    predicted: parseFloat(row.cells[8].textContent),
+                    status:    row.cells[10] ? row.cells[10].textContent.trim() : ''
+                });
+            }
+        });
+        if (reportData.length === 0) { showToast('⚠️ No data to export'); return; }
+
+        const formData = new URLSearchParams();
+        formData.append('year',      document.getElementById('filter-year').value);
+        formData.append('monthFrom', document.getElementById('filter-month-from').options[document.getElementById('filter-month-from').selectedIndex].text);
+        formData.append('monthTo',   document.getElementById('filter-month-to').options[document.getElementById('filter-month-to').selectedIndex].text);
+        formData.append('fabric',    document.getElementById('filter-fabric').value);
+        formData.append('shift',     document.getElementById('filter-shift').value);
+        formData.append('cutting',   document.getElementById('filter-cutting').value);
+        formData.append('data',      JSON.stringify(reportData));
+
+        const response = await fetch('/api/report/excel', {
+            method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:formData
+        });
+        if (!response.ok) throw new Error('Excel failed');
+
+        const blob = await response.blob();
+        const url  = window.URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = 'fabric_waste_report_' + new Date().toISOString().slice(0,10) + '.xlsx';
+        document.body.appendChild(a); a.click();
+        window.URL.revokeObjectURL(url); document.body.removeChild(a);
+        showToast('✅ Excel downloaded successfully!');
+    } catch(e) { console.error(e); showToast('❌ Excel generation failed');
+    } finally { btn.innerHTML = orig; btn.disabled = false; }
 }
 
 function showToast(msg) {
@@ -543,78 +938,9 @@ function showToast(msg) {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-async function downloadPDF() {
-    const btn = document.querySelector('.btn-pdf');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '⏳ Generating...';
-    btn.disabled = true;
-
-    try {
-        const tableRows = document.querySelectorAll('#report-tbody tr');
-        const reportData = [];
-        tableRows.forEach(row => {
-            if (row.cells.length >= 10) {
-                reportData.push({
-                    year:      parseInt(row.cells[0].textContent),
-                    month:     getMonthNumber(row.cells[1].textContent),
-                    fabric:    row.cells[2].textContent,
-                    pattern:   row.cells[3].textContent,
-                    gsm:       parseInt(row.cells[4].textContent),
-                    shift:     row.cells[5].textContent,
-                    cutting:   row.cells[6].textContent,
-                    actual:    parseFloat(row.cells[7].textContent),
-                    predicted: parseFloat(row.cells[8].textContent)
-                });
-            }
-        });
-
-        if (reportData.length === 0) { showToast("⚠️ No data to export"); return; }
-
-        const formData = new URLSearchParams();
-        formData.append("year",      document.getElementById("filter-year").value);
-        formData.append("monthFrom", document.getElementById("filter-month-from").options[document.getElementById("filter-month-from").selectedIndex].text);
-        formData.append("monthTo",   document.getElementById("filter-month-to").options[document.getElementById("filter-month-to").selectedIndex].text);
-        formData.append("fabric",    document.getElementById("filter-fabric").value);
-        formData.append("shift",     document.getElementById("filter-shift").value);
-        formData.append("cutting",   document.getElementById("filter-cutting").value);
-        formData.append("data",      JSON.stringify(reportData));
-
-        const response = await fetch("/api/report/pdf", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: formData
-        });
-
-        if (!response.ok) throw new Error("PDF failed");
-
-        const blob = await response.blob();
-        const url  = window.URL.createObjectURL(blob);
-        const a    = document.createElement("a");
-        a.href     = url;
-        a.download = "fabric_waste_report_" + new Date().toISOString().slice(0,10) + ".pdf";
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        showToast("✅ PDF downloaded successfully!");
-
-    } catch(e) {
-        console.error(e);
-        showToast("❌ PDF generation failed");
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled  = false;
-    }
-}
-
-function getMonthNumber(name) {
-    return {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12}[name] || 1;
-}
-
 const now = new Date();
 document.getElementById('gen-time').textContent =
     now.toLocaleDateString('en-GB') + ' · ' + now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 </script>
-
 </body>
 </html>
