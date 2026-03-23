@@ -43,8 +43,8 @@ public class ReportController {
                 .distinct().sorted().collect(Collectors.toList());
 
         List<String> fabricTypes = allJobs.stream()
-                .filter(j -> j.getMaterialId() != null)
-                .map(CuttingJob::getMaterialId)
+                .filter(j -> j.getFabricType() != null)
+                .map(CuttingJob::getFabricType)
                 .distinct().sorted().collect(Collectors.toList());
 
         List<String> shifts = allJobs.stream()
@@ -113,7 +113,7 @@ public class ReportController {
             if (year != null && !year.equals("all") && jobYear != Integer.parseInt(year)) return false;
             if (monthFrom != null && !monthFrom.equals("0") && jobMonth < Integer.parseInt(monthFrom)) return false;
             if (monthTo   != null && !monthTo.equals("0")   && jobMonth > Integer.parseInt(monthTo))   return false;
-            if (fabric  != null && !fabric.equals("all")  && !fabric.equalsIgnoreCase(job.getMaterialId()))   return false;
+            if (fabric != null && !fabric.equals("all") && !fabric.equalsIgnoreCase(job.getFabricType())) return false;
             if (shift   != null && !shift.equals("all")   && !shift.equalsIgnoreCase(job.getShift()))         return false;
             if (cutting != null && !cutting.equals("all") && !cutting.equalsIgnoreCase(job.getCuttingMethod()))return false;
             return true;
@@ -382,12 +382,12 @@ public class ReportController {
         String[] months = {"","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
         return jobs.stream().map(job -> {
             Map<String, Object> map = new HashMap<>();
-            map.put("jobId",     job.getJobId());
+            map.put("jobId",  job.getId() != null ? job.getId().toString() : "");
             map.put("jobDate",   job.getJobDate() != null ? job.getJobDate().toString() : "");
             map.put("year",      job.getJobDate() != null ? job.getJobDate().getYear() : 0);
             map.put("month",     job.getJobDate() != null ? job.getJobDate().getMonthValue() : 0);
             map.put("monthName", job.getJobDate() != null ? months[job.getJobDate().getMonthValue()] : "");
-            map.put("fabric",    job.getMaterialId());
+            map.put("fabric", job.getFabricType());
             map.put("shift",     job.getShift());
             map.put("cutting",   job.getCuttingMethod());
             map.put("actual",    job.getActualWastagePct()    != null ? job.getActualWastagePct()    : 0.0);
