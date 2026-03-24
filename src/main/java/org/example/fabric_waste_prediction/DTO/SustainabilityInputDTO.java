@@ -1,4 +1,4 @@
-package org.example.fabric_waste_prediction.dto;
+package org.example.fabric_waste_prediction.DTO;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;

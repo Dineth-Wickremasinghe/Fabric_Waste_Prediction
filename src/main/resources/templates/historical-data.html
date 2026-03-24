@@ -354,25 +354,25 @@
             align-items: center; justify-content: center;
         }
         .modal-overlay.active { display: flex; }
-        .modal {
+        .modal-box {
             background: #fff; border-radius: var(--radius);
             width: 100%; max-width: 600px;
             box-shadow: 0 24px 64px rgba(0,0,0,0.2);
             max-height: 90vh; overflow-y: auto;
             animation: popIn 0.2s ease;
         }
-        .modal-header {
+        .modal-head {
             background: var(--navy); padding: 18px 28px;
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 10;
         }
-        .modal-header h3 { color: #fff; font-size: 0.95rem; font-weight: 600; }
+        .modal-head h3 { color: #fff; font-size: 0.95rem; font-weight: 600; }
         .modal-close {
             background: none; border: none; color: rgba(255,255,255,0.65);
             font-size: 1.1rem; cursor: pointer; transition: color 0.15s;
         }
         .modal-close:hover { color: #fff; }
-        .modal-body { padding: 24px 28px; }
+        .modal-content { padding: 24px 28px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 2px; }
         .form-group.full { grid-column: 1 / -1; }
@@ -397,7 +397,7 @@
             display: none; color: #991b1b;
             font-size: 0.7rem; font-weight: 500; margin-top: 2px;
         }
-        .modal-footer {
+        .modal-foot {
             padding: 8px 28px 22px;
             display: flex; gap: 10px;
         }
@@ -444,7 +444,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/>
             </svg>
-            Fabric AI
+            Fabric AI Monitoring
         </div>
         <div class="topbar-divider"></div>
         <a href="/user/dashboard" class="btn-back">
@@ -702,13 +702,13 @@
 
 <!-- ── Update modal ────────────────────────────────────────── -->
 <div class="modal-overlay" id="cuttingModal">
-    <div class="modal">
-        <div class="modal-header">
+    <div class="modal-box">
+        <div class="modal-head">
             <h3>Update Production Cutting Record</h3>
             <button class="modal-close" onclick="closeCuttingModal()">✕</button>
         </div>
         <form id="cuttingUpdateForm" method="post" novalidate>
-            <div class="modal-body">
+            <div class="modal-content">
                 <div class="form-row">
                     <div class="form-group">
                         <label>Fabric Type</label>
@@ -789,7 +789,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-foot">
                 <button type="button" class="btn-back-modal" onclick="closeCuttingModal()">← Back</button>
                 <button type="button" class="btn-submit" onclick="submitCuttingForm()">Save Changes</button>
             </div>
