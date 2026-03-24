@@ -3,464 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCut - Complete Sustainability Dashboard</title>
+    <title>Sustainability Dashboard - Fabric Wastage Prediction System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            font-family: 'Inter', sans-serif;
+        :root {
+            --navy:    #0f1f35;
+            --navy-2:  #1a3352;
+            --blue:    #2563eb;
+            --blue-lt: #eff6ff;
+            --amber:   #d97706;
+            --amber-lt:#fffbeb;
+            --green:   #059669;
+            --green-lt:#ecfdf5;
+            --green-md:#a7f3d0;
+            --purple:  #7c3aed;
+            --purple-lt:#f5f3ff;
+            --red:     #dc2626;
+            --red-lt:  #fef2f2;
+            --surface: #f8fafc;
+            --border:  #e2e8f0;
+            --text:    #1e293b;
+            --muted:   #64748b;
+            --radius:  12px;
         }
 
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface);
+            color: var(--text);
             min-height: 100vh;
         }
 
-        /* Navigation */
-        .navbar {
-            background: linear-gradient(135deg, #1e3c2c 0%, #2e7d32 100%);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: 1rem 0;
+        /* ── Topbar ─────────────────────────────────────── */
+        .topbar {
+            background: var(--navy);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 16px; }
+        .topbar-brand {
+            display: flex; align-items: center; gap: 10px;
+            color: #fff; font-weight: 600; font-size: 1rem; letter-spacing: -0.01em;
+        }
+        .topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: rgba(255,255,255,0.65); font-size: 0.8rem; font-weight: 500;
+            text-decoration: none; padding: 5px 10px; border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: color 0.15s, background 0.15s, border-color 0.15s;
+        }
+        .btn-back:hover { color: #fff; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); }
+        .topbar-meta {
+            font-size: 0.75rem; color: rgba(255,255,255,0.45);
+            font-family: 'DM Mono', monospace; letter-spacing: 0.05em;
         }
 
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            letter-spacing: -0.5px;
-        }
+        /* ── Page layout ─────────────────────────────────── */
+        .page { padding: 32px 24px 64px; max-width: 1400px; margin: 0 auto; }
 
-        .navbar-brand i {
-            margin-right: 8px;
-        }
+        /* ── Page heading ─────────────────────────────────── */
+        .page-heading { margin-bottom: 28px; animation: fadeUp 0.3s ease both; }
+        .page-heading h1 { font-size: 1.3rem; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+        .page-heading p  { font-size: 0.82rem; color: var(--muted); }
 
-        /* Cards */
+        /* ── Alert banners ───────────────────────────────── */
+        .alert-banner {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 16px; border-radius: 8px;
+            font-size: 0.82rem; font-weight: 500; margin-bottom: 20px;
+        }
+        .alert-banner.success { background: var(--green-lt); border: 1px solid var(--green-md); color: #065f46; }
+        .alert-banner.danger  { background: var(--red-lt);   border: 1px solid #fca5a5; color: #991b1b; }
+
+        /* ── Cards ───────────────────────────────────────── */
         .card {
-            border: none;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: #fff !important;
+            border: 1px solid var(--border) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
             overflow: hidden;
+            animation: fadeUp 0.35s ease both;
+        }
+        .card:hover { transform: none !important; box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important; }
+
+        .card-head {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .card-head-icon {
+            width: 36px; height: 36px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 1rem;
+        }
+        .card-head-icon.green  { background: var(--green-lt);  color: var(--green); }
+        .card-head-icon.blue   { background: var(--blue-lt);   color: var(--blue); }
+        .card-head-icon.amber  { background: var(--amber-lt);  color: var(--amber); }
+        .card-head-icon.purple { background: var(--purple-lt); color: var(--purple); }
+        .card-head-body .card-head-title {
+            font-size: 0.9rem; font-weight: 600;
+            color: var(--navy); margin: 0;
+        }
+        .card-head-body .card-head-sub {
+            font-size: 0.75rem; color: var(--muted); margin: 0;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-        }
-
-        .card-header {
-            border: none;
-            padding: 1.25rem 1.5rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-        }
-
-        /* Section Headers */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        .section-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-
-        .section-icon.green {
-            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-            color: #2e7d32;
-        }
-
-        .section-icon.blue {
-            background: linear-gradient(135deg, #e3f2fd, #bbdef5);
-            color: #1976d2;
-        }
-
-        .section-icon.orange {
-            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-            color: #f57c00;
-        }
-
-        .section-icon.purple {
-            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
-            color: #7b1fa2;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin: 0;
-            color: #1e293b;
-        }
-
-        .section-subtitle {
-            font-size: 0.8rem;
-            color: #64748b;
-            margin: 0;
-        }
-
-        /* Form Styling */
+        /* ── Form fields ─────────────────────────────────── */
         .form-label {
-            font-weight: 500;
-            font-size: 0.85rem;
-            color: #334155;
-            margin-bottom: 0.25rem;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            color: var(--text) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px !important;
         }
-
         .form-control, .form-select {
-            border: 1.5px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 0.7rem 1rem;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            border: 1px solid var(--border) !important;
+            border-radius: 8px !important;
+            padding: 9px 12px !important;
+            font-size: 0.85rem !important;
+            font-family: 'DM Sans', sans-serif !important;
+            color: var(--text) !important;
+            background: var(--surface) !important;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s !important;
         }
-
         .form-control:focus, .form-select:focus {
-            border-color: #2e7d32;
-            box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+            border-color: var(--blue) !important;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1) !important;
+            background: #fff !important;
         }
 
-        /* Range Slider */
-        .form-range {
-            height: 6px;
-        }
-
-        .form-range::-webkit-slider-thumb {
-            background: #2e7d32;
-            width: 18px;
-            height: 18px;
-        }
-
+        /* ── Range slider ─────────────────────────────────── */
+        .form-range::-webkit-slider-thumb { background: var(--navy); }
+        .form-range::-moz-range-thumb     { background: var(--navy); }
         .range-value {
             font-weight: 600;
-            color: #2e7d32;
-            background: #e8f5e9;
-            padding: 4px 12px;
+            color: var(--navy);
+            background: var(--blue-lt);
+            padding: 3px 10px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
+            font-family: 'DM Mono', monospace;
         }
 
-        /* Radio Buttons */
+        /* ── Question cards ──────────────────────────────── */
+        .question-card {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .question-card:hover {
+            background: #fff;
+            border-color: var(--blue);
+            box-shadow: 0 2px 8px rgba(37,99,235,0.06);
+        }
+        .question-number {
+            width: 24px; height: 24px;
+            background: var(--navy);
+            color: #fff; border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700; margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .question-title {
+            font-weight: 600; font-size: 0.88rem; color: var(--text);
+        }
+
+        /* ── Option buttons (radio) ───────────────────────── */
         .btn-option {
-            border-radius: 30px !important;
-            padding: 8px 16px !important;
-            font-size: 0.85rem !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            font-size: 0.78rem !important;
             font-weight: 500 !important;
-            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif !important;
+            transition: all 0.15s !important;
+            border-width: 1px !important;
+        }
+        .btn-option:hover { transform: none !important; }
+
+        /* ── Submit buttons ──────────────────────────────── */
+        .btn-calculate, .btn-predict {
+            background: var(--navy) !important;
+            border: none !important;
+            padding: 11px !important;
+            font-weight: 600 !important;
+            font-size: 0.88rem !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            transition: background 0.2s, transform 0.15s !important;
+            color: #fff !important;
+        }
+        .btn-calculate:hover, .btn-predict:hover {
+            background: var(--navy-2) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: none !important;
         }
 
-        .btn-option:hover {
-            transform: translateY(-2px);
+        /* ── Report buttons ──────────────────────────────── */
+        .btn-report {
+            background: var(--navy) !important;
+            border: none !important;
+            padding: 9px 16px !important;
+            font-weight: 500 !important;
+            font-size: 0.82rem !important;
+            border-radius: 8px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            transition: background 0.2s, transform 0.15s !important;
+            color: #fff !important;
+        }
+        .btn-report:hover {
+            background: var(--navy-2) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: none !important;
+        }
+        .btn-outline-secondary {
+            border-color: var(--border) !important;
+            color: var(--muted) !important;
+            border-radius: 7px !important;
+            font-size: 0.78rem !important;
+            font-family: 'DM Sans', sans-serif !important;
+        }
+        .btn-outline-secondary:hover {
+            background: var(--surface) !important;
+            border-color: var(--navy) !important;
+            color: var(--navy) !important;
         }
 
-        .btn-check:checked + .btn-outline-success {
-            background: linear-gradient(135deg, #2e7d32, #43a047);
-            border-color: #2e7d32;
-            color: white;
-        }
-
-        .btn-check:checked + .btn-outline-warning {
-            background: #ffc107;
-            border-color: #ffc107;
-            color: #000;
-        }
-
-        .btn-check:checked + .btn-outline-danger {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: white;
-        }
-
-        .btn-check:checked + .btn-outline-info {
-            background: #0dcaf0;
-            border-color: #0dcaf0;
-            color: #000;
-        }
-
-        .btn-check:checked + .btn-outline-secondary {
-            background: #6c757d;
-            border-color: #6c757d;
-            color: white;
-        }
-
-        .btn-check:checked + .btn-outline-dark {
-            background: #212529;
-            border-color: #212529;
-            color: white;
-        }
-
-        /* Score Card */
+        /* ── Score card ──────────────────────────────────── */
         .score-card {
-            background: linear-gradient(135deg, #1e3c2c, #2e7d32);
-            border-radius: 20px;
-            padding: 1.5rem;
-            color: white;
+            background: var(--navy);
+            border-radius: 10px;
+            padding: 24px;
+            color: #fff;
             text-align: center;
-            position: relative;
-            overflow: hidden;
         }
-
-        .score-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
         .score-number {
-            font-size: 4rem;
-            font-weight: 800;
+            font-size: 3.5rem;
+            font-weight: 600;
             line-height: 1;
+            font-family: 'DM Mono', monospace;
         }
-
         .rating-badge {
             display: inline-block;
-            padding: 6px 20px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        /* Metric Cards */
-        .metric-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1rem;
-            text-align: center;
-            transition: all 0.2s;
-            border: 1px solid #e9ecef;
-        }
-
-        .metric-card:hover {
-            border-color: #2e7d32;
-            transform: translateY(-3px);
-        }
-
-        .metric-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 0.75rem;
-            font-size: 1.25rem;
-        }
-
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0;
-        }
-
-        .metric-label {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-bottom: 0;
-        }
-
-        /* Question Cards */
-        .question-card {
-            background: #f8fafc;
+            padding: 5px 18px;
             border-radius: 20px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s;
-            border: 1px solid #e9ecef;
+            font-weight: 600;
+            font-size: 0.82rem;
+            margin-top: 8px;
         }
 
-        .question-card:hover {
-            background: white;
-            border-color: #2e7d32;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        .question-number {
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #2e7d32, #43a047);
-            color: white;
+        /* ── Metric cards ────────────────────────────────── */
+        .metric-card {
+            background: #fff;
             border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-right: 10px;
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: border-color 0.15s;
         }
-
-        .question-title {
-            font-weight: 600;
-            color: #1e293b;
+        .metric-card:hover { border-color: var(--blue); transform: none; }
+        .metric-icon {
+            width: 40px; height: 40px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px; font-size: 1.1rem;
         }
+        .metric-value { font-size: 1.3rem; font-weight: 600; color: var(--navy); font-family: 'DM Mono', monospace; }
+        .metric-label { font-size: 0.72rem; color: var(--muted); }
 
-        /* Prediction Form Card */
-        .prediction-card {
-            background: linear-gradient(135deg, #fef9e6, #fff4e0);
-            border: 1px solid #ffe0b2;
-        }
-
-        /* Report Card */
-        .report-card {
-            background: linear-gradient(135deg, #e8f0fe, #d9e6ff);
-            border: 1px solid #bbdef5;
-        }
-
-        /* Tip Box */
+        /* ── Tip box ─────────────────────────────────────── */
         .tip-box {
-            background: #fff8e7;
-            border-left: 4px solid #ffc107;
-            padding: 1rem;
-            border-radius: 12px;
-            margin-top: 1rem;
+            background: var(--amber-lt);
+            border-left: 3px solid var(--amber);
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 0.82rem;
+            color: #92400e;
         }
 
-        /* Buttons */
-        .btn-calculate {
-            background: linear-gradient(135deg, #2e7d32, #43a047);
-            border: none;
-            padding: 12px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border-radius: 40px;
-            transition: all 0.3s;
-        }
-
-        .btn-calculate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(46,125,50,0.3);
-        }
-
-        .btn-predict {
-            background: linear-gradient(135deg, #f57c00, #ff9800);
-            border: none;
-            padding: 12px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border-radius: 40px;
-            transition: all 0.3s;
-        }
-
-        .btn-predict:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(245,124,0,0.3);
-        }
-
-        .btn-report {
-            background: linear-gradient(135deg, #6f42c1, #8b5cf6);
-            border: none;
-            padding: 10px 20px;
-            font-weight: 500;
-            font-size: 0.85rem;
-            border-radius: 30px;
-            transition: all 0.3s;
-        }
-
-        .btn-report:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(111,66,193,0.3);
-        }
-
-        .btn-report i {
-            margin-right: 6px;
-        }
-
-        /* Date Range Picker */
+        /* ── Date range card ─────────────────────────────── */
         .date-range-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1rem;
-            margin-bottom: 1rem;
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border);
         }
 
-        /* Responsive */
+        /* ── Risk badges ─────────────────────────────────── */
+        .badge.bg-danger  { background: var(--red)   !important; }
+        .badge.bg-warning { background: var(--amber) !important; color: #fff !important; }
+        .badge.bg-success { background: var(--green) !important; }
+
+        /* ── Table ───────────────────────────────────────── */
+        .table thead tr { background: var(--navy); }
+        .table thead th {
+            color: rgba(255,255,255,0.75); font-size: 0.72rem;
+            font-weight: 600; letter-spacing: 0.06em;
+            text-transform: uppercase; padding: 10px 12px;
+            border: none !important;
+        }
+        .table tbody tr { border-bottom: 1px solid var(--border); }
+        .table tbody td { padding: 10px 12px; font-size: 0.82rem; }
+        .table-danger  { background: var(--red-lt)   !important; }
+        .table-warning { background: var(--amber-lt) !important; }
+
+        /* ── Chart border fix ────────────────────────────── */
+        canvas { border-radius: 4px; }
+
+        /* ── Preview card empty state ────────────────────── */
+        .preview-empty {
+            text-align: center; color: var(--muted);
+            padding: 40px 20px; font-size: 0.85rem;
+        }
+        .preview-empty i { font-size: 2rem; display: block; margin-bottom: 10px; opacity: 0.4; }
+
+        /* ── Animations ──────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 768px) {
-            .score-number {
-                font-size: 2.5rem;
-            }
-            .metric-value {
-                font-size: 1.2rem;
-            }
-            .question-card {
-                padding: 1rem;
-            }
-            .btn-report {
-                width: 100%;
-                margin-bottom: 8px;
-            }
-        }
-
-        /* Animation */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animated {
-            animation: fadeInUp 0.5s ease-out;
+            .topbar { padding: 0 16px; }
+            .topbar-meta { display: none; }
+            .page { padding: 20px 14px 48px; }
         }
     </style>
 </head>
 <body>
 
-<!-- Navigation -->
-<nav class="navbar navbar-dark sticky-top">
-    <div class="container">
-        <a class="navbar-brand" href="#">
-            <i class="bi bi-recycle"></i> EcoCut
-        </a>
-        <div class="d-flex gap-2">
-            <a href="/sustainability/dashboard" class="btn btn-outline-light btn-sm active">
-                <i class="bi bi-speedometer2"></i> Dashboard
-            </a>
+<!-- ── Topbar ─────────────────────────────────────────────── -->
+<header class="topbar">
+    <div class="topbar-left">
+        <div class="topbar-brand">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/>
+            </svg>
+            Fabric AI
         </div>
+        <div class="topbar-divider"></div>
+        <a href="/user/dashboard" class="btn-back">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Dashboard
+        </a>
     </div>
-</nav>
+    <div class="topbar-meta">SUSTAINABILITY DASHBOARD</div>
+</header>
 
-<div class="container py-4">
-    <!-- Header -->
-    <div class="text-center mb-4 animated">
-        <h1 class="display-5 fw-bold" style="color: #1e3c2c;">🌿 Complete Sustainability Dashboard</h1>
-        <p class="text-muted">Calculate environmental impact + Get sustainability score & recommendations</p>
+<div class="page">
+
+    <!-- Page heading -->
+    <div class="page-heading">
+        <h1> Sustainability Dashboard</h1>
+        <p>Calculate environmental impact, get your sustainability score and recommendations</p>
     </div>
 
     <div class="row g-4">
-        <!-- Left Column: Forms -->
+
+        <!-- ── LEFT COLUMN ──────────────────────────────── -->
         <div class="col-lg-5">
-            <!-- PREDICTION FORM (Original) -->
-            <div class="card prediction-card mb-4">
-                <div class="card-header bg-transparent">
-                    <div class="section-header mb-0">
-                        <div class="section-icon orange">
-                            <i class="bi bi-calculator"></i>
-                        </div>
-                        <div>
-                            <h5 class="section-title">📊 Fabric Prediction</h5>
-                            <p class="section-subtitle">Calculate your environmental impact</p>
-                        </div>
+
+            <!-- Fabric Prediction Form -->
+            <div class="card mb-4">
+                <div class="card-head">
+                    <div class="card-head-icon amber"><i class="bi bi-calculator"></i></div>
+                    <div class="card-head-body">
+                        <p class="card-head-title">Fabric Prediction</p>
+                        <p class="card-head-sub">Calculate your environmental impact</p>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="p-3">
                     <form th:action="@{/sustainability/predict}" method="post" th:object="${predictionInput}">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -501,80 +429,68 @@
                 </div>
             </div>
 
-            <!-- SUSTAINABILITY FORM (6 Questions) -->
+            <!-- Sustainability Check Form -->
             <div class="card">
-                <div class="card-header bg-transparent">
-                    <div class="section-header mb-0">
-                        <div class="section-icon green">
-                            <i class="bi bi-sliders2"></i>
-                        </div>
-                        <div>
-                            <h5 class="section-title">🌱 Sustainability Check</h5>
-                            <p class="section-subtitle">Answer 6 questions for your sustainability score</p>
-                        </div>
+                <div class="card-head">
+                    <div class="card-head-icon green"><i class="bi bi-sliders2"></i></div>
+                    <div class="card-head-body">
+                        <p class="card-head-title">Sustainability Check</p>
+                        <p class="card-head-sub">Answer 6 questions for your sustainability score</p>
                     </div>
                 </div>
-                <div class="card-body">
-                    <!-- Messages -->
-                    <div th:if="${success}" class="alert alert-success rounded-4 mb-3">
+                <div class="p-3">
+
+                    <div th:if="${success}" class="alert-banner success mb-3">
                         <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
                     </div>
-                    <div th:if="${error}" class="alert alert-danger rounded-4 mb-3">
+                    <div th:if="${error}" class="alert-banner danger mb-3">
                         <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
                     </div>
 
                     <form th:action="@{/sustainability/calculate-simple}" th:object="${sustainabilityInput}" method="post" id="sustainabilityForm">
 
-                        <!-- Question 1: Recycling Rate -->
+                        <!-- Q1: Recycling Rate -->
                         <div class="question-card">
                             <div class="d-flex align-items-center mb-2">
                                 <span class="question-number">1</span>
-                                <span class="question-title">♻️ Fabric Waste Recycling</span>
+                                <span class="question-title">Fabric Waste Recycling</span>
                             </div>
-                            <div class="mt-2">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="text-muted small">0%</span>
-                                    <span class="fw-bold text-success range-value" id="recyclingValue">50%</span>
-                                    <span class="text-muted small">100%</span>
-                                </div>
-                                <input type="range" class="form-range" th:field="*{recyclingRate}" min="0" max="100" step="5" oninput="updatePreview()">
-                                <small class="text-muted">Percentage of fabric waste recycled</small>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted" style="font-size:0.72rem">0%</span>
+                                <span class="range-value" id="recyclingValue">50%</span>
+                                <span class="text-muted" style="font-size:0.72rem">100%</span>
                             </div>
+                            <input type="range" class="form-range" th:field="*{recyclingRate}" min="0" max="100" step="5" oninput="updatePreview()">
+                            <small class="text-muted" style="font-size:0.72rem">Percentage of fabric waste recycled</small>
                         </div>
 
-                        <!-- Question 2: Waste Disposal -->
+                        <!-- Q2: Waste Disposal -->
                         <div class="question-card">
                             <div class="d-flex align-items-center mb-2">
                                 <span class="question-number">2</span>
-                                <span class="question-title">🗑️ Non-Recycled Waste</span>
+                                <span class="question-title">Non-Recycled Waste Disposal</span>
                             </div>
                             <div class="row g-2 mt-1">
                                 <div class="col-4">
                                     <input type="radio" class="btn-check" th:field="*{wasteDisposal}" value="RECYCLE" id="recycle" onchange="updatePreview()">
-                                    <label class="btn btn-outline-success w-100 btn-option" for="recycle">
-                                        <i class="bi bi-arrow-repeat"></i> Recycle
-                                    </label>
+                                    <label class="btn btn-outline-success w-100 btn-option" for="recycle"><i class="bi bi-arrow-repeat"></i> Recycle</label>
                                 </div>
                                 <div class="col-4">
                                     <input type="radio" class="btn-check" th:field="*{wasteDisposal}" value="INCINERATE" id="incinerate" onchange="updatePreview()">
-                                    <label class="btn btn-outline-warning w-100 btn-option" for="incinerate">
-                                        <i class="bi bi-fire"></i> Incinerate
-                                    </label>
+                                    <label class="btn btn-outline-warning w-100 btn-option" for="incinerate"><i class="bi bi-fire"></i> Incinerate</label>
                                 </div>
                                 <div class="col-4">
                                     <input type="radio" class="btn-check" th:field="*{wasteDisposal}" value="LANDFILL" id="landfill" onchange="updatePreview()">
-                                    <label class="btn btn-outline-danger w-100 btn-option" for="landfill">
-                                        <i class="bi bi-trash"></i> Landfill
-                                    </label>
+                                    <label class="btn btn-outline-danger w-100 btn-option" for="landfill"><i class="bi bi-trash"></i> Landfill</label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Question 3: Energy Source -->
+                        <!-- Q3: Energy Source -->
                         <div class="question-card">
                             <div class="d-flex align-items-center mb-2">
                                 <span class="question-number">3</span>
-                                <span class="question-title">⚡ Energy Source</span>
+                                <span class="question-title">Energy Source</span>
                             </div>
                             <div class="row g-2 mt-1">
                                 <div class="col-3">
@@ -596,28 +512,26 @@
                             </div>
                         </div>
 
-                        <!-- Question 4: Renewable Percentage -->
+                        <!-- Q4: Renewable % -->
                         <div class="question-card">
                             <div class="d-flex align-items-center mb-2">
                                 <span class="question-number">4</span>
-                                <span class="question-title">🌱 Renewable Energy</span>
+                                <span class="question-title">Renewable Energy Percentage</span>
                             </div>
-                            <div class="mt-2">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="text-muted small">0%</span>
-                                    <span class="fw-bold text-success range-value" id="renewableValue">30%</span>
-                                    <span class="text-muted small">100%</span>
-                                </div>
-                                <input type="range" class="form-range" th:field="*{renewablePercentage}" min="0" max="100" step="5" oninput="updatePreview()">
-                                <small class="text-muted">Percentage of energy from renewable sources</small>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted" style="font-size:0.72rem">0%</span>
+                                <span class="range-value" id="renewableValue">30%</span>
+                                <span class="text-muted" style="font-size:0.72rem">100%</span>
                             </div>
+                            <input type="range" class="form-range" th:field="*{renewablePercentage}" min="0" max="100" step="5" oninput="updatePreview()">
+                            <small class="text-muted" style="font-size:0.72rem">Percentage of energy from renewable sources</small>
                         </div>
 
-                        <!-- Question 5: Certification -->
+                        <!-- Q5: Certification -->
                         <div class="question-card">
                             <div class="d-flex align-items-center mb-2">
                                 <span class="question-number">5</span>
-                                <span class="question-title">🏆 Eco-Certification</span>
+                                <span class="question-title">Eco-Certification</span>
                             </div>
                             <div class="row g-2 mt-1">
                                 <div class="col-3">
@@ -639,30 +553,26 @@
                             </div>
                         </div>
 
-                        <!-- Question 6: Compliance -->
+                        <!-- Q6: Compliance -->
                         <div class="question-card">
                             <div class="d-flex align-items-center mb-2">
                                 <span class="question-number">6</span>
-                                <span class="question-title">📋 Regulatory Compliance</span>
+                                <span class="question-title">Regulatory Compliance</span>
                             </div>
                             <div class="row g-2 mt-1">
                                 <div class="col-6">
                                     <input type="radio" class="btn-check" th:field="*{followsLaws}" th:value="true" id="lawsYes" onchange="updatePreview()">
-                                    <label class="btn btn-outline-success w-100 btn-option" for="lawsYes">
-                                        <i class="bi bi-check-circle"></i> Yes, comply
-                                    </label>
+                                    <label class="btn btn-outline-success w-100 btn-option" for="lawsYes"><i class="bi bi-check-circle"></i> Yes, comply</label>
                                 </div>
                                 <div class="col-6">
                                     <input type="radio" class="btn-check" th:field="*{followsLaws}" th:value="false" id="lawsNo" onchange="updatePreview()">
-                                    <label class="btn btn-outline-danger w-100 btn-option" for="lawsNo">
-                                        <i class="bi bi-x-circle"></i> Not yet
-                                    </label>
+                                    <label class="btn btn-outline-danger w-100 btn-option" for="lawsNo"><i class="bi bi-x-circle"></i> Not yet</label>
                                 </div>
                             </div>
-                            <small class="text-muted d-block mt-2">Water discharge, air emissions, waste disposal regulations</small>
+                            <small class="text-muted d-block mt-2" style="font-size:0.72rem">Water discharge, air emissions, waste disposal regulations</small>
                         </div>
 
-                        <button type="submit" class="btn btn-calculate w-100 mt-3">
+                        <button type="submit" class="btn btn-calculate w-100 mt-2">
                             <i class="bi bi-calculator-fill me-2"></i> Calculate Sustainability Score
                         </button>
                     </form>
@@ -670,127 +580,106 @@
             </div>
         </div>
 
-        <!-- Right Column: Dashboard Metrics -->
+        <!-- ── RIGHT COLUMN ──────────────────────────────── -->
         <div class="col-lg-7">
+
             <!-- Live Score Preview -->
             <div class="card mb-4" id="previewCard">
-                <div class="card-body p-4">
+                <div class="p-3">
                     <div id="livePreview">
-                        <div class="text-center text-muted py-5">
-                            <i class="bi bi-sliders2 fs-1"></i>
-                            <p class="mt-3">Adjust the sliders to see your sustainability score</p>
+                        <div class="preview-empty">
+                            <i class="bi bi-sliders2"></i>
+                            Adjust the sliders to see your sustainability score
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Prediction Impact Results -->
-            <div th:if="${impact}" class="card mb-4 border-success">
-                <div class="card-header bg-transparent">
-                    <div class="section-header mb-0">
-                        <div class="section-icon orange">
-                            <i class="bi bi-graph-up-arrow"></i>
-                        </div>
-                        <div>
-                            <h5 class="section-title">📈 Latest Prediction Impact</h5>
-                            <p class="section-subtitle">Based on your fabric prediction</p>
-                        </div>
+            <div th:if="${impact}" class="card mb-4">
+                <div class="card-head">
+                    <div class="card-head-icon amber"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="card-head-body">
+                        <p class="card-head-title">Latest Prediction Impact</p>
+                        <p class="card-head-sub">Based on your fabric prediction</p>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="p-3">
                     <div class="row g-3">
                         <div class="col-md-3 col-6">
                             <div class="metric-card">
-                                <div class="metric-icon" style="background: #e8f5e9; color: #2e7d32;">
-                                    <i class="bi bi-cloud"></i>
-                                </div>
+                                <div class="metric-icon" style="background:var(--green-lt);color:var(--green);"><i class="bi bi-cloud"></i></div>
                                 <p class="metric-value" th:text="${#numbers.formatDecimal(impact.co2SavedKg, 1, 0)} + ' kg'">125 kg</p>
                                 <p class="metric-label">CO₂ Saved</p>
                             </div>
                         </div>
                         <div class="col-md-3 col-6">
                             <div class="metric-card">
-                                <div class="metric-icon" style="background: #e3f2fd; color: #1976d2;">
-                                    <i class="bi bi-droplet"></i>
-                                </div>
+                                <div class="metric-icon" style="background:var(--blue-lt);color:var(--blue);"><i class="bi bi-droplet"></i></div>
                                 <p class="metric-value" th:text="${#numbers.formatDecimal(impact.waterSavedL, 1, 0)} + ' L'">7,530 L</p>
                                 <p class="metric-label">Water Saved</p>
                             </div>
                         </div>
                         <div class="col-md-3 col-6">
                             <div class="metric-card">
-                                <div class="metric-icon" style="background: #fff3e0; color: #f57c00;">
-                                    <i class="bi bi-trash3"></i>
-                                </div>
+                                <div class="metric-icon" style="background:var(--amber-lt);color:var(--amber);"><i class="bi bi-trash3"></i></div>
                                 <p class="metric-value" th:text="${#numbers.formatDecimal(impact.fabricSavedKg, 1, 1)} + ' kg'">50.2 kg</p>
                                 <p class="metric-label">Fabric Saved</p>
                             </div>
                         </div>
                         <div class="col-md-3 col-6">
                             <div class="metric-card">
-                                <div class="metric-icon" style="background: #fce4ec; color: #c2185b;">
-                                    <i class="bi bi-cash-stack"></i>
-                                </div>
+                                <div class="metric-icon" style="background:var(--purple-lt);color:var(--purple);"><i class="bi bi-cash-stack"></i></div>
                                 <p class="metric-value" th:text="'Rs. ' + ${#numbers.formatDecimal(impact.costSavedLkr, 1, 0)}">Rs. 37,500</p>
                                 <p class="metric-label">Cost Saved</p>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-3">
+                    <div class="mt-3" style="font-size:0.83rem;">
                         <p><strong>Risk Level:</strong>
                             <span class="badge" th:classappend="${impact.riskLevel == 'HIGH' ? 'bg-danger' : (impact.riskLevel == 'MEDIUM' ? 'bg-warning' : 'bg-success')}"
                                   th:text="${impact.riskLevel}">LOW</span>
                         </p>
-                        <p><strong>Recommendations:</strong> <span th:text="${impact.recommendations}"></span></p>
+                        <p class="mt-1"><strong>Recommendations:</strong> <span th:text="${impact.recommendations}"></span></p>
                     </div>
                 </div>
             </div>
 
             <!-- Key Impact Metrics -->
             <div class="card mb-4">
-                <div class="card-body">
-                    <div class="section-header mb-3">
-                        <div class="section-icon blue">
-                            <i class="bi bi-graph-up"></i>
-                        </div>
-                        <div>
-                            <h5 class="section-title">Key Impact Metrics</h5>
-                            <p class="section-subtitle">Overall performance (last 30 days)</p>
-                        </div>
+                <div class="card-head">
+                    <div class="card-head-icon blue"><i class="bi bi-graph-up"></i></div>
+                    <div class="card-head-body">
+                        <p class="card-head-title">Key Impact Metrics</p>
+                        <p class="card-head-sub">Overall performance (last 30 days)</p>
                     </div>
+                </div>
+                <div class="p-3">
                     <div class="row g-3">
                         <div class="col-md-3 col-6">
                             <div class="metric-card">
-                                <div class="metric-icon" style="background: #e8f5e9; color: #2e7d32;">
-                                    <i class="bi bi-cloud"></i>
-                                </div>
+                                <div class="metric-icon" style="background:var(--green-lt);color:var(--green);"><i class="bi bi-cloud"></i></div>
                                 <p class="metric-value" th:text="${summary.totalCarbonAvoided != null ? #numbers.formatDecimal(summary.totalCarbonAvoided, 1, 0) + ' kg' : '12,400 kg'}">12,400 kg</p>
                                 <p class="metric-label">CO₂ Avoided</p>
                             </div>
                         </div>
                         <div class="col-md-3 col-6">
                             <div class="metric-card">
-                                <div class="metric-icon" style="background: #e3f2fd; color: #1976d2;">
-                                    <i class="bi bi-droplet"></i>
-                                </div>
+                                <div class="metric-icon" style="background:var(--blue-lt);color:var(--blue);"><i class="bi bi-droplet"></i></div>
                                 <p class="metric-value" th:text="${summary.totalWaterSaved != null ? #numbers.formatDecimal(summary.totalWaterSaved, 1, 0) + ' L' : '45,200 L'}">45,200 L</p>
                                 <p class="metric-label">Water Saved</p>
                             </div>
                         </div>
                         <div class="col-md-3 col-6">
                             <div class="metric-card">
-                                <div class="metric-icon" style="background: #fff3e0; color: #f57c00;">
-                                    <i class="bi bi-trash3"></i>
-                                </div>
+                                <div class="metric-icon" style="background:var(--amber-lt);color:var(--amber);"><i class="bi bi-trash3"></i></div>
                                 <p class="metric-value" th:text="${summary.totalWasteReduced != null ? #numbers.formatDecimal(summary.totalWasteReduced, 1, 0) + ' kg' : '2,800 kg'}">2,800 kg</p>
                                 <p class="metric-label">Landfill Avoided</p>
                             </div>
                         </div>
                         <div class="col-md-3 col-6">
                             <div class="metric-card">
-                                <div class="metric-icon" style="background: #fce4ec; color: #c2185b;">
-                                    <i class="bi bi-cash-stack"></i>
-                                </div>
+                                <div class="metric-icon" style="background:var(--purple-lt);color:var(--purple);"><i class="bi bi-cash-stack"></i></div>
                                 <p class="metric-value" th:text="${summary.totalCostSaved != null ? 'Rs. ' + #numbers.formatDecimal(summary.totalCostSaved, 1, 0) : 'Rs. 12,500'}">Rs. 12,500</p>
                                 <p class="metric-label">Cost Saved</p>
                             </div>
@@ -799,20 +688,16 @@
                 </div>
             </div>
 
-            <!-- REPORT GENERATION SECTION (Moved after Key Impact Metrics) -->
-            <div class="card report-card mb-4">
-                <div class="card-header bg-transparent">
-                    <div class="section-header mb-0">
-                        <div class="section-icon purple">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </div>
-                        <div>
-                            <h5 class="section-title">📄 Generate Reports</h5>
-                            <p class="section-subtitle">Export your sustainability data</p>
-                        </div>
+            <!-- Report Generation -->
+            <div class="card mb-4">
+                <div class="card-head">
+                    <div class="card-head-icon purple"><i class="bi bi-file-earmark-text"></i></div>
+                    <div class="card-head-body">
+                        <p class="card-head-title">Generate Reports</p>
+                        <p class="card-head-sub">Export your sustainability data</p>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="p-3">
                     <div class="date-range-card">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -827,52 +712,56 @@
                         <div class="row g-2 mt-3">
                             <div class="col-md-6">
                                 <button class="btn btn-report w-100" onclick="generateReport('pdf')">
-                                    <i class="bi bi-file-pdf-fill"></i> Export as PDF
+                                    <i class="bi bi-file-pdf-fill me-1"></i> Export as PDF
                                 </button>
                             </div>
                             <div class="col-md-6">
                                 <button class="btn btn-report w-100" onclick="generateReport('excel')">
-                                    <i class="bi bi-file-excel-fill"></i> Export as Excel
+                                    <i class="bi bi-file-excel-fill me-1"></i> Export as Excel
                                 </button>
                             </div>
                         </div>
                         <div class="row g-2 mt-2">
                             <div class="col-md-4">
-                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('7days')">
-                                    <i class="bi bi-calendar-week"></i> Last 7 Days
-                                </button>
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('7days')">Last 7 Days</button>
                             </div>
                             <div class="col-md-4">
-                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('30days')">
-                                    <i class="bi bi-calendar-month"></i> Last 30 Days
-                                </button>
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('30days')">Last 30 Days</button>
                             </div>
                             <div class="col-md-4">
-                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('year')">
-                                    <i class="bi bi-calendar-year"></i> Last Year
-                                </button>
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickRange('year')">Last Year</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Fabric Breakdown & High Risk -->
+            <!-- Fabric Breakdown + High Risk -->
             <div class="row g-4">
                 <div class="col-md-6">
                     <div class="card h-100">
-                        <div class="card-body">
-                            <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-success"></i> Fabric Waste Breakdown</h6>
+                        <div class="card-head">
+                            <div class="card-head-icon green"><i class="bi bi-pie-chart"></i></div>
+                            <div class="card-head-body">
+                                <p class="card-head-title">Fabric Waste Breakdown</p>
+                            </div>
+                        </div>
+                        <div class="p-3">
                             <canvas id="fabricChart" height="180"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="card h-100">
-                        <div class="card-body">
-                            <h6 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2 text-warning"></i> High Risk Fabrics</h6>
+                        <div class="card-head">
+                            <div class="card-head-icon amber"><i class="bi bi-exclamation-triangle"></i></div>
+                            <div class="card-head-body">
+                                <p class="card-head-title">High Risk Fabrics</p>
+                            </div>
+                        </div>
+                        <div class="p-3">
                             <div class="table-responsive">
-                                <table class="table table-sm">
+                                <table class="table table-sm mb-0">
                                     <thead>
                                     <tr>
                                         <th>Fabric</th>
@@ -887,7 +776,7 @@
                                         <td><span class="badge" th:classappend="${fabric.riskLevel == 'HIGH' ? 'bg-danger' : 'bg-warning'}" th:text="${fabric.riskLevel}">HIGH</span></td>
                                     </tr>
                                     <tr th:if="${highRiskFabrics == null or highRiskFabrics.isEmpty()}">
-                                        <td colspan="3" class="text-center text-muted">No high risk fabrics</td>
+                                        <td colspan="3" class="text-center text-muted" style="font-size:0.82rem;padding:20px;">No high risk fabrics</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -899,32 +788,37 @@
 
             <!-- Environmental Impact Trend -->
             <div class="card mt-4">
-                <div class="card-body">
-                    <h6 class="fw-bold mb-3"><i class="bi bi-graph-up me-2 text-success"></i> Environmental Impact Trend</h6>
+                <div class="card-head">
+                    <div class="card-head-icon green"><i class="bi bi-graph-up"></i></div>
+                    <div class="card-head-body">
+                        <p class="card-head-title">Environmental Impact Trend</p>
+                    </div>
+                </div>
+                <div class="p-3">
                     <canvas id="impactChart" height="120"></canvas>
-                    <div class="mt-2 text-center small text-muted">
-                        <span class="me-3"><span class="badge bg-success" style="width: 10px; height: 10px; padding: 0; display: inline-block; border-radius: 50%;"></span> CO₂ Savings (kg)</span>
-                        <span><span class="badge bg-primary" style="width: 10px; height: 10px; padding: 0; display: inline-block; border-radius: 50%;"></span> Water Saved (10L)</span>
+                    <div class="mt-2 text-center" style="font-size:0.72rem;color:var(--muted);">
+                        <span class="me-3">
+                            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px;"></span>CO₂ Savings (kg)
+                        </span>
+                        <span>
+                            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:4px;"></span>Water Saved (10L)
+                        </span>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+
+        </div><!-- /right col -->
+    </div><!-- /row -->
+</div><!-- /page -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Report Generation Functions
+    // ── All JS is identical to the original ──────────────────
     function generateReport(format) {
         const startDate = document.getElementById('reportStartDate').value;
-        const endDate = document.getElementById('reportEndDate').value;
-
-        if (!startDate || !endDate) {
-            alert('Please select both start and end dates');
-            return;
-        }
-
+        const endDate   = document.getElementById('reportEndDate').value;
+        if (!startDate || !endDate) { alert('Please select both start and end dates'); return; }
         window.location.href = '/sustainability/report/' + format + '?startDate=' + startDate + '&endDate=' + endDate;
     }
 
@@ -932,30 +826,21 @@
         const today = new Date();
         const endDate = today.toISOString().split('T')[0];
         let startDate = new Date();
-
         switch(range) {
-            case '7days':
-                startDate.setDate(today.getDate() - 7);
-                break;
-            case '30days':
-                startDate.setDate(today.getDate() - 30);
-                break;
-            case 'year':
-                startDate.setFullYear(today.getFullYear() - 1);
-                break;
+            case '7days':  startDate.setDate(today.getDate() - 7);       break;
+            case '30days': startDate.setDate(today.getDate() - 30);      break;
+            case 'year':   startDate.setFullYear(today.getFullYear()-1);  break;
         }
-
         document.getElementById('reportStartDate').value = startDate.toISOString().split('T')[0];
-        document.getElementById('reportEndDate').value = endDate;
+        document.getElementById('reportEndDate').value   = endDate;
     }
 
-    // Live Preview Function
     function updatePreview() {
-        const recycling = parseFloat(document.querySelector('[name="recyclingRate"]')?.value) || 0;
-        const renewable = parseFloat(document.querySelector('[name="renewablePercentage"]')?.value) || 0;
+        const recycling    = parseFloat(document.querySelector('[name="recyclingRate"]')?.value) || 0;
+        const renewable    = parseFloat(document.querySelector('[name="renewablePercentage"]')?.value) || 0;
         const wasteDisposal = document.querySelector('[name="wasteDisposal"]:checked')?.value || 'RECYCLE';
         const certification = document.querySelector('[name="certification"]:checked')?.value || 'NONE';
-        const followsLaws = document.querySelector('[name="followsLaws"]:checked')?.value === 'true';
+        const followsLaws   = document.querySelector('[name="followsLaws"]:checked')?.value === 'true';
 
         document.getElementById('recyclingValue').innerText = recycling + '%';
         document.getElementById('renewableValue').innerText = renewable + '%';
@@ -965,114 +850,105 @@
         score += (renewable / 100) * 35;
         if (followsLaws) score += 20;
         if (certification === 'OEKO_TEX') score += 5;
-        if (certification === 'GOTS') score += 8;
+        if (certification === 'GOTS')     score += 8;
         if (certification === 'BLUESIGN') score += 10;
-        if (wasteDisposal === 'RECYCLE') score += 10;
+        if (wasteDisposal === 'RECYCLE')    score += 10;
         if (wasteDisposal === 'INCINERATE') score += 5;
-
         score = Math.min(100, Math.round(score));
 
         let rating = '', bgColor = '', emoji = '', message = '';
-        if (score >= 80) { rating = 'PLATINUM'; bgColor = '#e5e4e2'; emoji = '🏆'; message = 'Excellent! You\'re a sustainability leader!'; }
-        else if (score >= 70) { rating = 'GOLD'; bgColor = '#ffd700'; emoji = '⭐'; message = 'Great work! Keep up the good practices!'; }
-        else if (score >= 60) { rating = 'SILVER'; bgColor = '#c0c0c0'; emoji = '👍'; message = 'Good progress! A few improvements will get you higher!'; }
-        else if (score >= 50) { rating = 'BRONZE'; bgColor = '#cd7f32'; emoji = '📈'; message = 'Fair score. Focus on recycling and renewable energy!'; }
-        else { rating = 'NEEDS IMPROVEMENT'; bgColor = '#ff5252'; emoji = '⚠️'; message = 'Start with recycling more fabric waste and using clean energy!'; }
+        if      (score >= 80) { rating = 'PLATINUM';          bgColor = '#e5e4e2'; emoji = '🏆'; message = "Excellent! You're a sustainability leader!"; }
+        else if (score >= 70) { rating = 'GOLD';              bgColor = '#ffd700'; emoji = '⭐'; message = 'Great work! Keep up the good practices!'; }
+        else if (score >= 60) { rating = 'SILVER';            bgColor = '#c0c0c0'; emoji = '👍'; message = 'Good progress! A few improvements will get you higher!'; }
+        else if (score >= 50) { rating = 'BRONZE';            bgColor = '#cd7f32'; emoji = '📈'; message = 'Fair score. Focus on recycling and renewable energy!'; }
+        else                  { rating = 'NEEDS IMPROVEMENT'; bgColor = '#ff5252'; emoji = '⚠️'; message = 'Start with recycling more fabric waste and using clean energy!'; }
 
         let tips = [];
-        if (recycling < 50) tips.push('♻️ Recycle more fabric waste - aim for 50%+');
-        if (renewable < 30) tips.push('⚡ Use more clean energy - aim for 30%+');
-        if (!followsLaws) tips.push('📋 Follow environmental laws');
-        if (certification === 'NONE') tips.push('🏆 Get eco-certification (GOTS, OEKO-TEX, or BLUESIGN)');
-        if (wasteDisposal === 'LANDFILL') tips.push('🗑️ Switch from landfill to recycling or incineration');
+        if (recycling < 50)              tips.push('Recycle more fabric waste — aim for 50%+');
+        if (renewable < 30)              tips.push('Use more clean energy — aim for 30%+');
+        if (!followsLaws)                tips.push('Follow environmental laws');
+        if (certification === 'NONE')    tips.push('Get eco-certification (GOTS, OEKO-TEX, or BLUESIGN)');
+        if (wasteDisposal === 'LANDFILL') tips.push('Switch from landfill to recycling or incineration');
 
-        const tipHtml = tips.length > 0 ?
-            `<div class="tip-box mt-3"><i class="bi bi-lightbulb me-2"></i><strong>Tips to improve:</strong><br>${tips.map(t => `• ${t}`).join('<br>')}</div>` :
-            `<div class="tip-box mt-3" style="background:#e8f5e9; border-left-color:#4caf50;"><i class="bi bi-star-fill me-2"></i><strong>Perfect! You're doing everything right! 🎉</strong></div>`;
+        const tipHtml = tips.length > 0
+            ? `<div class="tip-box mt-3"><strong>Tips to improve:</strong><br>${tips.map(t => '• ' + t).join('<br>')}</div>`
+            : `<div class="tip-box mt-3" style="background:var(--green-lt);border-left-color:var(--green);color:#065f46;"><strong>Perfect! You're doing everything right! 🎉</strong></div>`;
 
         document.getElementById('livePreview').innerHTML = `
             <div class="score-card">
                 <div class="score-number">${score}%</div>
-                <div class="rating-badge" style="background: ${bgColor}; color: ${score < 50 ? 'white' : '#333'}">${emoji} ${rating} ${emoji}</div>
-                <p class="mt-2 mb-0">${message}</p>
+                <div class="rating-badge" style="background:${bgColor};color:${score<50?'#fff':'#333'}">${emoji} ${rating} ${emoji}</div>
+                <p class="mt-2 mb-0" style="font-size:0.85rem;opacity:0.85;">${message}</p>
             </div>
-            <div class="row text-center mt-4">
-                <div class="col-4"><small class="text-muted">Fabric Recycling</small><h5 class="text-success mt-1">${recycling}%</h5></div>
-                <div class="col-4"><small class="text-muted">Clean Energy</small><h5 class="text-success mt-1">${renewable}%</h5></div>
-                <div class="col-4"><small class="text-muted">Disposal</small><h5 class="text-success mt-1">${wasteDisposal === 'RECYCLE' ? '♻️ Recycle' : wasteDisposal === 'INCINERATE' ? '🔥 Incinerate' : '🗑️ Landfill'}</h5></div>
+            <div class="row text-center mt-3">
+                <div class="col-4"><small style="color:var(--muted);font-size:0.72rem;">Fabric Recycling</small><div style="font-weight:600;color:var(--navy);font-family:'DM Mono',monospace;margin-top:3px;">${recycling}%</div></div>
+                <div class="col-4"><small style="color:var(--muted);font-size:0.72rem;">Clean Energy</small><div style="font-weight:600;color:var(--navy);font-family:'DM Mono',monospace;margin-top:3px;">${renewable}%</div></div>
+                <div class="col-4"><small style="color:var(--muted);font-size:0.72rem;">Disposal</small><div style="font-weight:600;color:var(--navy);font-size:0.82rem;margin-top:3px;">${wasteDisposal==='RECYCLE'?'♻️ Recycle':wasteDisposal==='INCINERATE'?'🔥 Incinerate':'🗑️ Landfill'}</div></div>
             </div>
-            ${tipHtml}
-        `;
+            ${tipHtml}`;
     }
 
-    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        // Set default dates for report (last 30 days)
         const today = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
+        const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(today.getDate()-30);
         document.getElementById('reportStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
-        document.getElementById('reportEndDate').value = today.toISOString().split('T')[0];
+        document.getElementById('reportEndDate').value   = today.toISOString().split('T')[0];
 
         const recyclingInput = document.querySelector('[name="recyclingRate"]');
         const renewableInput = document.querySelector('[name="renewablePercentage"]');
         if (recyclingInput && !recyclingInput.value) recyclingInput.value = 50;
         if (renewableInput && !renewableInput.value) renewableInput.value = 30;
 
-        const defaultWaste = document.getElementById('recycle');
-        const defaultEnergy = document.getElementById('mixed');
-        const defaultCert = document.getElementById('none');
-        const defaultLawsYes = document.getElementById('lawsYes');
-
-        if (defaultWaste) defaultWaste.checked = true;
-        if (defaultEnergy) defaultEnergy.checked = true;
-        if (defaultCert) defaultCert.checked = true;
-        if (defaultLawsYes) defaultLawsYes.checked = true;
+        const defaults = { recycle:'recycle', mixed:'mixed', none:'none', lawsYes:'lawsYes' };
+        Object.values(defaults).forEach(id => { const el = document.getElementById(id); if (el) el.checked = true; });
 
         updatePreview();
 
         // Fabric Breakdown Chart
         fetch('/sustainability/api/fabric-breakdown')
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
-                const fabricCtx = document.getElementById('fabricChart').getContext('2d');
-                new Chart(fabricCtx, {
+                new Chart(document.getElementById('fabricChart').getContext('2d'), {
                     type: 'doughnut',
                     data: {
                         labels: data.map(f => f.fabricType),
-                        datasets: [{
-                            data: data.map(f => f.wastagePercentage),
-                            backgroundColor: data.map(f => f.colorCode || '#28a745'),
-                            borderWidth: 0
-                        }]
+                        datasets: [{ data: data.map(f => f.wastagePercentage), backgroundColor: data.map(f => f.colorCode || '#059669'), borderWidth: 0 }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } },
+                        responsive: true, maintainAspectRatio: true,
+                        plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 11 }, color: '#64748b' } } },
                         cutout: '60%'
                     }
                 });
             });
 
         // Impact Trend Chart
-        const impactCtx = document.getElementById('impactChart').getContext('2d');
-        new Chart(impactCtx, {
+        new Chart(document.getElementById('impactChart').getContext('2d'), {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
                 datasets: [
-                    { label: 'CO2 Savings (kg)', data: [1200, 1350, 1100, 1600, 1450, 1700], borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,0.05)', tension: 0.4, fill: true },
-                    { label: 'Water Saved (10L)', data: [850, 920, 780, 1100, 980, 1250], borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.05)', tension: 0.4, fill: true }
+                    { label: 'CO2 Savings (kg)',  data: [1200,1350,1100,1600,1450,1700], borderColor: '#059669', backgroundColor: 'rgba(5,150,105,0.06)',  tension: 0.4, fill: true, borderWidth: 2, pointRadius: 3 },
+                    { label: 'Water Saved (10L)', data: [850, 920, 780, 1100,980, 1250], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.05)', tension: 0.4, fill: true, borderWidth: 2, pointRadius: 3 }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            options: {
+                responsive: true, maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: '#0f1f35', titleColor: '#cbd5e1', bodyColor: '#e2e8f0', padding: 10, cornerRadius: 8 }
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#94a3b8', font: { family: 'DM Sans', size: 11 } } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#94a3b8', font: { family: 'DM Mono', size: 11 } } }
+                }
+            }
         });
     });
 
     document.querySelectorAll('input').forEach(input => {
         input.addEventListener('change', updatePreview);
-        input.addEventListener('input', updatePreview);
+        input.addEventListener('input',  updatePreview);
     });
 </script>
 </body>
