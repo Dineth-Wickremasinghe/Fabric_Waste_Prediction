@@ -247,7 +247,18 @@ public class WasteService {
     // ─── Cutting Method Chart ─────────────────────────────────────────────────
     public String[] getCuttingMethodLabels() {
         List<Object[]> results = predictionRepository.getAvgWasteByCuttingMethod();
-        return results.stream().map(row -> { if (row[0] == null) return "Unknown"; String val = row[0].toString().trim(); return val.equals("0.0") ? "Manual" : "Auto"; }).toArray(String[]::new);
+        return results.stream().map(row -> {
+            if (row[0] == null) return "Unknown";
+            String val = row[0].toString().trim();
+            return switch (val) {
+                case "0.0"       -> "Auto";
+                case "1.0"       -> "Manual";
+                case "Automatic" -> "Auto";   // normalise legacy value
+                case "Auto"      -> "Auto";
+                case "Manual"    -> "Manual";
+                default          -> val;
+            };
+        }).toArray(String[]::new);
     }
 
     public double[] getCuttingMethodData() {
@@ -438,7 +449,14 @@ public class WasteService {
             // Fields from Prediction
             job.setFabricType(prediction.getFabricType());
             job.setFabricPattern(prediction.getFabricPattern());
-            job.setCuttingMethod(prediction.getCuttingMethod());
+            String cutting_method = prediction.getCuttingMethod();
+            if(cutting_method.equals("0.0")){
+                cutting_method = "Auto";
+            }
+            else if(cutting_method.equals("1.0")){
+                cutting_method = "Manual";
+            }
+            job.setCuttingMethod(cutting_method);
             job.setMarkerLossPct(prediction.getMarkerLossPct());
             job.setPatternComplexity(prediction.getPatternComplexity());
             job.setOperatorExperience(prediction.getOperatorExperience());
