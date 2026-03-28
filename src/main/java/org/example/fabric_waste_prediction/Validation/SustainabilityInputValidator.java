@@ -1,6 +1,6 @@
 package org.example.fabric_waste_prediction.Validation;
 
-import org.example.fabric_waste_prediction.dto.SustainabilityInputDTO;
+import org.example.fabric_waste_prediction.DTO.SustainabilityInputDTO;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;

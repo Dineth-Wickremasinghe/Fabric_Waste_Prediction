@@ -1,6 +1,6 @@
 package org.example.fabric_waste_prediction.test;
 
-import org.example.fabric_waste_prediction.dto.SustainabilityInputDTO;
+import org.example.fabric_waste_prediction.DTO.SustainabilityInputDTO;
 import org.example.fabric_waste_prediction.Validation.SustainabilityInputValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
