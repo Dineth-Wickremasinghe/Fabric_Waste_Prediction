@@ -4,151 +4,312 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Fabric Wastage Prediction System</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --navy:    #0f1f35;
+            --navy-2:  #1a3352;
+            --blue:    #2563eb;
+            --blue-lt: #eff6ff;
+            --amber:   #d97706;
+            --amber-lt:#fffbeb;
+            --green:   #059669;
+            --green-lt:#ecfdf5;
+            --red:     #dc2626;
+            --red-lt:  #fef2f2;
+            --surface: #f8fafc;
+            --border:  #e2e8f0;
+            --text:    #1e293b;
+            --muted:   #64748b;
+            --radius:  12px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            font-family: 'DM Sans', sans-serif;
+            background: var(--navy);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 24px;
+            background-image:
+                    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
 
+        /* ── Card ───────────────────────────────────────── */
         .login-card {
-            background: white;
-            border-radius: 16px;
-            padding: 48px 40px;
+            background: #fff;
+            border-radius: var(--radius);
             width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+            overflow: hidden;
+            animation: fadeUp 0.4s ease both;
         }
 
-        .header {
-            background: linear-gradient(135deg, #1976d2, #42a5f5);
-            margin: -48px -40px 32px -40px;
-            padding: 28px 40px;
-            border-radius: 16px 16px 0 0;
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Card header ────────────────────────────────── */
+        .card-header {
+            background: var(--navy);
+            padding: 32px 36px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--navy-2);
+            position: relative;
+        }
+
+        /* Subtle amber accent line for admin differentiation */
+        .card-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--amber), transparent);
+            opacity: 0.6;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: -0.01em;
+        }
+
+        .brand-icon {
+            width: 36px; height: 36px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card-header-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #fff;
             text-align: center;
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 20px;
-            font-weight: 700;
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         .admin-badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            padding: 4px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(217,119,6,0.18);
+            border: 1px solid rgba(217,119,6,0.35);
+            color: #fbbf24;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 12px;
-            margin-top: 8px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .form-group { margin-bottom: 20px; }
-
-        label {
-            display: block;
-            font-size: 13px;
+            font-size: 0.7rem;
             font-weight: 600;
-            color: #555;
-            margin-bottom: 6px;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-family: 'DM Mono', monospace;
         }
 
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
+        /* ── Card body ──────────────────────────────────── */
+        .card-body {
+            padding: 28px 32px 24px;
+        }
+
+        /* ── Alert banners ──────────────────────────────── */
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
             border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.2s;
-            outline: none;
+            font-size: 0.82rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .alert svg { flex-shrink: 0; }
+        .alert.error   { background: var(--red-lt);   border: 1px solid #fca5a5; color: #991b1b; }
+        .alert.success { background: var(--green-lt); border: 1px solid #a7f3d0; color: #065f46; }
+
+        /* ── Form fields ────────────────────────────────── */
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
         }
 
-        input:focus { border-color: #1976d2; }
+        .field-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
 
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 13px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--surface);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+        input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+            background: #fff;
+        }
+        input::placeholder { color: #b0bec5; }
+
+        /* ── Login button ───────────────────────────────── */
         .btn-login {
             width: 100%;
-            padding: 13px;
-            background: linear-gradient(135deg, #1976d2, #42a5f5);
-            color: white;
+            padding: 11px;
+            background: var(--navy);
+            color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 8px;
-            transition: opacity 0.2s;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.15s;
+            font-family: 'DM Sans', sans-serif;
+            letter-spacing: 0.01em;
         }
+        .btn-login:hover { background: var(--navy-2); transform: translateY(-1px); }
+        .btn-login:active { transform: translateY(0); }
 
-        .btn-login:hover { opacity: 0.9; }
+        /* ── Footer ─────────────────────────────────────── */
+        .card-footer {
+            padding: 16px 32px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
 
         .btn-back {
-            display: block;
-            text-align: center;
-            margin-top: 16px;
-            color: #1976d2;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--muted);
             text-decoration: none;
-            font-size: 14px;
+            font-size: 0.8rem;
             font-weight: 500;
+            transition: color 0.15s;
         }
+        .btn-back:hover { color: var(--navy); }
 
-        .btn-back:hover { text-decoration: underline; }
-
-        .error-msg {
-            background: #ffebee;
-            color: #c62828;
-            border: 1px solid #ef9a9a;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
-
-        .success-msg {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #a5d6a7;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 16px;
+        /* ── Bottom tagline ─────────────────────────────── */
+        .tagline {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.25);
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.06em;
         }
     </style>
 </head>
 <body>
-<div class="login-card">
-    <div class="header">
-        <h1>Fabric Wastage Prediction System</h1>
-        <span class="admin-badge">Admin Portal</span>
+
+<div>
+    <div class="login-card">
+
+        <!-- Header -->
+        <div class="card-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/>
+                    </svg>
+                </div>
+                Fabric AI
+            </div>
+            <span class="card-header-title">Fabric Wastage Prediction System</span>
+            <span class="admin-badge">
+                <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Admin Portal
+            </span>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+
+            <div th:if="${param.error}" class="alert error">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Invalid username or password.
+            </div>
+            <div th:if="${param.logout}" class="alert success">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                You have been logged out successfully.
+            </div>
+
+            <form th:action="@{/user/login}" method="post">
+                <div class="field-group">
+                    <label class="field-label" for="username">Username</label>
+                    <input type="text" id="username" name="username"
+                           placeholder="Enter admin username" required autocomplete="username" />
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           placeholder="Enter admin password" required autocomplete="current-password" />
+                </div>
+                <button type="submit" class="btn-login">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+                        <polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+                    </svg>
+                    Sign In as Admin
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+            <a href="/" class="btn-back">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+
     </div>
 
-    <!-- ✅ Fixed: using param.error and param.logout instead of ${error}/${success} -->
-    <div th:if="${param.error}"  class="error-msg">Invalid username or password.</div>
-    <div th:if="${param.logout}" class="success-msg">You have been logged out successfully.</div>
-
-    <form th:action="@{/user/login}" method="post">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter admin username" required />
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter admin password" required />
-        </div>
-        <button type="submit" class="btn-login">Login as Admin</button>
-    </form>
-
-    <a href="/" class="btn-back">← Back to Home</a>
+    <p class="tagline">FABRIC WASTAGE PREDICTION SYSTEM — ADMIN</p>
 </div>
+
 </body>
 </html>

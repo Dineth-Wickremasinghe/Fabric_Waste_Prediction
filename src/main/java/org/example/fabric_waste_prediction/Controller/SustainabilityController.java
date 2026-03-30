@@ -2,7 +2,7 @@ package org.example.fabric_waste_prediction.Controller;
 
 import jakarta.validation.Valid;
 import org.example.fabric_waste_prediction.Validation.SustainabilityInputValidator;
-import org.example.fabric_waste_prediction.dto.*;
+import org.example.fabric_waste_prediction.DTO.*;
 import org.example.fabric_waste_prediction.Entity.FabricRisk;
 import org.example.fabric_waste_prediction.Service.ReportGeneratorService;
 import org.example.fabric_waste_prediction.Service.SustainabilityService;
@@ -62,7 +62,7 @@ public class SustainabilityController {
 
         // Add sustainability input if not present (for the form)
         if (!model.containsAttribute("sustainabilityInput")) {
-            model.addAttribute("sustainabilityInput", new SustainabilityInputDTO());
+            model.addAttribute("sustainabilityInput", new org.example.fabric_waste_prediction.DTO.SustainabilityInputDTO());
         }
 
         return "sustainability/dashboard";
@@ -110,7 +110,7 @@ public class SustainabilityController {
      */
     @PostMapping("/calculate-simple")
     public String calculateSimpleMetrics(
-            @Valid @ModelAttribute("sustainabilityInput") SustainabilityInputDTO input,
+            @Valid @ModelAttribute("sustainabilityInput") org.example.fabric_waste_prediction.DTO.SustainabilityInputDTO input,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
 
@@ -132,7 +132,7 @@ public class SustainabilityController {
             baseImpact.setSustainabilityScore(85.0);
 
             // Calculate enhanced metrics using your DTO
-            EnhancedImpactMetricsDTO enhanced = enhancedSustainabilityService.calculateEnhancedMetrics(input, baseImpact);
+            org.example.fabric_waste_prediction.DTO.EnhancedImpactMetricsDTO enhanced = enhancedSustainabilityService.calculateEnhancedMetrics(input, baseImpact);
 
             // Add simple score as well
             double simpleScore = input.calculateSimpleScore();
@@ -162,7 +162,7 @@ public class SustainabilityController {
     @GetMapping("/input")
     public String showOriginalSustainabilityInputForm(Model model) {
         if (!model.containsAttribute("sustainabilityInput")) {
-            model.addAttribute("sustainabilityInput", new SustainabilityInputDTO());
+            model.addAttribute("sustainabilityInput", new org.example.fabric_waste_prediction.DTO.SustainabilityInputDTO());
         }
 
         // Add dropdown options for complex form
@@ -180,7 +180,7 @@ public class SustainabilityController {
      */
     @PostMapping("/calculate-sustainability")
     public String calculateSustainabilityMetrics(
-            @Valid @ModelAttribute("sustainabilityInput") SustainabilityInputDTO input,
+            @Valid @ModelAttribute("sustainabilityInput") org.example.fabric_waste_prediction.DTO.SustainabilityInputDTO input,
             BindingResult bindingResult,
             @RequestParam(required = false) String scenario,
             RedirectAttributes redirectAttributes,
@@ -228,14 +228,14 @@ public class SustainabilityController {
      */
     @PostMapping("/api/validate-input")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> validateInput(@RequestBody SustainabilityInputDTO input) {
+    public ResponseEntity<Map<String, Object>> validateInput(@RequestBody org.example.fabric_waste_prediction.DTO.SustainabilityInputDTO input) {
         Map<String, Object> response = new HashMap<>();
-        List<ValidationErrorDTO> errors = new ArrayList<>();
+        List<org.example.fabric_waste_prediction.DTO.ValidationErrorDTO> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
 
         // Perform validation
         if (input.getRecyclingRate() + input.getRenewablePercentage() > 150) {
-            errors.add(new ValidationErrorDTO("combined",
+            errors.add(new org.example.fabric_waste_prediction.DTO.ValidationErrorDTO("combined",
                     "Recycling rate and renewable energy percentage combined too high"));
         }
 
@@ -373,7 +373,7 @@ public class SustainabilityController {
         return baseWastage * layerFactor * widthFactor;
     }
 
-    private Map<String, String> generateSuggestions(SustainabilityInputDTO input) {
+    private Map<String, String> generateSuggestions(org.example.fabric_waste_prediction.DTO.SustainabilityInputDTO input) {
         Map<String, String> suggestions = new HashMap<>();
 
         if (input.getRecyclingRate() < 50) {

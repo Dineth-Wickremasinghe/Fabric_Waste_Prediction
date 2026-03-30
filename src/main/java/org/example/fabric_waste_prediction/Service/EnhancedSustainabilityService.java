@@ -1,6 +1,6 @@
 package org.example.fabric_waste_prediction.Service;
 
-import org.example.fabric_waste_prediction.dto.*;
+import org.example.fabric_waste_prediction.DTO.*;
 import org.example.fabric_waste_prediction.Entity.*;
 import org.example.fabric_waste_prediction.Repository.*;
 import org.springframework.stereotype.Service;

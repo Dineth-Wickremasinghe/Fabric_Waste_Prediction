@@ -5,102 +5,885 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fabric Waste Prediction</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
-        .navbar { background: linear-gradient(135deg, #1e3a5f, #2e86c1); }
-        .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 600; }
-        .prediction-result {
-            background: linear-gradient(135deg, #1e3a5f, #2e86c1);
-            color: white; border-radius: 16px;
-            padding: 30px; text-align: center; margin-bottom: 24px;
+        :root {
+            --navy:    #0f1f35;
+            --navy-2:  #1a3352;
+            --blue:    #2563eb;
+            --blue-lt: #eff6ff;
+            --amber:   #d97706;
+            --amber-lt:#fffbeb;
+            --green:   #059669;
+            --green-lt:#ecfdf5;
+            --red:     #dc2626;
+            --red-lt:  #fef2f2;
+            --surface: #f8fafc;
+            --border:  #e2e8f0;
+            --text:    #1e293b;
+            --muted:   #64748b;
+            --radius:  12px;
         }
-        .prediction-result h2 { font-size: 3rem; font-weight: 700; margin: 0; }
-        .prediction-result p { opacity: 0.85; margin: 0; font-size: 1rem; }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background: var(--surface);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Topbar ─────────────────────────────────────── */
+        .topbar {
+            background: var(--navy);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+        }
+        .topbar-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255,255,255,0.15);
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.65);
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: color 0.15s, background 0.15s, border-color 0.15s;
+            letter-spacing: 0.01em;
+        }
+        .btn-back:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.22);
+        }
+        .topbar-meta {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.45);
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Page layout ────────────────────────────────── */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+        }
+
+        /* ── Service error banner ───────────────────────── */
+        .error-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px 24px;
+            border-radius: var(--radius);
+            margin-bottom: 28px;
+            background: var(--red-lt);
+            border: 1px solid #fca5a5;
+            animation: fadeIn 0.35s ease both;
+        }
+        .error-banner-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            color: var(--red);
+        }
+        .error-banner-body { display: flex; flex-direction: column; gap: 3px; }
+        .error-banner-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #991b1b;
+        }
+        .error-banner-msg {
+            font-size: 0.8rem;
+            color: #b91c1c;
+            line-height: 1.5;
+        }
+        .error-banner-tip {
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #991b1b;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            width: fit-content;
+        }
+
+        /* ── Prediction result banner ───────────────────── */
+        .result-banner {
+            background: var(--navy);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            animation: fadeIn 0.4s ease both;
+            border: 1px solid var(--navy-2);
+        }
+        .result-banner-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .result-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.5);
+            font-weight: 600;
+        }
+        .result-value {
+            font-size: 2.8rem;
+            font-weight: 600;
+            color: #fff;
+            font-family: 'DM Mono', monospace;
+            line-height: 1;
+        }
+        .result-sub {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .result-sub-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 0 3px rgba(5,150,105,0.25);
+            flex-shrink: 0;
+        }
+        .result-banner-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        .result-chip {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.75);
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.03em;
+        }
+
+        /* ── Cards ──────────────────────────────────────── */
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            animation: fadeIn 0.35s ease both;
+        }
+
+        /* ── Card header ────────────────────────────────── */
+        .card-head {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title svg { color: var(--muted); flex-shrink: 0; }
+
+        /* ── Form internals ─────────────────────────────── */
+        .form-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+        .field-group { display: flex; flex-direction: column; gap: 5px; }
+
+        .field-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.01em;
+        }
+        .field-hint {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .form-control, .form-select {
+            padding: 9px 13px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--surface);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+            -webkit-appearance: none;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+            background: #fff;
+        }
+        .form-select { cursor: pointer; }
+
+        /* ── Submit button ──────────────────────────────── */
         .btn-predict {
-            background: linear-gradient(135deg, #1e3a5f, #2e86c1);
-            color: white; border: none; padding: 12px 40px;
-            border-radius: 8px; font-size: 1rem; font-weight: 600; width: 100%;
+            background: var(--navy);
+            color: #fff;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            letter-spacing: 0.01em;
+            font-family: 'DM Sans', sans-serif;
+            margin-top: 4px;
         }
-        .btn-predict:hover { opacity: 0.9; color: white; }
-        .table thead { background-color: #1e3a5f; color: white; }
-        .badge-result {
-            background-color: #d4edda; color: #155724;
-            padding: 4px 10px; border-radius: 20px; font-weight: 600;
+        .btn-predict:hover { background: var(--navy-2); transform: translateY(-1px); }
+        .btn-predict:active { transform: translateY(0); }
+
+        /* ── Record badge ────────────────────────────────── */
+        .record-badge {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* ── Table ──────────────────────────────────────── */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: var(--navy); }
+        thead th {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            padding: 12px 16px;
+            white-space: nowrap;
+        }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--surface); }
+        tbody td { padding: 13px 16px; font-size: 0.85rem; vertical-align: middle; }
+
+        .id-cell { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+        .features-cell { color: var(--muted); font-size: 0.78rem; max-width: 220px; line-height: 1.5; }
+        .pred-badge {
+            background: var(--blue-lt);
+            color: var(--blue);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+            white-space: nowrap;
+        }
+        .date-cell { font-size: 0.78rem; color: var(--muted); font-family: 'DM Mono', monospace; white-space: nowrap; }
+        .empty-row td { text-align: center; color: var(--muted); padding: 48px 16px; font-size: 0.875rem; }
+
+        /* ── Pagination ─────────────────────────────────── */
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+        .pagination-btns { display: flex; gap: 4px; }
+        .page-btn {
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            color: var(--text);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: background 0.12s, border-color 0.12s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .page-btn:hover:not(:disabled) { background: var(--surface); border-color: var(--navy); }
+        .page-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Animations ─────────────────────────────────── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .card:nth-child(1) { animation-delay: 0.05s; }
+        .card:nth-child(2) { animation-delay: 0.12s; }
+
+        /* ── Validation error states ────────────────────── */
+        .field-group { position: relative; }
+
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: var(--red) !important;
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.12) !important;
+            background: #fff !important;
+        }
+        .form-control.is-valid,
+        .form-select.is-valid {
+            border-color: var(--green) !important;
+            box-shadow: 0 0 0 3px rgba(5,150,105,0.10) !important;
+            background: #fff !important;
+        }
+
+        .val-tip {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            background: #fff;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            font-size: 0.72rem;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(220,38,38,0.12);
+            z-index: 20;
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            animation: fadeIn 0.15s ease both;
+        }
+        .val-tip::before {
+            content: '';
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--red);
+            flex-shrink: 0;
+        }
+
+
+        /* ── Info tooltip (field-level) ─────────────────── */
+        .field-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .info-icon {
+            position: relative;
+            width: 17px; height: 17px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.62rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+            font-style: normal;
+            flex-shrink: 0;
+        }
+        .info-icon:hover .info-tip { display: block; }
+        .info-tip {
+            display: none;
+            position: absolute;
+            right: 0; top: 22px;
+            width: 230px;
+            background: var(--navy);
+            color: #e2e8f0;
+            font-size: 0.72rem;
+            line-height: 1.55;
+            padding: 10px 13px;
+            border-radius: 8px;
+            z-index: 50;
+            font-weight: 400;
+            text-align: left;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            pointer-events: none;
+            white-space: normal;
+        }
+        .info-tip::before {
+            content: '';
+            position: absolute;
+            top: -5px; right: 6px;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid var(--navy);
+        }
+
+        /* ── How-to panel ───────────────────────────────── */
+        .howto-panel {
+            background: var(--blue-lt);
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease both;
+        }
+        .howto-toggle {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1d4ed8;
+            text-align: left;
+        }
+        .howto-toggle:hover { background: rgba(37,99,235,0.05); }
+        .howto-toggle-left { display: flex; align-items: center; gap: 8px; }
+        .howto-chevron {
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+            color: #3b82f6;
+        }
+        .howto-chevron.open { transform: rotate(180deg); }
+        .howto-body {
+            display: none;
+            padding: 0 20px 18px;
+            border-top: 1px solid #bfdbfe;
+        }
+        .howto-body.open { display: block; }
+        .howto-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+        .howto-step {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .howto-step-num {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .howto-step-text {
+            font-size: 0.8rem;
+            color: #1e40af;
+            line-height: 1.5;
+        }
+        .howto-step-text strong { color: #1d4ed8; display: block; margin-bottom: 1px; }
+        .howto-note {
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: rgba(37,99,235,0.08);
+            border-radius: 7px;
+            font-size: 0.78rem;
+            color: #1e40af;
+            line-height: 1.5;
+        }
+
+        /* ── Result interpretation ──────────────────────── */
+        .interp-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .interp-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+        }
+        .interp-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        .interp-low  { background: rgba(5,150,105,0.18);  color: #6ee7b7; }
+        .interp-low  .interp-dot  { background: #6ee7b7; }
+        .interp-mod  { background: rgba(217,119,6,0.22);  color: #fcd34d; }
+        .interp-mod  .interp-dot  { background: #fcd34d; }
+        .interp-high { background: rgba(220,38,38,0.22);  color: #fca5a5; }
+        .interp-high .interp-dot  { background: #fca5a5; }
+        .interp-key {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .interp-key-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.55);
+        }
+        .interp-key-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%; flex-shrink: 0;
+        }
+
+        /* ── DSS advice banner ──────────────────────────── */
+        .dss-banner {
+            background: var(--amber-lt);
+            border: 1px solid #fcd34d;
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            animation: fadeIn 0.35s ease both;
+        }
+        .dss-banner-icon {
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            color: var(--amber);
+        }
+        .dss-banner-body { display: flex; flex-direction: column; gap: 4px; }
+        .dss-banner-title { font-size: 0.88rem; font-weight: 600; color: #92400e; }
+        .dss-banner-msg   { font-size: 0.8rem;  color: #b45309; line-height: 1.5; }
+        .dss-banner-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #92400e;
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            width: fit-content;
+            transition: background 0.15s;
+        }
+        .dss-banner-link:hover { background: #fde68a; color: #78350f; }
+
+        /* ── Responsive ─────────────────────────────────── */
+        @media (max-width: 600px) {
+            .topbar-meta { display: none; }
+            .result-banner { flex-direction: column; align-items: flex-start; }
+            .result-banner-right { align-items: flex-start; }
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark px-4 py-3 mb-4">
-    <span class="navbar-brand fs-4 fw-bold">🧵 Fabric Waste Prediction System</span>
-</nav>
+<!-- ── Top bar ──────────────────────────────────────────── -->
+<header class="topbar">
+    <div class="topbar-left">
+        <div class="topbar-brand">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/>
+            </svg>
+            Fabric AI
+        </div>
+        <div class="topbar-divider"></div>
+        <a href="/user/dashboard" class="btn-back">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Dashboard
+        </a>
+    </div>
+    <div class="topbar-meta">WASTE PREDICTION</div>
+</header>
 
-<div class="container pb-5">
+<div class="page">
 
-    <!-- Result banner — only visible after form submit -->
-    <div th:if="${prediction != null}" class="prediction-result">
-        <p>Predicted Fabric Wastage</p>
-        <h2 th:text="${#numbers.formatDecimal(prediction, 1, 4)} + '%'">--</h2>
-        <p class="mt-2">✓ Saved to database</p>
+    <!-- ── Service error banner ─────────────────────────── -->
+    <div th:if="${serviceError}" class="error-banner">
+        <div class="error-banner-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <div class="error-banner-body">
+            <span class="error-banner-title">Prediction Service Unavailable</span>
+            <span class="error-banner-msg">
+                The prediction engine could not be reached. Your inputs were not processed
+                and nothing has been saved. Please try again in a moment.
+            </span>
+            <span class="error-banner-tip">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                Contact your administrator if this issue persists
+            </span>
+        </div>
+    </div>
+
+    <!-- ── Result banner — only visible after form submit ── -->
+    <div th:if="${prediction != null}" class="result-banner">
+        <div class="result-banner-left">
+            <span class="result-label">Predicted Fabric Wastage</span>
+            <span class="result-value" th:text="${#numbers.formatDecimal(prediction, 1, 4)} + '%'">—</span>
+            <span class="result-sub">
+                <span class="result-sub-dot"></span>
+                Saved to database
+            </span>
+            <!-- Interpretation badge -->
+            <div class="interp-row">
+                <span th:if="${prediction < 10}"  class="interp-badge interp-low">
+                    <span class="interp-dot"></span> Low Waste
+                </span>
+                <span th:if="${prediction >= 10 and prediction <= 20}" class="interp-badge interp-mod">
+                    <span class="interp-dot"></span> Moderate Waste
+                </span>
+                <span th:if="${prediction > 20}" class="interp-badge interp-high">
+                    <span class="interp-dot"></span> High Waste
+                </span>
+            </div>
+        </div>
+        <div class="result-banner-right">
+            <span class="result-chip">PREDICTION COMPLETE</span>
+            <!-- Interpretation key -->
+            <div class="interp-key">
+                <span class="interp-key-item">
+                    <span class="interp-key-dot" style="background:#6ee7b7;"></span> &lt;10% Low
+                </span>
+                <span class="interp-key-item">
+                    <span class="interp-key-dot" style="background:#fcd34d;"></span> 10–20% Moderate
+                </span>
+                <span class="interp-key-item">
+                    <span class="interp-key-dot" style="background:#fca5a5;"></span> &gt;20% High
+                </span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ── How to use panel ──────────────────────────────── -->
+    <div class="howto-panel">
+        <button class="howto-toggle" onclick="toggleHowTo(this)" type="button">
+            <span class="howto-toggle-left">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                How to use this tool
+            </span>
+            <svg class="howto-chevron" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
+        </button>
+        <div class="howto-body" id="howtoBody">
+            <div class="howto-steps">
+                <div class="howto-step">
+                    <div class="howto-step-num">1</div>
+                    <div class="howto-step-text">
+                        <strong>Fill in the parameters</strong>
+                        Select or enter values for all five fields on the left. Hover the <b>?</b> icon on each field for guidance.
+                    </div>
+                </div>
+                <div class="howto-step">
+                    <div class="howto-step-num">2</div>
+                    <div class="howto-step-text">
+                        <strong>Run the prediction</strong>
+                        Click <em>Predict Fabric Waste</em>. The AI model will estimate the expected fabric wastage percentage.
+                    </div>
+                </div>
+                <div class="howto-step">
+                    <div class="howto-step-num">3</div>
+                    <div class="howto-step-text">
+                        <strong>Interpret the result</strong>
+                        The result banner shows the predicted % with a colour-coded level — Low (&lt;10%), Moderate (10–20%), or High (&gt;20%).
+                    </div>
+                </div>
+                <div class="howto-step">
+                    <div class="howto-step-num">4</div>
+                    <div class="howto-step-text">
+                        <strong>Take action on high waste</strong>
+                        If waste is predicted to be high, please use the Decision Support System for improvement recommendations.
+                    </div>
+                </div>
+            </div>
+            <div class="howto-note">
+                &#9432;&nbsp; All predictions are automatically saved to the history table on the right and can be reviewed at any time.
+            </div>
+        </div>
+    </div>
+
+    <!-- ── DSS advice banner — shown when prediction > 20% ── -->
+    <div th:if="${prediction != null and prediction > 20}" class="dss-banner">
+        <div class="dss-banner-icon">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <div class="dss-banner-body">
+            <span class="dss-banner-title">High Waste Predicted — Action Recommended</span>
+            <span class="dss-banner-msg">
+                The predicted wastage exceeds 20%, which is above the acceptable threshold.
+                Use the Decision Support System to identify contributing factors and receive
+                tailored recommendations on how to reduce fabric waste for this configuration.
+            </span>
+            <a href="/decision-support" class="dss-banner-link">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                Go to Decision Support System
+            </a>
+        </div>
     </div>
 
     <div class="row g-4">
 
-        <!-- Input Form -->
+        <!-- ── Input Form ─────────────────────────────────── -->
         <div class="col-lg-5">
             <div class="card">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">📋 Enter Parameters</h5>
+                <div class="card-head">
+                    <h5 class="card-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                        Enter Parameters
+                    </h5>
                 </div>
-                <div class="card-body p-4">
-                    <form th:action="@{/dashboard/predict}" method="post">
 
-                        <div class="mb-3">
-                            <label class="form-label fw-500">Pattern Complexity</label>
+                <div class="form-body">
+                    <form id="predictForm" th:action="@{/dashboard/predict}" method="post" style="display:contents;" novalidate>
+
+                        <div class="field-group">
+                            <div class="field-label-row">
+                                <label class="field-label">Pattern Complexity</label>
+                                <i class="info-icon">?<div class="info-tip">Reflects how intricate the cut pattern is. High complexity patterns have more pieces and irregular shapes, leading to more off-cuts and higher waste. Low complexity (simple shapes) typically wastes the least fabric.</div></i>
+                            </div>
                             <select name="patternComplexity" class="form-select" required>
-                                <option value="">-- Select Pattern Complexity --</option>
+                                <option value="">Select Pattern Complexity</option>
                                 <option value="0.0">High</option>
                                 <option value="1.0">Low</option>
                                 <option value="2.0">Medium</option>
                             </select>
-                            <small class="text-muted">Complexity level of the pattern</small>
+                            <span class="field-hint">Complexity level of the pattern</span>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Operator Experience (Years)</label>
-                            <input type="number" step="0.1" min="0" max="50" name="operatorExperience"
-                                   class="form-control" placeholder="e.g. 13.0"
+                        <div class="field-group">
+                            <div class="field-label-row">
+                                <label class="field-label">Operator Experience (Years)</label>
+                                <i class="info-icon">?<div class="info-tip">The number of years the cutting operator has been working. More experienced operators (10+ years) tend to produce less waste through better material placement and cutting precision. Enter a value between 0 and 50.</div></i>
+                            </div>
+                            <input type="number" step="0.1" min="0" max="50"
+                                   name="operatorExperience"
+                                   class="form-control"
+                                   placeholder="e.g. 13.0"
                                    required>
-                            <small class="text-muted">Years of experience of the operator</small>
+                            <span class="field-hint">Years of experience of the operator</span>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Fabric Pattern</label>
+                        <div class="field-group">
+                            <div class="field-label-row">
+                                <label class="field-label">Fabric Pattern</label>
+                                <i class="info-icon">?<div class="info-tip">The visual design on the fabric surface. Patterns like Checked and Striped require alignment during cutting, which increases waste. Solid and Printed fabrics are generally easier to cut with minimal offcuts.</div></i>
+                            </div>
                             <select name="fabricPattern" class="form-select" required>
-                                <option value="">-- Select Fabric Pattern --</option>
+                                <option value="">Select Fabric Pattern</option>
                                 <option value="Checked">Checked</option>
                                 <option value="Floral">Floral</option>
                                 <option value="Printed">Printed</option>
                                 <option value="Solid">Solid</option>
                                 <option value="Striped">Striped</option>
                             </select>
-                            <small class="text-muted">The fabric pattern</small>
+                            <span class="field-hint">The fabric pattern type</span>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Cutting Method</label>
+                        <div class="field-group">
+                            <div class="field-label-row">
+                                <label class="field-label">Cutting Method</label>
+                                <i class="info-icon">?<div class="info-tip">How the fabric is cut. Automated cutting uses computer-controlled machines for precise, optimised cuts with minimal waste. Manual cutting relies on operator skill and typically produces more offcuts, especially on complex patterns.</div></i>
+                            </div>
                             <select name="cuttingMethod" class="form-select" required>
-                                <option value="">-- Select Cutting Method --</option>
+                                <option value="">Select Cutting Method</option>
                                 <option value="1.0">Manual</option>
                                 <option value="0.0">Automated</option>
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Fabric Type</label>
+                        <div class="field-group">
+                            <div class="field-label-row">
+                                <label class="field-label">Fabric Type</label>
+                                <i class="info-icon">?<div class="info-tip">The material composition of the fabric. Structured fabrics like Denim and Twill are less prone to stretch distortion during cutting. Delicate or stretchy fabrics like Rayon and Viscose can be harder to cut precisely, potentially increasing waste.</div></i>
+                            </div>
                             <select name="fabricType" class="form-select" required>
-                                <option value="">-- Select Fabric Type --</option>
+                                <option value="">Select Fabric Type</option>
                                 <option value="Blended">Blended</option>
                                 <option value="Cotton">Cotton</option>
                                 <option value="Denim">Denim</option>
@@ -111,14 +894,16 @@
                                 <option value="Twill">Twill</option>
                                 <option value="Viscose">Viscose</option>
                             </select>
-                            <small class="text-muted">Type of fabric used</small>
+                            <span class="field-hint">Type of fabric used</span>
                         </div>
 
                         <input type="hidden" name="markerLossPct" value="22.509572901325473">
 
-
-                        <button type="submit" class="btn btn-predict">
-                            🔍 Predict Fabric Waste
+                        <button type="submit" class="btn-predict">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            Predict Fabric Waste
                         </button>
 
                     </form>
@@ -126,48 +911,56 @@
             </div>
         </div>
 
-        <!-- History Table -->
+        <!-- ── History Table ──────────────────────────────── -->
         <div class="col-lg-7">
-            <div class="card">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">📊 Prediction History</h5>
-                    <span class="badge bg-secondary"
+            <div class="card" style="overflow:hidden;">
+                <div class="card-head">
+                    <h5 class="card-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                        Prediction History
+                    </h5>
+                    <span class="record-badge"
                           th:text="${history != null ? #lists.size(history) : 0} + ' records'">0 records</span>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Input Features</th>
-                                <th>Predicted Wastage</th>
-                                <th>Date & Time</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:if="${#lists.isEmpty(history)}">
-                                <td colspan="4" class="text-center text-muted py-4">
-                                    No predictions yet. Fill the form to get started!
-                                </td>
-                            </tr>
-                            <tr th:each="record : ${history}">
-                                <td th:text="${record.id}"></td>
-                                <td><small class="text-muted"
-                                           th:text="${record.inputFeatures}"></small></td>
-                                <td>
-                                        <span class="badge-result"
-                                              th:text="${#numbers.formatDecimal(record.predictionResult, 1, 4)} + '%'">
-                                        </span>
-                                </td>
-                                <td>
-                                    <small th:text="${#temporals.format(record.createdAt, 'dd MMM yyyy, HH:mm')}">
-                                    </small>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Input Features</th>
+                            <th>Predicted Wastage</th>
+                            <th>Date &amp; Time</th>
+                        </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                        <tr class="empty-row" th:if="${history == null or #lists.isEmpty(history)}">
+                            <td colspan="4">
+                                No predictions yet — fill the form to get started.
+                            </td>
+                        </tr>
+                        <tr th:each="record : ${history}" th:data-id="${record.id}">
+                            <td class="id-cell" th:text="${record.id}"></td>
+                            <td class="features-cell" th:text="${record.inputFeatures}"></td>
+                            <td>
+                                <span class="pred-badge"
+                                      th:text="${#numbers.formatDecimal(record.predictionResult, 1, 4)} + '%'">
+                                </span>
+                            </td>
+                            <td class="date-cell">
+                                <small th:text="${#temporals.format(record.createdAt, 'dd MMM yyyy, HH:mm')}"></small>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination bar -->
+                <div class="pagination-bar" id="paginationBar">
+                    <span id="pageInfo"></span>
+                    <div class="pagination-btns" id="pageBtns"></div>
                 </div>
             </div>
         </div>
@@ -176,5 +969,254 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ── Pagination ────────────────────────────────────────────
+    (function () {
+        const PAGE_SIZE = 5;
+        let currentPage = 1;
+
+        function getAllRows() {
+            return Array.from(document.querySelectorAll('#historyBody tr[data-id]'));
+        }
+
+        function renderPage() {
+            const rows       = getAllRows();
+            const total      = rows.length;
+            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+            // Clamp currentPage
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start   = (currentPage - 1) * PAGE_SIZE;
+            const end     = Math.min(start + PAGE_SIZE, total);
+            const visible = new Set(rows.slice(start, end).map(r => r.dataset.id));
+
+            rows.forEach(r => {
+                r.style.display = visible.has(r.dataset.id) ? '' : 'none';
+            });
+
+            // Page info text
+            const infoEl = document.getElementById('pageInfo');
+            if (infoEl) {
+                infoEl.textContent = total === 0
+                    ? ''
+                    : 'Showing ' + (start + 1) + '–' + end + ' of ' + total;
+            }
+
+            // Buttons
+            const btnsEl = document.getElementById('pageBtns');
+            if (!btnsEl) return;
+            btnsEl.innerHTML = '';
+
+            // Prev
+            const prev = document.createElement('button');
+            prev.className   = 'page-btn';
+            prev.textContent = '‹';
+            prev.disabled    = currentPage === 1;
+            prev.onclick     = () => { currentPage--; renderPage(); };
+            btnsEl.appendChild(prev);
+
+            // Numbered pages
+            for (let p = 1; p <= totalPages; p++) {
+                const btn       = document.createElement('button');
+                btn.className   = 'page-btn' + (p === currentPage ? ' active' : '');
+                btn.textContent = p;
+                btn.onclick     = (pg => () => { currentPage = pg; renderPage(); })(p);
+                btnsEl.appendChild(btn);
+            }
+
+            // Next
+            const next = document.createElement('button');
+            next.className   = 'page-btn';
+            next.textContent = '›';
+            next.disabled    = currentPage === totalPages;
+            next.onclick     = () => { currentPage++; renderPage(); };
+            btnsEl.appendChild(next);
+
+            // Hide the whole pagination bar if nothing to page
+            const bar = document.getElementById('paginationBar');
+            if (bar) bar.style.display = total === 0 ? 'none' : '';
+        }
+
+        document.addEventListener('DOMContentLoaded', renderPage);
+    })();
+</script>
+
+
+<script>
+    (function () {
+        // ── Validation rules ─────────────────────────────────────
+        const RULES = [
+            {
+                name: 'patternComplexity',
+                type: 'select',
+                label: 'Pattern Complexity',
+                validate(v) {
+                    if (!v) return 'Please select a pattern complexity.';
+                    return null;
+                }
+            },
+            {
+                name: 'operatorExperience',
+                type: 'input',
+                label: 'Operator Experience',
+                validate(v) {
+                    if (v === '' || v === null) return 'Operator experience is required.';
+                    const num = parseFloat(v);
+                    if (isNaN(num))         return 'Please enter a valid number.';
+                    if (num < 0)            return 'Experience cannot be negative.';
+                    if (num > 50)           return 'Max realistic experience is 50 years.';
+                    if (!/^\d{1,2}(\.\d)?$/.test(v.trim()))
+                        return 'Use up to 1 decimal place (e.g. 13.5).';
+                    return null;
+                }
+            },
+            {
+                name: 'fabricPattern',
+                type: 'select',
+                label: 'Fabric Pattern',
+                validate(v) {
+                    if (!v) return 'Please select a fabric pattern.';
+                    return null;
+                }
+            },
+            {
+                name: 'cuttingMethod',
+                type: 'select',
+                label: 'Cutting Method',
+                validate(v) {
+                    if (!v) return 'Please select a cutting method.';
+                    return null;
+                }
+            },
+            {
+                name: 'fabricType',
+                type: 'select',
+                label: 'Fabric Type',
+                validate(v) {
+                    if (!v) return 'Please select a fabric type.';
+                    return null;
+                }
+            }
+        ];
+
+        // ── Helpers ──────────────────────────────────────────────
+        function getField(name) {
+            return document.querySelector('[name="' + name + '"]');
+        }
+
+        function clearError(field) {
+            field.classList.remove('is-invalid');
+            field.classList.remove('is-valid');
+            const group = field.closest('.field-group');
+            if (group) {
+                const tip = group.querySelector('.val-tip');
+                if (tip) tip.remove();
+            }
+        }
+
+        function showError(field, message) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+            const group = field.closest('.field-group');
+            if (!group) return;
+            const existing = group.querySelector('.val-tip');
+            if (existing) existing.remove();
+            const tip = document.createElement('div');
+            tip.className = 'val-tip';
+            tip.textContent = message;
+            group.appendChild(tip);
+        }
+
+        function markValid(field) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            const group = field.closest('.field-group');
+            if (group) {
+                const tip = group.querySelector('.val-tip');
+                if (tip) tip.remove();
+            }
+        }
+
+        // ── Live validation on blur / change ─────────────────────
+        RULES.forEach(rule => {
+            const field = getField(rule.name);
+            if (!field) return;
+
+            const eventType = rule.type === 'select' ? 'change' : 'blur';
+
+            field.addEventListener(eventType, function () {
+                const error = rule.validate(this.value.trim());
+                clearError(this);
+                if (error) {
+                    showError(this, error);
+                } else {
+                    markValid(this);
+                }
+            });
+
+            // Also clear on input for text/number fields
+            if (rule.type === 'input') {
+                field.addEventListener('input', function () {
+                    clearError(this);
+                });
+            }
+        });
+
+        // ── Submit validation ────────────────────────────────────
+        const form = document.getElementById('predictForm');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                let firstError = null;
+                let allValid = true;
+
+                RULES.forEach(rule => {
+                    const field = getField(rule.name);
+                    if (!field) return;
+                    const error = rule.validate(field.value.trim());
+                    clearError(field);
+                    if (error) {
+                        allValid = false;
+                        showError(field, error);
+                        if (!firstError) firstError = field;
+                    } else {
+                        markValid(field);
+                    }
+                });
+
+                if (!allValid) {
+                    e.preventDefault();
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstError.focus();
+                    }
+                }
+            });
+        }
+
+    })();
+</script>
+
+<script>
+    // ── How-to panel toggle ───────────────────────────────────
+    function toggleHowTo(btn) {
+        const body    = document.getElementById('howtoBody');
+        const chevron = btn.querySelector('.howto-chevron');
+        const isOpen  = body.classList.contains('open');
+        body.classList.toggle('open', !isOpen);
+        chevron.classList.toggle('open', !isOpen);
+    }
+    // Auto-open if no prediction yet (first visit)
+    document.addEventListener('DOMContentLoaded', function () {
+        const hasPrediction = document.querySelector('.result-banner') !== null;
+        if (!hasPrediction) {
+            const body    = document.getElementById('howtoBody');
+            const chevron = document.querySelector('.howto-chevron');
+            if (body)    body.classList.add('open');
+            if (chevron) chevron.classList.add('open');
+        }
+    });
+</script>
 </body>
 </html>
