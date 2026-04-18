@@ -128,22 +128,6 @@
         .new-chat-btn:active { transform: scale(0.98); }
         .new-chat-btn svg { width: 13px; height: 13px; stroke: white; fill: none; stroke-width: 2.5; }
 
-        .sidebar-tabs { display: flex; gap: 4px; margin-top: 10px; }
-        .tab-btn {
-            flex: 1; padding: 7px 4px; border: none;
-            background: transparent; border-radius: 7px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 11.5px; font-weight: 500;
-            color: rgba(255,255,255,0.4); cursor: pointer;
-            transition: all 0.15s;
-        }
-        .tab-btn.active {
-            background: rgba(217,119,6,0.18);
-            border: 1px solid rgba(217,119,6,0.3);
-            color: #fbbf24;
-        }
-        .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.7); }
-
         .sidebar-content { flex: 1; overflow-y: auto; padding: 10px 10px; }
         .sidebar-content::-webkit-scrollbar { width: 3px; }
         .sidebar-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
@@ -178,46 +162,6 @@
         .history-delete svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
         .history-item:hover .history-delete { display: flex; align-items: center; }
 
-        /* Docs tab */
-        .doc-upload-area {
-            border: 1.5px dashed rgba(217,119,6,0.3); border-radius: 9px;
-            padding: 18px 12px; text-align: center; cursor: pointer;
-            transition: all 0.2s; margin-bottom: 10px;
-            background: rgba(217,119,6,0.04);
-        }
-        .doc-upload-area:hover { border-color: var(--amber); background: rgba(217,119,6,0.1); }
-        .doc-upload-area svg { width: 20px; height: 20px; stroke: rgba(255,255,255,0.3); fill: none; margin-bottom: 8px; transition: stroke 0.2s; }
-        .doc-upload-area:hover svg { stroke: #fbbf24; }
-        .doc-upload-area p { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.6; }
-        .doc-upload-area span { color: #fbbf24; font-weight: 500; }
-        #docFileInput { display: none; }
-
-        .upload-progress {
-            display: none; background: rgba(255,255,255,0.06); border-radius: 8px;
-            padding: 10px 12px; margin-bottom: 10px;
-            font-size: 11.5px; color: rgba(255,255,255,0.6);
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-        .upload-progress.show { display: block; }
-        .progress-bar-wrap { background: rgba(255,255,255,0.08); border-radius: 4px; height: 3px; margin-top: 8px; overflow: hidden; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--amber), #fbbf24); border-radius: 4px; animation: indeterminate 1.5s infinite; }
-        @keyframes indeterminate { 0%{margin-left:-40%;width:40%} 100%{margin-left:100%;width:40%} }
-
-        .doc-item {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 10px; border-radius: 8px; font-size: 12px;
-            color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.05);
-            margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.07);
-            transition: border-color 0.15s;
-        }
-        .doc-item:hover { border-color: rgba(217,119,6,0.3); }
-        .doc-item svg { width: 13px; height: 13px; stroke: #fbbf24; fill: none; flex-shrink: 0; }
-        .doc-item-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .doc-item-chunks {
-            font-size: 10px; color: rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.06); padding: 2px 7px;
-            border-radius: 10px; flex-shrink: 0; font-family: 'DM Mono', monospace;
-        }
         .empty-state { text-align: center; padding: 20px 8px; color: rgba(255,255,255,0.25); font-size: 12px; line-height: 1.7; }
 
         /* ── CHAT MAIN ── */
@@ -414,27 +358,10 @@
                 <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 New Conversation
             </button>
-            <div class="sidebar-tabs">
-                <button class="tab-btn active" id="tabHistory" onclick="switchTab('history')">💬 History</button>
-                <button class="tab-btn" id="tabDocs" onclick="switchTab('docs')">📄 Documents</button>
-            </div>
         </div>
 
         <div class="sidebar-content" id="historyPanel">
             <div id="historyList"></div>
-        </div>
-
-        <div class="sidebar-content" id="docsPanel" style="display:none;">
-            <div class="doc-upload-area" onclick="document.getElementById('docFileInput').click()">
-                <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <p><span>Click to upload</span> a PDF<br>into the knowledge base</p>
-            </div>
-            <input type="file" id="docFileInput" accept=".pdf" onchange="uploadPDF(this)"/>
-            <div class="upload-progress" id="uploadProgress">
-                <span id="uploadFileName">Uploading…</span>
-                <div class="progress-bar-wrap"><div class="progress-bar"></div></div>
-            </div>
-            <div id="docsList"></div>
         </div>
     </aside>
 
@@ -442,7 +369,7 @@
         <div class="chat-subheader">
             <div class="chat-title-wrap">
                 <span class="chat-title" id="chatTitleBar">Decision Support Assistant</span>
-                <span class="chat-subtitle">gemini · chromadb · rag</span>
+                <span class="chat-subtitle">Gemini  · RAG</span>
             </div>
             <span class="rag-badge">
                 <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -453,7 +380,7 @@
         <div class="messages" id="messages">
             <div class="welcome" id="welcome">
                 <div class="welcome-icon">
-                    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="white" fill="none">
                         <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/>
                     </svg>
                 </div>
@@ -484,25 +411,14 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    const API_URL    = "http://localhost:8000/rag/query";
-    const INGEST_URL = "http://localhost:8000/rag/ingest";
+    const API_URL = "http://localhost:8000/rag/query";
 
-    let typing = false, currentSessionId = null, currentMessages = [], activeTab = 'history';
+    let typing = false, currentSessionId = null, currentMessages = [];
 
     function getSessions() { try { return JSON.parse(localStorage.getItem('fab_sessions') || '[]'); } catch { return []; } }
     function saveSessions(s) { localStorage.setItem('fab_sessions', JSON.stringify(s)); }
-    function getDocs() { try { return JSON.parse(localStorage.getItem('fab_docs') || '[]'); } catch { return []; } }
-    function saveDocs(d) { localStorage.setItem('fab_docs', JSON.stringify(d)); }
 
-    window.addEventListener('DOMContentLoaded', () => { renderHistory(); renderDocs(); });
-
-    function switchTab(tab) {
-        activeTab = tab;
-        document.getElementById('tabHistory').classList.toggle('active', tab === 'history');
-        document.getElementById('tabDocs').classList.toggle('active', tab === 'docs');
-        document.getElementById('historyPanel').style.display = tab === 'history' ? '' : 'none';
-        document.getElementById('docsPanel').style.display   = tab === 'docs'    ? '' : 'none';
-    }
+    window.addEventListener('DOMContentLoaded', () => { renderHistory(); });
 
     function renderHistory() {
         const sessions = getSessions(), container = document.getElementById('historyList');
@@ -554,32 +470,6 @@
         if (existing) { existing.messages = currentMessages; existing.updatedAt = new Date().toISOString(); }
         else sessions.unshift({ id: currentSessionId, title, messages: currentMessages, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
         saveSessions(sessions); renderHistory();
-    }
-
-    function renderDocs() {
-        const docs = getDocs(), container = document.getElementById('docsList');
-        if (!docs.length) { container.innerHTML = '<div class="empty-state">No documents uploaded yet.<br>Upload a PDF to build the knowledge base.</div>'; return; }
-        container.innerHTML = docs.map(d => `<div class="doc-item">
-            <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <span class="doc-item-name">${escapeHtml(d.filename)}</span>
-            <span class="doc-item-chunks">${d.chunks}</span>
-        </div>`).join('');
-    }
-
-    async function uploadPDF(input) {
-        const file = input.files[0]; if (!file) return; input.value = '';
-        const progress = document.getElementById('uploadProgress');
-        document.getElementById('uploadFileName').textContent = 'Uploading ' + file.name + '…';
-        progress.classList.add('show');
-        const formData = new FormData(); formData.append('file', file);
-        try {
-            const res = await fetch(INGEST_URL, { method: 'POST', body: formData });
-            progress.classList.remove('show');
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json(); const docs = getDocs();
-            docs.unshift({ filename: data.filename, chunks: data.chunks_stored, uploadedAt: new Date().toISOString() });
-            saveDocs(docs); renderDocs(); showToast('✓ Ingested — ' + data.chunks_stored + ' chunks', 'success');
-        } catch (err) { progress.classList.remove('show'); showToast('Upload failed: ' + err.message, 'error'); }
     }
 
     function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
