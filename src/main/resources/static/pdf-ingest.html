@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Fabric AI — Document Ingestion</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --navy:    #0f1f35;
+            --navy-2:  #1a3352;
+            --blue:    #2563eb;
+            --blue-lt: #eff6ff;
+            --amber:   #d97706;
+            --amber-lt:#fffbeb;
+            --green:   #059669;
+            --green-lt:#ecfdf5;
+            --red:     #dc2626;
+            --red-lt:  #fef2f2;
+            --surface: #f8fafc;
+            --border:  #e2e8f0;
+            --text:    #1e293b;
+            --muted:   #64748b;
+            --radius:  12px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--surface);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: var(--navy);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 16px; }
+        .topbar-brand {
+            display: flex; align-items: center; gap: 10px;
+            color: #fff; font-weight: 600; font-size: 1rem; letter-spacing: -0.01em;
+        }
+        .topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: rgba(255,255,255,0.65); font-size: 0.8rem; font-weight: 500;
+            text-decoration: none; padding: 5px 10px; border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: color 0.15s, background 0.15s, border-color 0.15s;
+            letter-spacing: 0.01em;
+        }
+        .btn-back:hover { color: #fff; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); }
+        .topbar-meta {
+            font-size: 0.75rem; color: rgba(255,255,255,0.45);
+            font-family: 'DM Mono', monospace; letter-spacing: 0.05em;
+        }
+        .status-dot {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 0.72rem; color: rgba(255,255,255,0.5);
+            font-family: 'DM Mono', monospace;
+        }
+        .status-dot-pulse {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.7);
+            animation: blink 2s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* ── Page ── */
+        .page { max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+
+        /* ── Page header ── */
+        .page-header { margin-bottom: 24px; }
+        .page-title { font-size: 1.15rem; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+        .page-sub   { font-size: 0.8rem; color: var(--muted); }
+
+        /* ── Stats bar ── */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .stat-tile {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px 20px;
+            display: flex; flex-direction: column; gap: 4px;
+            animation: fadeIn 0.3s ease both;
+        }
+        .stat-tile:nth-child(1){animation-delay:0.00s}
+        .stat-tile:nth-child(2){animation-delay:0.05s}
+        .stat-tile:nth-child(3){animation-delay:0.10s}
+        .stat-label {
+            font-size: 0.68rem; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--muted); font-weight: 600;
+        }
+        .stat-value {
+            font-size: 1.5rem; font-weight: 600; color: var(--navy);
+            font-family: 'DM Mono', monospace; line-height: 1.1;
+        }
+        .stat-sub { font-size: 0.72rem; color: var(--muted); }
+
+        /* ── Cards ── */
+        .card {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: var(--radius); box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            animation: fadeIn 0.35s ease both;
+        }
+        .card + .card { margin-top: 16px; }
+        .card-header {
+            padding: 20px 24px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; flex-wrap: wrap;
+        }
+        .card-title { font-size: 0.95rem; font-weight: 600; color: var(--navy); margin: 0; }
+        .card-sub   { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+        .card-body  { padding: 24px; }
+
+        /* ── Drop zone ── */
+        .dropzone {
+            border: 1.5px dashed var(--border); border-radius: var(--radius);
+            padding: 44px 24px; text-align: center; cursor: pointer;
+            background: var(--surface);
+            transition: border-color 0.2s, background 0.2s;
+            position: relative;
+        }
+        .dropzone:hover, .dropzone.drag-over {
+            border-color: var(--blue); background: var(--blue-lt);
+        }
+        .dropzone input[type="file"] {
+            position: absolute; inset: 0; opacity: 0;
+            cursor: pointer; width: 100%; height: 100%;
+        }
+        .dropzone-icon {
+            width: 48px; height: 48px; margin: 0 auto 14px;
+            background: var(--blue-lt); border: 1px solid #bfdbfe;
+            border-radius: 10px; display: grid; place-items: center;
+        }
+        .dropzone-icon svg { width: 22px; height: 22px; stroke: var(--blue); }
+        .dropzone h3 { font-size: 0.9rem; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
+        .dropzone p  { font-size: 0.78rem; color: var(--muted); }
+        .dropzone p strong { color: var(--blue); font-weight: 500; }
+        .dropzone-hint {
+            display: inline-flex; align-items: center; gap: 5px;
+            margin-top: 12px; font-size: 0.7rem; color: var(--muted);
+            font-family: 'DM Mono', monospace;
+            background: #fff; border: 1px solid var(--border);
+            padding: 3px 10px; border-radius: 20px;
+        }
+
+        /* ── File queue ── */
+        #file-queue { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+
+        .file-item {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 9px; padding: 11px 14px;
+            animation: fadeIn 0.2s ease;
+        }
+        .file-item-icon {
+            width: 30px; height: 30px; border-radius: 6px;
+            background: var(--red-lt); border: 1px solid #fca5a5;
+            display: grid; place-items: center; flex-shrink: 0;
+        }
+        .file-item-icon svg { width: 14px; height: 14px; stroke: var(--red); }
+        .file-meta  { flex: 1; min-width: 0; }
+        .file-name  {
+            font-size: 0.82rem; font-weight: 500; color: var(--navy);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .file-size  { font-size: 0.7rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+
+        .file-badge {
+            font-family: 'DM Mono', monospace; font-size: 0.68rem; font-weight: 600;
+            padding: 2px 8px; border-radius: 20px;
+            letter-spacing: 0.04em; text-transform: uppercase; flex-shrink: 0;
+        }
+        .file-badge.pending   { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+        .file-badge.uploading { background: var(--amber-lt); color: var(--amber); border: 1px solid #fcd34d; }
+        .file-badge.done      { background: var(--green-lt); color: var(--green); border: 1px solid #a7f3d0; }
+        .file-badge.error     { background: var(--red-lt);   color: var(--red);   border: 1px solid #fca5a5; }
+
+        .remove-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--muted); padding: 4px; border-radius: 5px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: color 0.15s, background 0.15s;
+        }
+        .remove-btn:hover { color: var(--red); background: var(--red-lt); }
+        .remove-btn svg { width: 13px; height: 13px; }
+
+        /* ── Action row ── */
+        .action-row { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 20px; border-radius: 8px; border: none;
+            font-size: 0.82rem; font-weight: 500; font-family: 'DM Sans', sans-serif;
+            letter-spacing: 0.01em; white-space: nowrap; cursor: pointer;
+            transition: background 0.2s, transform 0.15s, border-color 0.15s;
+        }
+        .btn:active { transform: translateY(0) !important; }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+        .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+        .btn-navy { background: var(--navy); color: #fff; }
+        .btn-navy:hover:not(:disabled) { background: var(--navy-2); transform: translateY(-1px); }
+
+        .btn-outline {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--muted);
+        }
+        .btn-outline:hover:not(:disabled) { border-color: var(--navy); color: var(--navy); background: var(--surface); }
+
+        .btn-danger-outline {
+            background: transparent; border: 1px solid #fca5a5; color: var(--red);
+        }
+        .btn-danger-outline:hover:not(:disabled) { background: var(--red-lt); border-color: var(--red); transform: translateY(-1px); }
+
+        /* ── Spinner ── */
+        .spinner {
+            display: inline-block; width: 13px; height: 13px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff; border-radius: 50%;
+            animation: spin 0.7s linear infinite; flex-shrink: 0;
+        }
+        .spinner.dark { border-color: rgba(220,38,38,0.2); border-top-color: var(--red); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Danger zone card ── */
+        .card.danger { border-color: #fca5a5; }
+        .card.danger .card-header { background: var(--red-lt); border-bottom-color: #fca5a5; }
+        .card.danger .card-title  { color: var(--red); }
+        .card.danger .card-sub    { color: #b91c1c; }
+
+        /* ── Danger zone body ── */
+        .danger-body {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; flex-wrap: wrap;
+        }
+        .danger-desc p { font-size: 0.85rem; font-weight: 500; color: var(--navy); margin-bottom: 3px; }
+        .danger-desc small { font-size: 0.78rem; color: var(--muted); line-height: 1.5; display: block; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(15,31,53,0.5); backdrop-filter: blur(4px);
+            display: none; place-items: center;
+        }
+        .modal-overlay.open { display: grid; }
+        .modal {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 28px;
+            max-width: 400px; width: 90%;
+            box-shadow: 0 8px 32px rgba(15,31,53,0.16);
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: var(--red-lt); border: 1px solid #fca5a5;
+            display: grid; place-items: center; margin-bottom: 16px;
+        }
+        .modal-icon svg { width: 20px; height: 20px; stroke: var(--red); }
+        .modal h3 { font-size: 1rem; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+        .modal p  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 22px; }
+        .modal p strong { color: var(--red); font-weight: 500; }
+        .modal-actions { display: flex; gap: 10px; }
+        .btn-cancel {
+            flex: 1; padding: 9px 16px;
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); border-radius: 8px; font-weight: 500;
+            font-size: 0.82rem; cursor: pointer; font-family: 'DM Sans', sans-serif;
+            transition: background 0.15s;
+        }
+        .btn-cancel:hover { background: #e9eef5; }
+
+        /* ── Toast ── */
+        #toast-container {
+            position: fixed; bottom: 24px; right: 24px;
+            display: flex; flex-direction: column; gap: 8px; z-index: 999;
+        }
+        .toast {
+            font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500;
+            padding: 11px 16px; border-radius: 9px;
+            display: flex; align-items: center; gap: 9px;
+            max-width: 300px; box-shadow: 0 4px 16px rgba(15,31,53,0.12);
+            animation: toastIn 0.25s ease;
+        }
+        .toast svg { width: 15px; height: 15px; flex-shrink: 0; }
+        .toast.success { background: var(--green-lt); border: 1px solid #a7f3d0; color: #065f46; }
+        .toast.error   { background: var(--red-lt);   border: 1px solid #fca5a5; color: #991b1b; }
+        .toast.info    { background: var(--blue-lt);  border: 1px solid #bfdbfe; color: #1e40af; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(12px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 700px) {
+            .stats-bar { grid-template-columns: 1fr 1fr; }
+            .topbar-meta, .status-dot { display: none; }
+        }
+        @media (max-width: 480px) { .stats-bar { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+    <div class="topbar-left">
+        <div class="topbar-brand">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/>
+            </svg>
+            Fabric AI
+        </div>
+        <div class="topbar-divider"></div>
+        <a href="/admin/dashboard" class="btn-back">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Dashboard
+        </a>
+    </div>
+    <div class="topbar-meta">DOCUMENT INGESTION</div>
+    <div class="status-dot">
+        <span class="status-dot-pulse"></span>
+        ChromaDB Vector Store Connected
+    </div>
+</header>
+
+<!-- ── Page ── -->
+<div class="page">
+
+    <div class="page-header">
+        <p class="page-title">Knowledge Base Ingestion</p>
+        <p class="page-sub">Upload PDF documents to embed into the Gemini RAG vector store</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-tile">
+            <span class="stat-label">Queued</span>
+            <span class="stat-value" id="statQueued">0</span>
+            <span class="stat-sub">files ready to ingest</span>
+        </div>
+        <div class="stat-tile">
+            <span class="stat-label">Ingested</span>
+            <span class="stat-value" id="statDone">0</span>
+            <span class="stat-sub">this session</span>
+        </div>
+        <div class="stat-tile">
+            <span class="stat-label">Failed</span>
+            <span class="stat-value" id="statFailed">0</span>
+            <span class="stat-sub">this session</span>
+        </div>
+    </div>
+
+    <!-- Upload card -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <p class="card-title">Upload PDF Documents</p>
+                <p class="card-sub">Drag and drop or browse to select — only .pdf files accepted</p>
+            </div>
+            <button class="btn btn-outline" id="clear-queue-btn" onclick="clearQueue()" style="display:none;">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Clear Queue
+            </button>
+        </div>
+        <div class="card-body">
+
+            <div class="dropzone" id="dropzone">
+                <input type="file" id="file-input" accept=".pdf" multiple/>
+                <div class="dropzone-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5
+              7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625
+              c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0
+              1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                    </svg>
+                </div>
+                <h3>Drop PDF files here</h3>
+                <p>or <strong>click to browse</strong> your computer</p>
+                <div class="dropzone-hint">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0
+            105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                    POST /ingest · multipart/form-data · field: file
+                </div>
+            </div>
+
+            <div id="file-queue"></div>
+
+            <div class="action-row">
+                <button class="btn btn-navy" id="upload-btn" disabled onclick="uploadFiles()">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5
+              M16.5 12L12 7.5m0 0L7.5 12M12 7.5v9"/>
+                    </svg>
+                    <span id="upload-label">Ingest to Vector DB</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger zone card -->
+    <div class="card danger">
+        <div class="card-header">
+            <div>
+                <p class="card-title">Danger Zone</p>
+                <p class="card-sub">Irreversible operations on the ChromaDB collection</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="danger-body">
+                <div class="danger-desc">
+                    <p>Clear Entire Collection</p>
+                    <small>Permanently deletes all documents and embeddings from the ChromaDB vector store.<br/>
+                        This action cannot be undone.</small>
+                </div>
+                <button class="btn btn-danger-outline" onclick="openModal()">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166
+              m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0
+              01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562
+              c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916
+              c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09
+              1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                    </svg>
+                    Clear Collection
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Confirm Modal ── -->
+<div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+        <div class="modal-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0
+          2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697
+          16.126zM12 15.75h.007v.008H12v-.008z"/>
+            </svg>
+        </div>
+        <h3>Clear Collection?</h3>
+        <p>This will <strong>permanently delete all documents</strong> from your ChromaDB collection.
+            All embeddings and vector data will be wiped and cannot be recovered.</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="modal-cancel">Cancel</button>
+            <button class="btn btn-danger-outline" id="modal-confirm" style="flex:1; justify-content:center;">
+        <span id="modal-icon-slot">
+          <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166
+              m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0
+              01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562
+              c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916
+              c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09
+              1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+          </svg>
+        </span>
+                <span id="modal-label-slot">Yes, Clear All</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Toasts ── -->
+<div id="toast-container"></div>
+
+<script>
+    const API_BASE = 'http://localhost:8000/rag';
+
+    let fileQueue   = [];
+    let sessionDone = 0;
+    let sessionFail = 0;
+
+    const dropzone      = document.getElementById('dropzone');
+    const fileInput     = document.getElementById('file-input');
+    const queueEl       = document.getElementById('file-queue');
+    const uploadBtn     = document.getElementById('upload-btn');
+    const clearQueueBtn = document.getElementById('clear-queue-btn');
+    const modal         = document.getElementById('confirm-modal');
+
+    // ── Drag & drop ──
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+        if (!files.length) { showToast('Only PDF files are accepted.', 'error'); return; }
+        addFiles(files);
+    });
+    fileInput.addEventListener('change', () => {
+        addFiles(Array.from(fileInput.files));
+        fileInput.value = '';
+    });
+
+    function addFiles(files) {
+        const existing = new Set(fileQueue.map(f => f.file.name));
+        files.filter(f => !existing.has(f.name)).forEach(file =>
+            fileQueue.push({ id: crypto.randomUUID(), file, status: 'pending' })
+        );
+        render();
+    }
+
+    function formatSize(b) {
+        if (b < 1024) return b + ' B';
+        if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+        return (b/1048576).toFixed(1) + ' MB';
+    }
+
+    function render() {
+        queueEl.innerHTML = '';
+        const labels = { pending:'Queued', uploading:'Ingesting…', done:'Ingested', error:'Failed' };
+
+        fileQueue.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'file-item';
+            el.innerHTML = `
+        <div class="file-item-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5
+              7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625
+              c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0
+              1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+          </svg>
+        </div>
+        <div class="file-meta">
+          <div class="file-name">${item.file.name}</div>
+          <div class="file-size">${formatSize(item.file.size)}</div>
+        </div>
+        <span class="file-badge ${item.status}">${labels[item.status]}</span>
+        ${item.status === 'pending' ? `
+          <button class="remove-btn" onclick="removeFile('${item.id}')" title="Remove">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>` : ''}
+      `;
+            queueEl.appendChild(el);
+        });
+
+        const hasPending = fileQueue.some(f => f.status === 'pending');
+        uploadBtn.disabled = !hasPending;
+        clearQueueBtn.style.display = fileQueue.length ? '' : 'none';
+
+        document.getElementById('statQueued').textContent  = fileQueue.filter(f=>f.status==='pending').length;
+        document.getElementById('statDone').textContent    = sessionDone;
+        document.getElementById('statFailed').textContent  = sessionFail;
+    }
+
+    function removeFile(id) { fileQueue = fileQueue.filter(f => f.id !== id); render(); }
+    function clearQueue()   { fileQueue = fileQueue.filter(f => f.status !== 'pending'); render(); }
+
+    // ── Upload ──
+    async function uploadFiles() {
+        const pending = fileQueue.filter(f => f.status === 'pending');
+        if (!pending.length) return;
+
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = `<span class="spinner"></span><span>Ingesting…</span>`;
+
+        let ok = 0, fail = 0;
+        for (const item of pending) {
+            setStatus(item.id, 'uploading');
+            try {
+                const fd = new FormData();
+                fd.append('file', item.file);
+                const res = await fetch(`${API_BASE}/ingest`, { method: 'POST', body: fd });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                setStatus(item.id, 'done'); ok++; sessionDone++;
+            } catch(e) {
+                setStatus(item.id, 'error'); fail++; sessionFail++;
+            }
+        }
+
+        uploadBtn.innerHTML = `
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5
+          M16.5 12L12 7.5m0 0L7.5 12M12 7.5v9"/>
+      </svg>
+      <span>Ingest to Vector DB</span>`;
+
+        if (ok)   showToast(`${ok} file${ok>1?'s':''} ingested successfully.`, 'success');
+        if (fail) showToast(`${fail} file${fail>1?'s':''} failed to ingest.`, 'error');
+        render();
+    }
+
+    function setStatus(id, status) {
+        const item = fileQueue.find(f => f.id === id);
+        if (item) item.status = status;
+        render();
+    }
+
+    // ── Modal ──
+    function openModal() { modal.classList.add('open'); }
+    document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+    document.getElementById('modal-confirm').addEventListener('click', async () => {
+        const btn   = document.getElementById('modal-confirm');
+        const icon  = document.getElementById('modal-icon-slot');
+        const label = document.getElementById('modal-label-slot');
+        btn.disabled = true;
+        icon.innerHTML  = `<span class="spinner dark"></span>`;
+        label.textContent = 'Clearing…';
+
+        try {
+            const res = await fetch(`${API_BASE}/collection`, { method: 'DELETE' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            modal.classList.remove('open');
+            showToast('Collection cleared — all vectors deleted.', 'success');
+            fileQueue = []; sessionDone = 0; sessionFail = 0; render();
+        } catch(e) {
+            showToast('Failed to clear: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            icon.innerHTML = `<svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166
+          m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0
+          01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562
+          c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916
+          c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09
+          1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+      </svg>`;
+            label.textContent = 'Yes, Clear All';
+        }
+    });
+
+    // ── Toast ──
+    const TOAST_ICONS = {
+        success: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+        error:   `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+        info:    `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>`
+    };
+
+    function showToast(msg, type='info') {
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        el.innerHTML = (TOAST_ICONS[type]||'') + msg;
+        document.getElementById('toast-container').appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    render();
+</script>
+</body>
+</html>
